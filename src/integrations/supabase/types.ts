@@ -9,7 +9,125 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      admins: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      families: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string | null
+          id: string
+          main_contact_email: string | null
+          main_contact_name: string
+          main_contact_phone: string | null
+          notes: string | null
+          payment_proof_url: string | null
+          payment_status: string | null
+          registration_status: string | null
+          state: string | null
+          total_amount: number | null
+          updated_at: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string | null
+          id?: string
+          main_contact_email?: string | null
+          main_contact_name: string
+          main_contact_phone?: string | null
+          notes?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string | null
+          registration_status?: string | null
+          state?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string | null
+          id?: string
+          main_contact_email?: string | null
+          main_contact_name?: string
+          main_contact_phone?: string | null
+          notes?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string | null
+          registration_status?: string | null
+          state?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      participants: {
+        Row: {
+          birth_date: string | null
+          created_at: string | null
+          dietary_restrictions: string | null
+          family_id: string | null
+          full_name: string
+          id: string
+          is_child: boolean | null
+          marital_status: Database["public"]["Enums"]["marital_status"] | null
+          special_needs: string | null
+        }
+        Insert: {
+          birth_date?: string | null
+          created_at?: string | null
+          dietary_restrictions?: string | null
+          family_id?: string | null
+          full_name: string
+          id?: string
+          is_child?: boolean | null
+          marital_status?: Database["public"]["Enums"]["marital_status"] | null
+          special_needs?: string | null
+        }
+        Update: {
+          birth_date?: string | null
+          created_at?: string | null
+          dietary_restrictions?: string | null
+          family_id?: string | null
+          full_name?: string
+          id?: string
+          is_child?: boolean | null
+          marital_status?: Database["public"]["Enums"]["marital_status"] | null
+          special_needs?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participants_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +136,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      marital_status: "solteiro" | "casado" | "divorciado" | "viuvo" | "outro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +251,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      marital_status: ["solteiro", "casado", "divorciado", "viuvo", "outro"],
+    },
   },
 } as const
