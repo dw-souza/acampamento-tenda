@@ -27,6 +27,7 @@ const Navbar = () => {
             <Link to="/acampamentos" className="px-3 py-2 text-tenda-brown hover:text-tenda-clay font-medium">Acampamentos</Link>
             <Link to="/galeria" className="px-3 py-2 text-tenda-brown hover:text-tenda-clay font-medium">Galeria</Link>
             <Link to="/contato" className="px-3 py-2 text-tenda-brown hover:text-tenda-clay font-medium">Contato</Link>
+            <Link to="/admin" className="px-3 py-2 text-tenda-brown hover:text-tenda-clay font-medium">Área Admin</Link>
           </div>
           
           <div className="flex items-center md:hidden">
@@ -42,7 +43,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile menu, show/hide based on menu state */}
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-tenda-beige">
@@ -80,6 +80,13 @@ const Navbar = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               Contato
+            </Link>
+            <Link 
+              to="/admin" 
+              className="block px-3 py-2 rounded-md text-base font-medium text-tenda-brown hover:bg-tenda-sand"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Área Admin
             </Link>
           </div>
         </div>
