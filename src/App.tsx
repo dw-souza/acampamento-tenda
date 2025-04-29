@@ -9,6 +9,8 @@ import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
+import AdminFamilies from "./pages/AdminFamilies";
+import AdminFamilyNew from "./pages/AdminFamilyNew";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +25,8 @@ const App = () => (
           <Route path="/sobre" element={<About />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/families" element={<AdminFamilies />} />
+          <Route path="/admin/families/new" element={<AdminFamilyNew />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

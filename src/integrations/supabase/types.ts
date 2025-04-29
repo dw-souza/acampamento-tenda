@@ -33,53 +33,95 @@ export type Database = {
       families: {
         Row: {
           address: string | null
+          bairro: string | null
           city: string | null
           created_at: string | null
+          data_casamento: string | null
+          forma_pagamento: string | null
+          has_children: boolean | null
           id: string
           main_contact_email: string | null
           main_contact_name: string
           main_contact_phone: string | null
+          needs_pajem: boolean | null
           notes: string | null
           payment_proof_url: string | null
           payment_status: string | null
+          phone_esposa: string | null
+          phone_esposo: string | null
+          phone_fixo: string | null
+          profissao_esposa: string | null
+          profissao_esposo: string | null
           registration_status: string | null
           state: string | null
           total_amount: number | null
           updated_at: string | null
+          valor_casal: number | null
+          valor_filhos: number | null
+          valor_pago: number | null
+          valor_pajem: number | null
           zip_code: string | null
         }
         Insert: {
           address?: string | null
+          bairro?: string | null
           city?: string | null
           created_at?: string | null
+          data_casamento?: string | null
+          forma_pagamento?: string | null
+          has_children?: boolean | null
           id?: string
           main_contact_email?: string | null
           main_contact_name: string
           main_contact_phone?: string | null
+          needs_pajem?: boolean | null
           notes?: string | null
           payment_proof_url?: string | null
           payment_status?: string | null
+          phone_esposa?: string | null
+          phone_esposo?: string | null
+          phone_fixo?: string | null
+          profissao_esposa?: string | null
+          profissao_esposo?: string | null
           registration_status?: string | null
           state?: string | null
           total_amount?: number | null
           updated_at?: string | null
+          valor_casal?: number | null
+          valor_filhos?: number | null
+          valor_pago?: number | null
+          valor_pajem?: number | null
           zip_code?: string | null
         }
         Update: {
           address?: string | null
+          bairro?: string | null
           city?: string | null
           created_at?: string | null
+          data_casamento?: string | null
+          forma_pagamento?: string | null
+          has_children?: boolean | null
           id?: string
           main_contact_email?: string | null
           main_contact_name?: string
           main_contact_phone?: string | null
+          needs_pajem?: boolean | null
           notes?: string | null
           payment_proof_url?: string | null
           payment_status?: string | null
+          phone_esposa?: string | null
+          phone_esposo?: string | null
+          phone_fixo?: string | null
+          profissao_esposa?: string | null
+          profissao_esposo?: string | null
           registration_status?: string | null
           state?: string | null
           total_amount?: number | null
           updated_at?: string | null
+          valor_casal?: number | null
+          valor_filhos?: number | null
+          valor_pago?: number | null
+          valor_pajem?: number | null
           zip_code?: string | null
         }
         Relationships: []
@@ -93,8 +135,13 @@ export type Database = {
           full_name: string
           id: string
           is_child: boolean | null
+          is_pajem: boolean | null
           marital_status: Database["public"]["Enums"]["marital_status"] | null
+          pajem_idade: number | null
+          pajem_parentesco: string | null
+          pajem_phone: string | null
           special_needs: string | null
+          vai_acampamento: boolean | null
         }
         Insert: {
           birth_date?: string | null
@@ -104,8 +151,13 @@ export type Database = {
           full_name: string
           id?: string
           is_child?: boolean | null
+          is_pajem?: boolean | null
           marital_status?: Database["public"]["Enums"]["marital_status"] | null
+          pajem_idade?: number | null
+          pajem_parentesco?: string | null
+          pajem_phone?: string | null
           special_needs?: string | null
+          vai_acampamento?: boolean | null
         }
         Update: {
           birth_date?: string | null
@@ -115,8 +167,13 @@ export type Database = {
           full_name?: string
           id?: string
           is_child?: boolean | null
+          is_pajem?: boolean | null
           marital_status?: Database["public"]["Enums"]["marital_status"] | null
+          pajem_idade?: number | null
+          pajem_parentesco?: string | null
+          pajem_phone?: string | null
           special_needs?: string | null
+          vai_acampamento?: boolean | null
         }
         Relationships: [
           {
