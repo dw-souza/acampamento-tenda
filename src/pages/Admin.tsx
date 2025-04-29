@@ -1,34 +1,61 @@
 
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
+import { toast } from "sonner";
 
 const AdminPage = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     checkAdmin();
   }, []);
 
   const checkAdmin = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      navigate("/admin/login");
-      return;
-    }
+    try {
+      setIsLoading(true);
+      // Verificar se há um usuário autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        navigate("/admin/login");
+        return;
+      }
 
-    const { data: admin } = await supabase
-      .from("admins")
-      .select("*")
-      .eq("user_id", user.id)
-      .single();
+      // Verificar se o usuário está na tabela de admins
+      const { data: admin, error } = await supabase
+        .from("admins")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
 
-    if (!admin) {
+      if (error || !admin) {
+        // Se houver erro ou não encontrar o admin, fazer logout e redirecionar
+        await supabase.auth.signOut();
+        toast.error("Acesso não autorizado");
+        navigate("/admin/login");
+        return;
+      }
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Erro ao verificar administrador:", error);
       navigate("/admin/login");
     }
   };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[80vh]">
+          <p>Verificando credenciais...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

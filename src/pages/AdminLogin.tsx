@@ -27,13 +27,16 @@ const AdminLogin = () => {
       if (error) throw error;
 
       if (data.user) {
-        const { data: admin } = await supabase
+        // Verificar se o usuário está na tabela de admins usando o ID do usuário
+        const { data: admin, error: adminError } = await supabase
           .from("admins")
           .select("*")
           .eq("user_id", data.user.id)
           .single();
 
-        if (!admin) {
+        if (adminError || !admin) {
+          // Se houver erro ou não encontrar o admin, fazer logout e exibir mensagem
+          await supabase.auth.signOut();
           throw new Error("Usuário não é administrador");
         }
 
