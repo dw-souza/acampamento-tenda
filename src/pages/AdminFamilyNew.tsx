@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -138,16 +137,16 @@ const AdminFamilyNew = () => {
     try {
       setLoading(true);
 
+      // Converter data_casamento de Date para string ISO para o Supabase
+      const formattedValues = {
+        ...values,
+        data_casamento: values.data_casamento ? values.data_casamento.toISOString() : null,
+      };
+
       // Criar a família
       const { data: family, error: familyError } = await supabase
         .from("families")
-        .insert({
-          ...values,
-          valor_casal: values.valor_casal || 0,
-          valor_filhos: values.valor_filhos || 0,
-          valor_pajem: values.valor_pajem || 0,
-          valor_pago: values.valor_pago || 0,
-        })
+        .insert(formattedValues)
         .select();
 
       if (familyError) throw familyError;
@@ -161,7 +160,7 @@ const AdminFamilyNew = () => {
           .insert({
             family_id: familyId,
             full_name: member.full_name,
-            birth_date: member.birth_date,
+            birth_date: member.birth_date ? member.birth_date.toISOString() : null,
             marital_status: member.marital_status,
             is_child: member.is_child,
             vai_acampamento: member.vai_acampamento,
@@ -177,7 +176,7 @@ const AdminFamilyNew = () => {
           .insert({
             family_id: familyId,
             full_name: child.full_name,
-            birth_date: child.birth_date,
+            birth_date: child.birth_date ? child.birth_date.toISOString() : null,
             is_child: true,
             vai_acampamento: child.vai_acampamento,
           });
