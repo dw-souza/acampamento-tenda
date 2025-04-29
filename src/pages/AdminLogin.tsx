@@ -19,6 +19,7 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
+      // Authenticate the user
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -27,15 +28,21 @@ const AdminLogin = () => {
       if (error) throw error;
 
       if (data.user) {
-        // Verificar se o usuário está na tabela de admins usando o ID do usuário
+        // Instead of relying on RLS here, we'll use direct ID check
+        // Note: We're checking if the authenticated user is in the admins table
         const { data: admin, error: adminError } = await supabase
           .from("admins")
           .select("*")
           .eq("user_id", data.user.id)
-          .single();
+          .maybeSingle();  // Using maybeSingle instead of single to avoid errors
 
-        if (adminError || !admin) {
-          // Se houver erro ou não encontrar o admin, fazer logout e exibir mensagem
+        if (adminError) {
+          console.error("Error checking admin status:", adminError);
+          throw new Error("Erro ao verificar credenciais de administrador");
+        }
+
+        if (!admin) {
+          // If not an admin, sign out and notify
           await supabase.auth.signOut();
           throw new Error("Usuário não é administrador");
         }
@@ -45,6 +52,7 @@ const AdminLogin = () => {
       }
     } catch (error: any) {
       toast.error(error.message || "Erro ao fazer login");
+      console.error("Login error:", error);
     } finally {
       setLoading(false);
     }

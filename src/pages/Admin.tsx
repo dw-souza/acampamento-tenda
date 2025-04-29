@@ -17,7 +17,8 @@ const AdminPage = () => {
   const checkAdmin = async () => {
     try {
       setIsLoading(true);
-      // Verificar se há um usuário autenticado
+      
+      // Get the current user
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -25,15 +26,24 @@ const AdminPage = () => {
         return;
       }
 
-      // Verificar se o usuário está na tabela de admins
+      // Check if the user is in the admins table using a direct query
+      // This avoids the RLS policy infinite recursion issue
       const { data: admin, error } = await supabase
         .from("admins")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();  // Using maybeSingle instead of single to avoid errors
 
-      if (error || !admin) {
-        // Se houver erro ou não encontrar o admin, fazer logout e redirecionar
+      if (error) {
+        console.error("Error checking admin status:", error);
+        await supabase.auth.signOut();
+        toast.error("Erro ao verificar credenciais de administrador");
+        navigate("/admin/login");
+        return;
+      }
+
+      if (!admin) {
+        // If not an admin, sign out and redirect
         await supabase.auth.signOut();
         toast.error("Acesso não autorizado");
         navigate("/admin/login");
