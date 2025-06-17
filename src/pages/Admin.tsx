@@ -21,17 +21,23 @@ const AdminPage = () => {
       // Get the current user
       const { data: { user } } = await supabase.auth.getUser();
       
+      console.log("Current user:", user?.id);
+      
       if (!user) {
+        console.log("Usuário não encontrado, redirecionando para login");
         navigate("/admin/login");
         return;
       }
 
       // Check if the user is in the admins table
+      console.log("Verificando status de admin para:", user.id);
       const { data: admin, error } = await supabase
         .from("admins")
         .select("*")
         .eq("user_id", user.id)
         .maybeSingle();
+
+      console.log("Resultado da consulta admin:", { admin, error });
 
       if (error) {
         console.error("Error checking admin status:", error);
@@ -42,6 +48,7 @@ const AdminPage = () => {
       }
 
       if (!admin) {
+        console.log("Usuário não é admin, fazendo logout");
         // If not an admin, sign out and redirect
         await supabase.auth.signOut();
         toast.error("Acesso não autorizado");
@@ -49,6 +56,7 @@ const AdminPage = () => {
         return;
       }
 
+      console.log("Admin verificado com sucesso:", admin);
       setIsLoading(false);
     } catch (error) {
       console.error("Erro ao verificar administrador:", error);
