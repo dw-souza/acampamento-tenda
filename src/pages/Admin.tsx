@@ -26,13 +26,12 @@ const AdminPage = () => {
         return;
       }
 
-      // Check if the user is in the admins table using a direct query
-      // This avoids the RLS policy infinite recursion issue
+      // Check if the user is in the admins table
       const { data: admin, error } = await supabase
         .from("admins")
         .select("*")
         .eq("user_id", user.id)
-        .maybeSingle();  // Using maybeSingle instead of single to avoid errors
+        .maybeSingle();
 
       if (error) {
         console.error("Error checking admin status:", error);

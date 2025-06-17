@@ -28,16 +28,16 @@ const AdminLogin = () => {
       if (error) throw error;
 
       if (data.user) {
-        // Instead of relying on RLS here, we'll use direct ID check
-        // Note: We're checking if the authenticated user is in the admins table
+        // Check if the user is in the admins table
         const { data: admin, error: adminError } = await supabase
           .from("admins")
           .select("*")
           .eq("user_id", data.user.id)
-          .maybeSingle();  // Using maybeSingle instead of single to avoid errors
+          .maybeSingle();
 
         if (adminError) {
           console.error("Error checking admin status:", adminError);
+          await supabase.auth.signOut();
           throw new Error("Erro ao verificar credenciais de administrador");
         }
 
