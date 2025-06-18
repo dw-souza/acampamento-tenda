@@ -11,27 +11,82 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
+import { Plus, Trash2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
-type Camp = Tables<"camps">;
+type Camp = Tables<"camps"> & {
+  stages: Tables<"stages">;
+  parishes: Tables<"parishes">;
+};
+
 type Family = Tables<"families">;
+type FamilyChild = Tables<"family_children">;
+
+type Child = {
+  full_name: string;
+  birth_date: string;
+  vai_acampamento: boolean;
+  dietary_restrictions?: string;
+  special_needs?: string;
+};
+
+type Registration = Tables<"camp_registrations"> & {
+  families: Family & {
+    family_children: FamilyChild[];
+  };
+};
 
 export default function AdminCampRegistrationForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [camp, setCamp] = useState<Camp | null>(null);
+  const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [families, setFamilies] = useState<Family[]>([]);
-  const [selectedFamily, setSelectedFamily] = useState<Family | null>(null);
-  const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<"pending" | "confirmed" | "waitlist" | "cancelled">("pending");
+  const [notes, setNotes] = useState("");
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [familyToDelete, setFamilyToDelete] = useState<Registration | null>(null);
+
+  // Campos do esposo
+  const [esposoNome, setEsposoNome] = useState("");
+  const [esposoPhone, setEsposoPhone] = useState("");
+  const [esposoEmail, setEsposoEmail] = useState("");
+  const [esposoProfissao, setEsposoProfissao] = useState("");
+
+  // Campos da esposa
+  const [esposaNome, setEsposaNome] = useState("");
+  const [esposaPhone, setEsposaPhone] = useState("");
+  const [esposaEmail, setEsposaEmail] = useState("");
+  const [esposaProfissao, setEsposaProfissao] = useState("");
+
+  // Campos de endereço
+  const [address, setAddress] = useState("");
+  const [bairro, setBairro] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [cep, setCep] = useState("");
+  const [dataCasamento, setDataCasamento] = useState("");
+  const [contatoPrincipal, setContatoPrincipal] = useState<"esposo" | "esposa">("esposo");
+  const [needsPajem, setNeedsPajem] = useState(false);
+  const [children, setChildren] = useState<Child[]>([]);
 
   useEffect(() => {
     if (id) {
       fetchCamp();
+      fetchRegistrations();
     }
   }, [id]);
 
@@ -39,7 +94,11 @@ export default function AdminCampRegistrationForm() {
     try {
       const { data, error } = await supabase
         .from("camps")
-        .select("*")
+        .select(`
+          *,
+          stages (*),
+          parishes (*)
+        `)
         .eq("id", id)
         .single();
 
@@ -53,43 +112,75 @@ export default function AdminCampRegistrationForm() {
     }
   };
 
-  const searchFamilies = async () => {
-    if (!searchTerm) return;
-
+  const fetchRegistrations = async () => {
     try {
       const { data, error } = await supabase
-        .from("families")
-        .select("*")
-        .or(`esposo_nome.ilike.%${searchTerm}%,esposa_nome.ilike.%${searchTerm}%`)
-        .limit(10);
+        .from("camp_registrations")
+        .select(`
+          *,
+          families (
+            *,
+            family_children (*)
+          )
+        `)
+        .eq("camp_id", id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setFamilies(data || []);
+      setRegistrations(data || []);
     } catch (error: any) {
-      toast.error("Erro ao buscar famílias: " + error.message);
+      toast.error("Erro ao carregar inscrições: " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFamily || !camp) return;
+    if (!camp) return;
 
     try {
-      // Verificar se a família já está inscrita
-      const { data: existingRegistration, error: checkError } = await supabase
-        .from("camp_registrations")
-        .select("*")
-        .eq("camp_id", camp.id)
-        .eq("family_id", selectedFamily.id)
+      // Criar a família
+      const { data: family, error: familyError } = await supabase
+        .from("families")
+        .insert({
+          esposo_nome: esposoNome,
+          esposa_nome: esposaNome,
+          address,
+          bairro,
+          city,
+          state,
+          zip_code: cep,
+          esposo_phone: esposoPhone,
+          esposo_email: esposoEmail,
+          esposo_profissao: esposoProfissao,
+          esposa_phone: esposaPhone,
+          esposa_email: esposaEmail,
+          esposa_profissao: esposaProfissao,
+          data_casamento: dataCasamento,
+          contato_principal: contatoPrincipal,
+        })
+        .select()
         .single();
 
-      if (checkError && checkError.code !== "PGRST116") {
-        throw checkError;
-      }
+      if (familyError) throw familyError;
 
-      if (existingRegistration) {
-        toast.error("Esta família já está inscrita neste acampamento.");
-        return;
+      // Criar os filhos
+      if (children.length > 0) {
+        const { error: childrenError } = await supabase
+          .from("family_children")
+          .insert(
+            children.map((child) => ({
+              family_id: family.id,
+              full_name: child.full_name,
+              birth_date: child.birth_date,
+              vai_acampamento: child.vai_acampamento,
+              dietary_restrictions: child.dietary_restrictions,
+              special_needs: child.special_needs,
+            }))
+          );
+
+        if (childrenError) throw childrenError;
       }
 
       // Verificar se o acampamento já atingiu o limite de famílias
@@ -109,31 +200,114 @@ export default function AdminCampRegistrationForm() {
       }
 
       // Criar a inscrição
-      const { error } = await supabase.from("camp_registrations").insert({
-        camp_id: camp.id,
-        family_id: selectedFamily.id,
-        status,
-        notes,
-      });
+      const { error: registrationError } = await supabase
+        .from("camp_registrations")
+        .insert({
+          camp_id: camp.id,
+          family_id: family.id,
+          status,
+          notes,
+        });
 
-      if (error) throw error;
+      if (registrationError) throw registrationError;
 
-      toast.success("Inscrição realizada com sucesso!");
-      navigate(`/admin/camps/registrations/${camp.id}`);
+      toast.success("Família inscrita com sucesso!");
+      fetchRegistrations();
+      resetForm();
     } catch (error: any) {
       toast.error("Erro ao realizar inscrição: " + error.message);
     }
+  };
+
+  const handleDelete = async () => {
+    if (!familyToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from("camp_registrations")
+        .delete()
+        .eq("id", familyToDelete.id);
+
+      if (error) throw error;
+
+      setRegistrations((prev) =>
+        prev.filter((reg) => reg.id !== familyToDelete.id)
+      );
+
+      toast.success("Família removida com sucesso!");
+      setShowDeleteDialog(false);
+      setFamilyToDelete(null);
+    } catch (error: any) {
+      toast.error("Erro ao remover família: " + error.message);
+    }
+  };
+
+  const addChild = () => {
+    setChildren([
+      ...children,
+      {
+        full_name: "",
+        birth_date: "",
+        vai_acampamento: true,
+        dietary_restrictions: "",
+        special_needs: "",
+      },
+    ]);
+  };
+
+  const removeChild = (index: number) => {
+    setChildren(children.filter((_, i) => i !== index));
+  };
+
+  const updateChild = (index: number, field: keyof Child, value: any) => {
+    const newChildren = [...children];
+    newChildren[index] = {
+      ...newChildren[index],
+      [field]: value,
+    };
+    setChildren(newChildren);
+  };
+
+  const resetForm = () => {
+    setEsposoNome("");
+    setEsposaNome("");
+    setAddress("");
+    setBairro("");
+    setCity("");
+    setState("");
+    setCep("");
+    setEsposoPhone("");
+    setEsposoEmail("");
+    setEsposoProfissao("");
+    setEsposaPhone("");
+    setEsposaEmail("");
+    setEsposaProfissao("");
+    setDataCasamento("");
+    setContatoPrincipal("esposo");
+    setNeedsPajem(false);
+    setChildren([]);
+    setNotes("");
+    setStatus("pending");
   };
 
   if (loading) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Carregando...</p>
-            </div>
+          <div className="flex justify-center items-center h-64">
+            <p>Carregando...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!camp) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-center items-center h-64">
+            <p>Acampamento não encontrado</p>
           </div>
         </div>
       </Layout>
@@ -143,103 +317,338 @@ export default function AdminCampRegistrationForm() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold mb-2">
-            Nova Inscrição - {camp?.name}
-          </h1>
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold">Nova Inscrição - {camp.name}</h1>
+            <p className="text-gray-500">
+              {camp.stages.name} - {camp.parishes.name}
+            </p>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Buscar Família</label>
-              <div className="flex gap-2">
+        <div className="max-w-3xl mx-auto">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold mb-4">Dados do Casal</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Dados do Esposo */}
+                <div className="space-y-4">
+                  <h3 className="font-medium">Esposo</h3>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Nome</label>
+                    <Input
+                      value={esposoNome}
+                      onChange={(e) => setEsposoNome(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Telefone</label>
+                    <Input
+                      value={esposoPhone}
+                      onChange={(e) => setEsposoPhone(e.target.value)}
+                      type="tel"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                    <Input
+                      value={esposoEmail}
+                      onChange={(e) => setEsposoEmail(e.target.value)}
+                      type="email"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Profissão</label>
+                    <Input
+                      value={esposoProfissao}
+                      onChange={(e) => setEsposoProfissao(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Dados da Esposa */}
+                <div className="space-y-4">
+                  <h3 className="font-medium">Esposa</h3>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Nome</label>
+                    <Input
+                      value={esposaNome}
+                      onChange={(e) => setEsposaNome(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Telefone</label>
+                    <Input
+                      value={esposaPhone}
+                      onChange={(e) => setEsposaPhone(e.target.value)}
+                      type="tel"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                    <Input
+                      value={esposaEmail}
+                      onChange={(e) => setEsposaEmail(e.target.value)}
+                      type="email"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Profissão</label>
+                    <Input
+                      value={esposaProfissao}
+                      onChange={(e) => setEsposaProfissao(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Contato Principal */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Contato Principal
+                </label>
+                <Select
+                  value={contatoPrincipal}
+                  onValueChange={(value: "esposo" | "esposa") => setContatoPrincipal(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="esposo">Esposo</SelectItem>
+                    <SelectItem value="esposa">Esposa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Data de Casamento */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Data de Casamento
+                </label>
                 <Input
-                  placeholder="Digite o nome do esposo ou esposa..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  type="date"
+                  value={dataCasamento}
+                  onChange={(e) => setDataCasamento(e.target.value)}
                 />
-                <Button type="button" onClick={searchFamilies}>
-                  Buscar
-                </Button>
+              </div>
+
+              {/* Endereço */}
+              <div className="mt-6">
+                <h3 className="font-medium mb-4">Endereço</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Endereço</label>
+                    <Input
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Bairro</label>
+                    <Input
+                      value={bairro}
+                      onChange={(e) => setBairro(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Cidade</label>
+                    <Input
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Estado</label>
+                    <Input
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">CEP</label>
+                    <Input
+                      value={cep}
+                      onChange={(e) => setCep(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Necessita Pajem */}
+              <div className="mt-6">
+                <label className="flex items-center gap-2">
+                  <Checkbox
+                    checked={needsPajem}
+                    onCheckedChange={(checked) => setNeedsPajem(checked === true)}
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Necessita de Pajem
+                  </span>
+                </label>
               </div>
             </div>
 
-            {families.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Selecione a Família</label>
-                <div className="grid gap-2">
-                  {families.map((family) => (
-                    <div
-                      key={family.id}
-                      className={`p-4 border rounded-lg cursor-pointer hover:bg-gray-50 ${
-                        selectedFamily?.id === family.id
-                          ? "border-primary bg-primary/5"
-                          : ""
-                      }`}
-                      onClick={() => setSelectedFamily(family)}
-                    >
-                      <div className="font-medium">
-                        {family.esposo_nome} e {family.esposa_nome}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {family.address}, {family.bairro}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            {/* Filhos */}
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Filhos</h3>
+                <Button type="button" onClick={addChild}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Filho
+                </Button>
               </div>
-            )}
 
-            {selectedFamily && (
-              <>
-                <div>
-                  <label className="text-sm font-medium">Status</label>
-                  <Select
-                    value={status}
-                    onValueChange={(value: typeof status) => setStatus(value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pendente</SelectItem>
-                      <SelectItem value="confirmed">Confirmado</SelectItem>
-                      <SelectItem value="waitlist">Lista de Espera</SelectItem>
-                      <SelectItem value="cancelled">Cancelado</SelectItem>
-                    </SelectContent>
-                  </Select>
+              {children.map((child, index) => (
+                <div key={index} className="p-4 border rounded-lg space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-md font-medium">Filho {index + 1}</h4>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeChild(index)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Nome</label>
+                      <Input
+                        value={child.full_name}
+                        onChange={(e) =>
+                          updateChild(index, "full_name", e.target.value)
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Data de Nascimento
+                      </label>
+                      <Input
+                        type="date"
+                        value={child.birth_date}
+                        onChange={(e) =>
+                          updateChild(index, "birth_date", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Restrições Alimentares
+                      </label>
+                      <Input
+                        value={child.dietary_restrictions || ""}
+                        onChange={(e) =>
+                          updateChild(
+                            index,
+                            "dietary_restrictions",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Necessidades Especiais
+                      </label>
+                      <Input
+                        value={child.special_needs || ""}
+                        onChange={(e) =>
+                          updateChild(index, "special_needs", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={child.vai_acampamento}
+                        onChange={(e) =>
+                          updateChild(
+                            index,
+                            "vai_acampamento",
+                            e.target.checked
+                          )
+                        }
+                        className="h-4 w-4"
+                      />
+                      <label className="text-sm font-medium">
+                        Vai ao Acampamento
+                      </label>
+                    </div>
+                  </div>
                 </div>
+              ))}
+            </div>
 
-                <div>
-                  <label className="text-sm font-medium">Notas</label>
-                  <Textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Adicione notas sobre esta inscrição..."
-                    rows={4}
-                  />
-                </div>
-              </>
-            )}
-          </div>
+            {/* Status e Observações */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Status</label>
+                <Select
+                  value={status}
+                  onValueChange={(value: any) => setStatus(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pendente</SelectItem>
+                    <SelectItem value="confirmed">Confirmado</SelectItem>
+                    <SelectItem value="waitlist">Lista de Espera</SelectItem>
+                    <SelectItem value="cancelled">Cancelado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="flex justify-end space-x-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate(`/admin/camps/registrations/${id}`)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={!selectedFamily}
-            >
-              Salvar
-            </Button>
-          </div>
-        </form>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Observações</label>
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={4}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <Button type="submit" className="flex-1">
+                Registrar Família
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => navigate(`/admin/camps/registrations/${id}`)}
+              >
+                Voltar
+              </Button>
+            </div>
+          </form>
+        </div>
+
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja remover esta família do acampamento? Esta
+                ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete}>
+                Confirmar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );

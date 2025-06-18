@@ -99,13 +99,12 @@ export interface Database {
         }
         Relationships: []
       }
-      participants: {
+      family_children: {
         Row: {
           id: string
           family_id: string
           full_name: string
           birth_date: string | null
-          is_child: boolean
           vai_acampamento: boolean
           dietary_restrictions: string | null
           special_needs: string | null
@@ -117,7 +116,6 @@ export interface Database {
           family_id: string
           full_name: string
           birth_date?: string | null
-          is_child: boolean
           vai_acampamento?: boolean
           dietary_restrictions?: string | null
           special_needs?: string | null
@@ -129,7 +127,6 @@ export interface Database {
           family_id?: string
           full_name?: string
           birth_date?: string | null
-          is_child?: boolean
           vai_acampamento?: boolean
           dietary_restrictions?: string | null
           special_needs?: string | null
@@ -138,10 +135,49 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "participants_family_id_fkey"
+            foreignKeyName: "family_children_family_id_fkey"
             columns: ["family_id"]
             isOneToOne: false
             referencedRelation: "families"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      tent_children: {
+        Row: {
+          id: string
+          tent_id: string
+          family_child_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tent_id: string
+          family_child_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tent_id?: string
+          family_child_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tent_children_tent_id_fkey"
+            columns: ["tent_id"]
+            isOneToOne: false
+            referencedRelation: "tents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tent_children_family_child_id_fkey"
+            columns: ["family_child_id"]
+            isOneToOne: false
+            referencedRelation: "family_children"
             referencedColumns: ["id"]
           }
         ]

@@ -8,8 +8,6 @@ import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
-import AdminFamilies from "./pages/AdminFamilies";
-import AdminFamilyNew from "./pages/AdminFamilyNew";
 import AdminParishes from "./pages/AdminParishes";
 import AdminParishForm from "./pages/AdminParishForm";
 import AdminStages from "@/pages/AdminStages";
@@ -18,6 +16,7 @@ import AdminCamps from "@/pages/AdminCamps";
 import AdminCampForm from "@/pages/AdminCampForm";
 import AdminCampRegistrations from "@/pages/AdminCampRegistrations";
 import AdminCampRegistrationForm from "@/pages/AdminCampRegistrationForm";
+import AdminCampTents from "@/pages/AdminCampTents";
 
 const queryClient = new QueryClient();
 
@@ -32,8 +31,6 @@ const App = () => (
           <Route path="/sobre" element={<About />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/families" element={<AdminFamilies />} />
-          <Route path="/admin/families/new" element={<AdminFamilyNew />} />
           <Route path="/admin/parishes" element={<AdminParishes />} />
           <Route path="/admin/parishes/new" element={<AdminParishForm />} />
           <Route path="/admin/parishes/edit/:id" element={<AdminParishForm />} />
@@ -43,6 +40,7 @@ const App = () => (
           <Route path="/admin/camps" element={<AdminCamps />} />
           <Route path="/admin/camps/new" element={<AdminCampForm />} />
           <Route path="/admin/camps/edit/:id" element={<AdminCampForm />} />
+          <Route path="/admin/camps/tents/:id" element={<AdminCampTents />} />
           <Route path="/admin/camps/registrations/:id" element={<AdminCampRegistrations />} />
           <Route path="/admin/camps/registrations/:id/new" element={<AdminCampRegistrationForm />} />
           <Route path="*" element={<NotFound />} />

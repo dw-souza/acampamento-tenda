@@ -27,8 +27,8 @@ import { Tables } from "@/integrations/supabase/types";
 import { Plus, Search } from "lucide-react";
 
 type Camp = Tables<"camps"> & {
-  stage: Tables<"stages">;
-  parish: Tables<"parishes">;
+  stages: Tables<"stages">;
+  parishes: Tables<"parishes">;
 };
 
 export default function AdminCamps() {
@@ -36,13 +36,7 @@ export default function AdminCamps() {
   const [camps, setCamps] = useState<Camp[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [deleteDialog, setDeleteDialog] = useState<{
-    open: boolean;
-    campId: string | null;
-  }>({
-    open: false,
-    campId: null,
-  });
+  const [campToDelete, setCampToDelete] = useState<Camp | null>(null);
 
   useEffect(() => {
     fetchCamps();
@@ -54,13 +48,12 @@ export default function AdminCamps() {
         .from("camps")
         .select(`
           *,
-          stage:stages(*),
-          parish:parishes(*)
+          stages (*),
+          parishes (*)
         `)
         .order("start_date", { ascending: false });
 
       if (error) throw error;
-
       setCamps(data || []);
     } catch (error: any) {
       toast.error("Erro ao carregar acampamentos: " + error.message);
@@ -70,22 +63,22 @@ export default function AdminCamps() {
   };
 
   const handleDelete = async () => {
-    if (!deleteDialog.campId) return;
+    if (!campToDelete) return;
 
     try {
       const { error } = await supabase
         .from("camps")
         .delete()
-        .eq("id", deleteDialog.campId);
+        .eq("id", campToDelete.id);
 
       if (error) throw error;
 
+      setCamps((prev) => prev.filter((camp) => camp.id !== campToDelete.id));
       toast.success("Acampamento excluído com sucesso!");
-      fetchCamps();
     } catch (error: any) {
       toast.error("Erro ao excluir acampamento: " + error.message);
     } finally {
-      setDeleteDialog({ open: false, campId: null });
+      setCampToDelete(null);
     }
   };
 
@@ -97,39 +90,20 @@ export default function AdminCamps() {
     return new Date(date).toLocaleDateString("pt-BR");
   };
 
-  const getStatusColor = (status: Camp["status"]) => {
-    switch (status) {
-      case "draft":
-        return "text-gray-500";
-      case "open":
-        return "text-green-500";
-      case "closed":
-        return "text-red-500";
-      case "in_progress":
-        return "text-blue-500";
-      case "completed":
-        return "text-purple-500";
-      default:
-        return "text-gray-500";
-    }
-  };
-
-  const getStatusText = (status: Camp["status"]) => {
-    switch (status) {
-      case "draft":
-        return "Rascunho";
-      case "open":
-        return "Inscrições Abertas";
-      case "closed":
-        return "Inscrições Encerradas";
-      case "in_progress":
-        return "Em Andamento";
-      case "completed":
-        return "Concluído";
-      default:
-        return status;
-    }
-  };
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Carregando...</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -168,75 +142,70 @@ export default function AdminCamps() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center">
-                    Carregando...
+              {filteredCamps.map((camp) => (
+                <TableRow key={camp.id}>
+                  <TableCell>{camp.name}</TableCell>
+                  <TableCell>{camp.stages.name}</TableCell>
+                  <TableCell>{camp.parishes.name}</TableCell>
+                  <TableCell>{formatDate(camp.start_date)}</TableCell>
+                  <TableCell>{formatDate(camp.end_date)}</TableCell>
+                  <TableCell className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        camp.status === "open"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {camp.status === "open" ? "Ativo" : "Inativo"}
+                    </span>
                   </TableCell>
-                </TableRow>
-              ) : filteredCamps.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center">
-                    Nenhum acampamento encontrado
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredCamps.map((camp) => (
-                  <TableRow key={camp.id}>
-                    <TableCell>{camp.name}</TableCell>
-                    <TableCell>{camp.stage.name}</TableCell>
-                    <TableCell>{camp.parish.name}</TableCell>
-                    <TableCell>{formatDate(camp.start_date)}</TableCell>
-                    <TableCell>{formatDate(camp.end_date)}</TableCell>
-                    <TableCell>
-                      <span className={getStatusColor(camp.status)}>
-                        {getStatusText(camp.status)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      onClick={() => navigate(`/admin/camps/edit/${camp.id}`)}
+                    >
+                      Editar
+                    </Button>
+                    {camp.stages.name.toLowerCase() === "kerigma" ? (
                       <Button
                         variant="ghost"
-                        size="sm"
                         onClick={() => navigate(`/admin/camps/registrations/${camp.id}`)}
                       >
                         Inscrições
                       </Button>
+                    ) : (
                       <Button
                         variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/admin/camps/edit/${camp.id}`)}
+                        onClick={() => navigate(`/admin/camps/tents/${camp.id}`)}
                       >
-                        Editar
+                        Tendas
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          setDeleteDialog({ open: true, campId: camp.id })
-                        }
-                      >
-                        Excluir
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
+                    )}
+                    <Button
+                      variant="ghost"
+                      className="text-red-600 hover:text-red-900"
+                      onClick={() => setCampToDelete(camp)}
+                    >
+                      Excluir
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>
 
         <AlertDialog
-          open={deleteDialog.open}
-          onOpenChange={(open) =>
-            setDeleteDialog({ open, campId: open ? deleteDialog.campId : null })
-          }
+          open={!!campToDelete}
+          onOpenChange={(open) => !open && setCampToDelete(null)}
         >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Excluir Acampamento</AlertDialogTitle>
               <AlertDialogDescription>
-                Tem certeza que deseja excluir este acampamento? Esta ação não
-                pode ser desfeita.
+                Tem certeza que deseja excluir este acampamento? Esta ação não pode
+                ser desfeita.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

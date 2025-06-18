@@ -29,7 +29,7 @@ import {
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
-import { Search } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,6 +58,7 @@ export default function AdminCampRegistrations() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegistration, setSelectedRegistration] = useState<CampRegistration | null>(null);
+  const [registrationToDelete, setRegistrationToDelete] = useState<CampRegistration | null>(null);
   const [notes, setNotes] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -155,23 +156,23 @@ export default function AdminCampRegistrations() {
   };
 
   const handleDelete = async () => {
-    if (!selectedRegistration) return;
+    if (!registrationToDelete) return;
 
     try {
       const { error } = await supabase
         .from("camp_registrations")
         .delete()
-        .eq("id", selectedRegistration.id);
+        .eq("id", registrationToDelete.id);
 
       if (error) throw error;
 
       setRegistrations((prev) =>
-        prev.filter((reg) => reg.id !== selectedRegistration.id)
+        prev.filter((reg) => reg.id !== registrationToDelete.id)
       );
 
       toast.success("Inscrição excluída com sucesso!");
       setShowDeleteDialog(false);
-      setSelectedRegistration(null);
+      setRegistrationToDelete(null);
     } catch (error: any) {
       toast.error("Erro ao excluir inscrição: " + error.message);
     }
@@ -247,6 +248,7 @@ export default function AdminCampRegistrations() {
             />
           </div>
           <Button onClick={() => navigate(`/admin/camps/registrations/${id}/new`)}>
+            <Plus className="w-4 h-4 mr-2" />
             Nova Inscrição
           </Button>
         </div>
@@ -330,7 +332,7 @@ export default function AdminCampRegistrations() {
                       variant="ghost"
                       className="text-red-600 hover:text-red-900"
                       onClick={() => {
-                        setSelectedRegistration(registration);
+                        setRegistrationToDelete(registration);
                         setShowDeleteDialog(true);
                       }}
                     >
