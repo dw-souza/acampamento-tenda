@@ -24,7 +24,13 @@ import {
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Users } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Camp = Tables<"camps"> & {
   stages: Tables<"stages">;
@@ -37,6 +43,7 @@ export default function AdminCamps() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [campToDelete, setCampToDelete] = useState<Camp | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     fetchCamps();
@@ -79,6 +86,7 @@ export default function AdminCamps() {
       toast.error("Erro ao excluir acampamento: " + error.message);
     } finally {
       setCampToDelete(null);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -160,35 +168,57 @@ export default function AdminCamps() {
                       {camp.status === "open" ? "Ativo" : "Inativo"}
                     </span>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      onClick={() => navigate(`/admin/camps/edit/${camp.id}`)}
-                    >
-                      Editar
-                    </Button>
-                    {camp.stages.name.toLowerCase() === "kerigma" ? (
-                      <Button
-                        variant="ghost"
-                        onClick={() => navigate(`/admin/camps/registrations/${camp.id}`)}
-                      >
-                        Inscrições
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        onClick={() => navigate(`/admin/camps/tents/${camp.id}`)}
-                      >
-                        Tendas
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      className="text-red-600 hover:text-red-900"
-                      onClick={() => setCampToDelete(camp)}
-                    >
-                      Excluir
-                    </Button>
+                  <TableCell className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(`/admin/camps/registrations/${camp.id}`)}
+                          >
+                            <Users className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ver Inscrições</p>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(`/admin/camps/${camp.id}`)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Editar Acampamento</p>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-600 hover:text-red-900"
+                            onClick={() => {
+                              setCampToDelete(camp);
+                              setShowDeleteDialog(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Excluir Acampamento</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </TableCell>
                 </TableRow>
               ))}
@@ -197,7 +227,7 @@ export default function AdminCamps() {
         </div>
 
         <AlertDialog
-          open={!!campToDelete}
+          open={showDeleteDialog}
           onOpenChange={(open) => !open && setCampToDelete(null)}
         >
           <AlertDialogContent>

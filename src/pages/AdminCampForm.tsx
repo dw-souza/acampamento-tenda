@@ -36,6 +36,8 @@ export default function AdminCampForm() {
     registration_start_date: "",
     registration_end_date: "",
     status: "draft",
+    couple_price: 250.00,
+    child_price: 25.00,
   });
 
   useEffect(() => {
@@ -102,18 +104,24 @@ export default function AdminCampForm() {
     setLoading(true);
 
     try {
-      const data = {
-        ...formData,
-        start_date: new Date(formData.start_date).toISOString(),
-        end_date: new Date(formData.end_date).toISOString(),
-        registration_start_date: new Date(formData.registration_start_date).toISOString(),
-        registration_end_date: new Date(formData.registration_end_date).toISOString(),
+      const campData = {
+        name: formData.name.toUpperCase(),
+        stage_id: formData.stage_id,
+        parish_id: formData.parish_id,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        max_families: formData.max_families,
+        couple_price: formData.couple_price,
+        child_price: formData.child_price,
+        registration_start_date: formData.registration_start_date,
+        registration_end_date: formData.registration_end_date,
+        status: formData.status,
       };
 
       if (id) {
         const { error } = await supabase
           .from("camps")
-          .update(data)
+          .update(campData)
           .eq("id", id);
 
         if (error) throw error;
@@ -121,7 +129,7 @@ export default function AdminCampForm() {
       } else {
         const { error } = await supabase
           .from("camps")
-          .insert(data);
+          .insert(campData);
 
         if (error) throw error;
         toast.success("Acampamento criado com sucesso!");
@@ -138,183 +146,223 @@ export default function AdminCampForm() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-2xl font-bold mb-6">
             {id ? "Editar Acampamento" : "Novo Acampamento"}
           </h1>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Nome do Acampamento</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="stage_id">Etapa</Label>
+                  <Select
+                    value={formData.stage_id}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, stage_id: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a etapa" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {stages.map((stage) => (
+                        <SelectItem key={stage.id} value={stage.id}>
+                          {stage.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="parish_id">Paróquia</Label>
+                  <Select
+                    value={formData.parish_id}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, parish_id: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a paróquia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {parishes.map((parish) => (
+                        <SelectItem key={parish.id} value={parish.id}>
+                          {parish.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="start_date">Data de Início</Label>
+                  <Input
+                    id="start_date"
+                    type="date"
+                    value={formData.start_date}
+                    onChange={(e) =>
+                      setFormData({ ...formData, start_date: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="end_date">Data de Término</Label>
+                  <Input
+                    id="end_date"
+                    type="date"
+                    value={formData.end_date}
+                    onChange={(e) =>
+                      setFormData({ ...formData, end_date: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="registration_start_date">
+                    Data de Início das Inscrições
+                  </Label>
+                  <Input
+                    id="registration_start_date"
+                    type="date"
+                    value={formData.registration_start_date}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        registration_start_date: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="registration_end_date">
+                    Data de Término das Inscrições
+                  </Label>
+                  <Input
+                    id="registration_end_date"
+                    type="date"
+                    value={formData.registration_end_date}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        registration_end_date: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="max_families">Máximo de Famílias</Label>
+                  <Input
+                    id="max_families"
+                    type="number"
+                    value={formData.max_families}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        max_families: parseInt(e.target.value),
+                      })
+                    }
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="couple_price">Valor por Casal (R$)</Label>
+                  <Input
+                    id="couple_price"
+                    type="number"
+                    step="0.01"
+                    value={formData.couple_price}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        couple_price: parseFloat(e.target.value),
+                      })
+                    }
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="child_price">Valor por Filho (R$)</Label>
+                  <Input
+                    id="child_price"
+                    type="number"
+                    step="0.01"
+                    value={formData.child_price}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        child_price: parseFloat(e.target.value),
+                      })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, status: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Rascunho</SelectItem>
+                    <SelectItem value="open">Aberto</SelectItem>
+                    <SelectItem value="closed">Fechado</SelectItem>
+                    <SelectItem value="in_progress">Em Andamento</SelectItem>
+                    <SelectItem value="completed">Concluído</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate("/admin/camps")}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
+          </form>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Nome</label>
-              <Input
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Etapa</label>
-              <Select
-                value={formData.stage_id}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, stage_id: value })
-                }
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma etapa" />
-                </SelectTrigger>
-                <SelectContent>
-                  {stages.map((stage) => (
-                    <SelectItem key={stage.id} value={stage.id}>
-                      {stage.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Paróquia</label>
-              <Select
-                value={formData.parish_id}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, parish_id: value })
-                }
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma paróquia" />
-                </SelectTrigger>
-                <SelectContent>
-                  {parishes.map((parish) => (
-                    <SelectItem key={parish.id} value={parish.id}>
-                      {parish.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Data de Início</label>
-                <Input
-                  type="date"
-                  value={formData.start_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, start_date: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Data de Término</label>
-                <Input
-                  type="date"
-                  value={formData.end_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, end_date: e.target.value })
-                  }
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Máximo de Famílias</label>
-              <Input
-                type="number"
-                min="1"
-                value={formData.max_families}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    max_families: parseInt(e.target.value),
-                  })
-                }
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">
-                  Início das Inscrições
-                </label>
-                <Input
-                  type="date"
-                  value={formData.registration_start_date}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      registration_start_date: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">
-                  Término das Inscrições
-                </label>
-                <Input
-                  type="date"
-                  value={formData.registration_end_date}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      registration_end_date: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Status</label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, status: value })
-                }
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Rascunho</SelectItem>
-                  <SelectItem value="open">Inscrições Abertas</SelectItem>
-                  <SelectItem value="closed">Inscrições Encerradas</SelectItem>
-                  <SelectItem value="in_progress">Em Andamento</SelectItem>
-                  <SelectItem value="completed">Concluído</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate("/admin/camps")}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Salvando..." : "Salvar"}
-            </Button>
-          </div>
-        </form>
       </div>
     </Layout>
   );

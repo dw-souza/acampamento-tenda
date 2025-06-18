@@ -121,27 +121,29 @@ export default function AdminParishForm() {
     setLoading(true);
 
     try {
+      const parishData = {
+        name: formData.name.toUpperCase(),
+        city: formData.city,
+        state: formData.state,
+        address: formData.address,
+        zip_code: formData.zip_code,
+        phone: formData.phone,
+        email: formData.email,
+        responsible_name: formData.responsible_name,
+        responsible_phone: formData.responsible_phone,
+        status: formData.status || "active"
+      };
+
       if (id) {
         const { error } = await supabase
           .from("parishes")
-          .update(formData)
+          .update(parishData)
           .eq("id", id);
 
         if (error) throw error;
         toast.success("Paróquia atualizada com sucesso!");
       } else {
-        const { error } = await supabase.from("parishes").insert({
-          name: formData.name!,
-          city: formData.city!,
-          state: formData.state!,
-          address: formData.address,
-          zip_code: formData.zip_code,
-          phone: formData.phone,
-          email: formData.email,
-          responsible_name: formData.responsible_name,
-          responsible_phone: formData.responsible_phone,
-          status: formData.status || "active"
-        });
+        const { error } = await supabase.from("parishes").insert(parishData);
 
         if (error) throw error;
         toast.success("Paróquia cadastrada com sucesso!");

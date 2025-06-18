@@ -49,22 +49,26 @@ export default function AdminStageForm() {
     setLoading(true);
 
     try {
+      const stageData = {
+        name: formData.name.toUpperCase(),
+        description: formData.description.toUpperCase(),
+      };
+
       if (id) {
         const { error } = await supabase
           .from("stages")
-          .update(formData)
+          .update(stageData)
           .eq("id", id);
 
         if (error) throw error;
         toast.success("Etapa atualizada com sucesso!");
       } else {
-        const { error } = await supabase.from("stages").insert({
-          name: formData.name!,
-          description: formData.description,
-        });
+        const { error } = await supabase
+          .from("stages")
+          .insert(stageData);
 
         if (error) throw error;
-        toast.success("Etapa cadastrada com sucesso!");
+        toast.success("Etapa criada com sucesso!");
       }
 
       navigate("/admin/stages");

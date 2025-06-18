@@ -137,40 +137,48 @@ export default function AdminCampRegistrationForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!camp) return;
+    setLoading(true);
 
     try {
-      // Criar a família
+      // Converter todos os campos de texto para uppercase
+      const familyData = {
+        esposo_nome: esposoNome.toUpperCase(),
+        esposo_phone: esposoPhone,
+        esposo_email: esposoEmail,
+        esposo_profissao: esposoProfissao.toUpperCase(),
+        esposa_nome: esposaNome.toUpperCase(),
+        esposa_phone: esposaPhone,
+        esposa_email: esposaEmail,
+        esposa_profissao: esposaProfissao.toUpperCase(),
+        contato_principal: contatoPrincipal,
+        data_casamento: dataCasamento,
+        address: address.toUpperCase(),
+        bairro: bairro.toUpperCase(),
+        city: city.toUpperCase(),
+        state: state.toUpperCase(),
+        zip_code: cep.toUpperCase(),
+        needs_pajem: needsPajem,
+      };
+
       const { data: family, error: familyError } = await supabase
         .from("families")
-        .insert({
-          esposo_nome: esposoNome,
-          esposa_nome: esposaNome,
-          address,
-          bairro,
-          city,
-          state,
-          zip_code: cep,
-          esposo_phone: esposoPhone,
-          esposo_email: esposoEmail,
-          esposo_profissao: esposoProfissao,
-          esposa_phone: esposaPhone,
-          esposa_email: esposaEmail,
-          esposa_profissao: esposaProfissao,
-          data_casamento: dataCasamento,
-          contato_principal: contatoPrincipal,
-        })
+        .insert(familyData)
         .select()
         .single();
 
       if (familyError) throw familyError;
 
-      // Criar os filhos
-      if (children.length > 0) {
+      // Converter nomes dos filhos para uppercase
+      const childrenData = children.map(child => ({
+        ...child,
+        full_name: child.full_name.toUpperCase(),
+      }));
+
+      if (childrenData.length > 0) {
         const { error: childrenError } = await supabase
           .from("family_children")
           .insert(
-            children.map((child) => ({
+            childrenData.map((child) => ({
               family_id: family.id,
               full_name: child.full_name,
               birth_date: child.birth_date,
@@ -199,7 +207,6 @@ export default function AdminCampRegistrationForm() {
         }
       }
 
-      // Criar a inscrição
       const { error: registrationError } = await supabase
         .from("camp_registrations")
         .insert({
@@ -216,6 +223,8 @@ export default function AdminCampRegistrationForm() {
       resetForm();
     } catch (error: any) {
       toast.error("Erro ao realizar inscrição: " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 

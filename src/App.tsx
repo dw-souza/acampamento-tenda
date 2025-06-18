@@ -17,6 +17,11 @@ import AdminCampForm from "@/pages/AdminCampForm";
 import AdminCampRegistrations from "@/pages/AdminCampRegistrations";
 import AdminCampRegistrationForm from "@/pages/AdminCampRegistrationForm";
 import AdminCampTents from "@/pages/AdminCampTents";
+import AdminTents from "@/pages/AdminTents";
+import AdminTentForm from "@/pages/AdminTentForm";
+import AdminTentParticipants from "@/pages/AdminTentParticipants";
+import AdminTentFamilyForm from "@/pages/AdminTentFamilyForm";
+import AdminTentFamilyAdd from "@/pages/AdminTentFamilyAdd";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +48,12 @@ const App = () => (
           <Route path="/admin/camps/tents/:id" element={<AdminCampTents />} />
           <Route path="/admin/camps/registrations/:id" element={<AdminCampRegistrations />} />
           <Route path="/admin/camps/registrations/:id/new" element={<AdminCampRegistrationForm />} />
+          <Route path="/admin/tents" element={<AdminTents />} />
+          <Route path="/admin/tents/new" element={<AdminTentForm />} />
+          <Route path="/admin/tents/edit/:id" element={<AdminTentForm />} />
+          <Route path="/admin/tents/:tentId/participants" element={<AdminTentParticipants />} />
+          <Route path="/admin/tents/family/:id" element={<AdminTentFamilyForm />} />
+          <Route path="/admin/tents/:tentId/family/add" element={<AdminTentFamilyAdd />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

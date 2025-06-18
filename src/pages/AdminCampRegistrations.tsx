@@ -29,7 +29,7 @@ import {
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Pencil, Trash2, FileText } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,12 +42,18 @@ import {
 } from "@/components/ui/alert-dialog";
 
 type CampRegistration = Tables<"camp_registrations"> & {
-  families: Tables<"families">;
+  families: Tables<"families"> & {
+    family_children?: Tables<"family_children">[];
+  };
+  is_paid: boolean;
+  payment_method: "pix" | "dinheiro" | "cartao" | "transferencia" | null;
 };
 
 type Camp = Tables<"camps"> & {
   stages: Tables<"stages">;
   parishes: Tables<"parishes">;
+  couple_price: number;
+  child_price: number;
 };
 
 export default function AdminCampRegistrations() {
@@ -95,7 +101,10 @@ export default function AdminCampRegistrations() {
         .from("camp_registrations")
         .select(`
           *,
-          families (*)
+          families (
+            *,
+            family_children (*)
+          )
         `)
         .eq("camp_id", id)
         .order("created_at", { ascending: false });
@@ -178,6 +187,48 @@ export default function AdminCampRegistrations() {
     }
   };
 
+  const handlePaymentMethodChange = async (registrationId: string, method: "pix" | "dinheiro" | "cartao" | "transferencia") => {
+    try {
+      const { error } = await supabase
+        .from("camp_registrations")
+        .update({ payment_method: method })
+        .eq("id", registrationId);
+
+      if (error) throw error;
+
+      setRegistrations((prev) =>
+        prev.map((reg) =>
+          reg.id === registrationId ? { ...reg, payment_method: method } : reg
+        )
+      );
+
+      toast.success("Método de pagamento atualizado!");
+    } catch (error: any) {
+      toast.error("Erro ao atualizar método de pagamento: " + error.message);
+    }
+  };
+
+  const handlePaymentStatusChange = async (registrationId: string, isPaid: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("camp_registrations")
+        .update({ is_paid: isPaid })
+        .eq("id", registrationId);
+
+      if (error) throw error;
+
+      setRegistrations((prev) =>
+        prev.map((reg) =>
+          reg.id === registrationId ? { ...reg, is_paid: isPaid } : reg
+        )
+      );
+
+      toast.success(`Status de pagamento atualizado para ${isPaid ? "Pago" : "Não Pago"}!`);
+    } catch (error: any) {
+      toast.error("Erro ao atualizar status de pagamento: " + error.message);
+    }
+  };
+
   const filteredRegistrations = registrations.filter((registration) =>
     `${registration.families.esposo_nome} ${registration.families.esposa_nome}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -210,6 +261,14 @@ export default function AdminCampRegistrations() {
       default:
         return status;
     }
+  };
+
+  const formatName = (fullName: string) => {
+    const names = fullName.split(' ');
+    if (names.length <= 2) {
+      return fullName;
+    }
+    return `${names[0]} ${names[names.length - 1]}`;
   };
 
   if (loading) {
@@ -267,6 +326,12 @@ export default function AdminCampRegistrations() {
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Valor Total
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Pagamento
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Notas
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -275,72 +340,125 @@ export default function AdminCampRegistrations() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredRegistrations.map((registration) => (
-                <tr key={registration.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {registration.families.esposo_nome} e {registration.families.esposa_nome}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {new Date(registration.created_at).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Select
-                      value={registration.status}
-                      onValueChange={(value) =>
-                        handleStatusChange(registration.id, value as "pending" | "confirmed" | "waitlist" | "cancelled")
-                      }
-                    >
-                      <SelectTrigger className="w-40">
-                        <SelectValue>
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                              registration.status
-                            )}`}
-                          >
-                            {getStatusLabel(registration.status)}
-                          </span>
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pendente</SelectItem>
-                        <SelectItem value="confirmed">Confirmado</SelectItem>
-                        <SelectItem value="waitlist">Lista de Espera</SelectItem>
-                        <SelectItem value="cancelled">Cancelado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-500">
-                      {registration.notes || "-"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setSelectedRegistration(registration);
-                        setNotes(registration.notes || "");
-                      }}
-                    >
-                      Editar Notas
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="text-red-600 hover:text-red-900"
-                      onClick={() => {
-                        setRegistrationToDelete(registration);
-                        setShowDeleteDialog(true);
-                      }}
-                    >
-                      Excluir
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+              {filteredRegistrations.map((registration) => {
+                const childrenCount = registration.families.family_children?.filter(
+                  child => child.vai_acampamento
+                ).length || 0;
+                const totalValue = camp ? 
+                  camp.couple_price + (childrenCount * camp.child_price) : 0;
+
+                return (
+                  <tr key={registration.id}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        <div>{formatName(registration.families.esposo_nome)}</div>
+                        <div>{formatName(registration.families.esposa_nome)}</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {new Date(registration.created_at).toLocaleDateString()}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Select
+                        value={registration.status}
+                        onValueChange={(value) =>
+                          handleStatusChange(registration.id, value as "pending" | "confirmed" | "waitlist" | "cancelled")
+                        }
+                      >
+                        <SelectTrigger className="w-40">
+                          <SelectValue>
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                                registration.status
+                              )}`}
+                            >
+                              {getStatusLabel(registration.status)}
+                            </span>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pendente</SelectItem>
+                          <SelectItem value="confirmed">Confirmado</SelectItem>
+                          <SelectItem value="waitlist">Lista de Espera</SelectItem>
+                          <SelectItem value="cancelled">Cancelado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        R$ {totalValue.toFixed(2)}
+                        <div className="text-xs text-gray-500">
+                          {childrenCount} {childrenCount === 1 ? 'filho' : 'filhos'}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant={registration.is_paid ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handlePaymentStatusChange(registration.id, !registration.is_paid)}
+                        >
+                          {registration.is_paid ? "Pago" : "Não Pago"}
+                        </Button>
+                        <Select
+                          value={registration.payment_method || ""}
+                          onValueChange={(value) =>
+                            handlePaymentMethodChange(registration.id, value as "pix" | "dinheiro" | "cartao" | "transferencia")
+                          }
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Método" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pix">PIX</SelectItem>
+                            <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                            <SelectItem value="cartao">Cartão</SelectItem>
+                            <SelectItem value="transferencia">Transferência</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-500">
+                        {registration.notes || "-"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(`/admin/families/${registration.families.id}`)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setSelectedRegistration(registration);
+                          setNotes(registration.notes || "");
+                        }}
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-600 hover:text-red-900"
+                        onClick={() => {
+                          setRegistrationToDelete(registration);
+                          setShowDeleteDialog(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
