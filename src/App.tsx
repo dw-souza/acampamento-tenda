@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +10,14 @@ import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
 import AdminFamilies from "./pages/AdminFamilies";
 import AdminFamilyNew from "./pages/AdminFamilyNew";
+import AdminParishes from "./pages/AdminParishes";
+import AdminParishForm from "./pages/AdminParishForm";
+import AdminStages from "@/pages/AdminStages";
+import AdminStageForm from "@/pages/AdminStageForm";
+import AdminCamps from "@/pages/AdminCamps";
+import AdminCampForm from "@/pages/AdminCampForm";
+import AdminCampRegistrations from "@/pages/AdminCampRegistrations";
+import AdminCampRegistrationForm from "@/pages/AdminCampRegistrationForm";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +34,17 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/families" element={<AdminFamilies />} />
           <Route path="/admin/families/new" element={<AdminFamilyNew />} />
+          <Route path="/admin/parishes" element={<AdminParishes />} />
+          <Route path="/admin/parishes/new" element={<AdminParishForm />} />
+          <Route path="/admin/parishes/edit/:id" element={<AdminParishForm />} />
+          <Route path="/admin/stages" element={<AdminStages />} />
+          <Route path="/admin/stages/new" element={<AdminStageForm />} />
+          <Route path="/admin/stages/edit/:id" element={<AdminStageForm />} />
+          <Route path="/admin/camps" element={<AdminCamps />} />
+          <Route path="/admin/camps/new" element={<AdminCampForm />} />
+          <Route path="/admin/camps/edit/:id" element={<AdminCampForm />} />
+          <Route path="/admin/camps/registrations/:id" element={<AdminCampRegistrations />} />
+          <Route path="/admin/camps/registrations/:id/new" element={<AdminCampRegistrationForm />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

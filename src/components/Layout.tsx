@@ -1,6 +1,7 @@
-
 import { ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
+import AdminNavbar from "./AdminNavbar";
 import Footer from "./Footer";
 
 interface LayoutProps {
@@ -8,13 +9,16 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
+      {isAdminRoute ? <AdminNavbar /> : <Navbar />}
       <main className="flex-grow">
         {children}
       </main>
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </div>
   );
 };
