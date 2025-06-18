@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       admins: {
@@ -32,148 +32,109 @@ export type Database = {
       }
       families: {
         Row: {
+          id: string
+          esposo_nome: string
+          esposa_nome: string
+          contato_principal: "esposo" | "esposa"
           address: string | null
           bairro: string | null
           city: string | null
-          created_at: string | null
-          data_casamento: string | null
-          forma_pagamento: string | null
-          has_children: boolean | null
-          id: string
-          main_contact_email: string | null
-          main_contact_name: string
-          main_contact_phone: string | null
-          needs_pajem: boolean | null
-          notes: string | null
-          payment_proof_url: string | null
-          payment_status: string | null
-          phone_esposa: string | null
-          phone_esposo: string | null
-          phone_fixo: string | null
-          profissao_esposa: string | null
-          profissao_esposo: string | null
-          registration_status: string | null
           state: string | null
-          total_amount: number | null
-          updated_at: string | null
-          valor_casal: number | null
-          valor_filhos: number | null
-          valor_pago: number | null
-          valor_pajem: number | null
           zip_code: string | null
+          data_casamento: string | null
+          esposo_phone: string | null
+          esposo_email: string | null
+          esposo_profissao: string | null
+          esposa_phone: string | null
+          esposa_email: string | null
+          esposa_profissao: string | null
+          needs_pajem: boolean
+          notes: string | null
+          created_at: string
+          updated_at: string
         }
         Insert: {
+          id?: string
+          esposo_nome: string
+          esposa_nome: string
+          contato_principal: "esposo" | "esposa"
           address?: string | null
           bairro?: string | null
           city?: string | null
-          created_at?: string | null
-          data_casamento?: string | null
-          forma_pagamento?: string | null
-          has_children?: boolean | null
-          id?: string
-          main_contact_email?: string | null
-          main_contact_name: string
-          main_contact_phone?: string | null
-          needs_pajem?: boolean | null
-          notes?: string | null
-          payment_proof_url?: string | null
-          payment_status?: string | null
-          phone_esposa?: string | null
-          phone_esposo?: string | null
-          phone_fixo?: string | null
-          profissao_esposa?: string | null
-          profissao_esposo?: string | null
-          registration_status?: string | null
           state?: string | null
-          total_amount?: number | null
-          updated_at?: string | null
-          valor_casal?: number | null
-          valor_filhos?: number | null
-          valor_pago?: number | null
-          valor_pajem?: number | null
           zip_code?: string | null
+          data_casamento?: string | null
+          esposo_phone?: string | null
+          esposo_email?: string | null
+          esposo_profissao?: string | null
+          esposa_phone?: string | null
+          esposa_email?: string | null
+          esposa_profissao?: string | null
+          needs_pajem?: boolean
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
         }
         Update: {
+          id?: string
+          esposo_nome?: string
+          esposa_nome?: string
+          contato_principal?: "esposo" | "esposa"
           address?: string | null
           bairro?: string | null
           city?: string | null
-          created_at?: string | null
-          data_casamento?: string | null
-          forma_pagamento?: string | null
-          has_children?: boolean | null
-          id?: string
-          main_contact_email?: string | null
-          main_contact_name?: string
-          main_contact_phone?: string | null
-          needs_pajem?: boolean | null
-          notes?: string | null
-          payment_proof_url?: string | null
-          payment_status?: string | null
-          phone_esposa?: string | null
-          phone_esposo?: string | null
-          phone_fixo?: string | null
-          profissao_esposa?: string | null
-          profissao_esposo?: string | null
-          registration_status?: string | null
           state?: string | null
-          total_amount?: number | null
-          updated_at?: string | null
-          valor_casal?: number | null
-          valor_filhos?: number | null
-          valor_pago?: number | null
-          valor_pajem?: number | null
           zip_code?: string | null
+          data_casamento?: string | null
+          esposo_phone?: string | null
+          esposo_email?: string | null
+          esposo_profissao?: string | null
+          esposa_phone?: string | null
+          esposa_email?: string | null
+          esposa_profissao?: string | null
+          needs_pajem?: boolean
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }
       participants: {
         Row: {
-          birth_date: string | null
-          created_at: string | null
-          dietary_restrictions: string | null
-          family_id: string | null
-          full_name: string
           id: string
-          is_child: boolean | null
-          is_pajem: boolean | null
-          marital_status: Database["public"]["Enums"]["marital_status"] | null
-          pajem_idade: number | null
-          pajem_parentesco: string | null
-          pajem_phone: string | null
+          family_id: string
+          full_name: string
+          birth_date: string | null
+          is_child: boolean
+          vai_acampamento: boolean
+          dietary_restrictions: string | null
           special_needs: string | null
-          vai_acampamento: boolean | null
+          created_at: string
+          updated_at: string
         }
         Insert: {
-          birth_date?: string | null
-          created_at?: string | null
-          dietary_restrictions?: string | null
-          family_id?: string | null
-          full_name: string
           id?: string
-          is_child?: boolean | null
-          is_pajem?: boolean | null
-          marital_status?: Database["public"]["Enums"]["marital_status"] | null
-          pajem_idade?: number | null
-          pajem_parentesco?: string | null
-          pajem_phone?: string | null
+          family_id: string
+          full_name: string
+          birth_date?: string | null
+          is_child: boolean
+          vai_acampamento?: boolean
+          dietary_restrictions?: string | null
           special_needs?: string | null
-          vai_acampamento?: boolean | null
+          created_at?: string
+          updated_at?: string
         }
         Update: {
-          birth_date?: string | null
-          created_at?: string | null
-          dietary_restrictions?: string | null
-          family_id?: string | null
-          full_name?: string
           id?: string
-          is_child?: boolean | null
-          is_pajem?: boolean | null
-          marital_status?: Database["public"]["Enums"]["marital_status"] | null
-          pajem_idade?: number | null
-          pajem_parentesco?: string | null
-          pajem_phone?: string | null
+          family_id?: string
+          full_name?: string
+          birth_date?: string | null
+          is_child?: boolean
+          vai_acampamento?: boolean
+          dietary_restrictions?: string | null
           special_needs?: string | null
-          vai_acampamento?: boolean | null
+          created_at?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -182,8 +143,214 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "families"
             referencedColumns: ["id"]
-          },
+          }
         ]
+      }
+      parishes: {
+        Row: {
+          id: string
+          name: string
+          address: string | null
+          city: string
+          state: string
+          zip_code: string | null
+          phone: string | null
+          email: string | null
+          responsible_name: string | null
+          responsible_phone: string | null
+          status: "active" | "inactive"
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          address?: string | null
+          city: string
+          state: string
+          zip_code?: string | null
+          phone?: string | null
+          email?: string | null
+          responsible_name?: string | null
+          responsible_phone?: string | null
+          status?: "active" | "inactive"
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          address?: string | null
+          city?: string
+          state?: string
+          zip_code?: string | null
+          phone?: string | null
+          email?: string | null
+          responsible_name?: string | null
+          responsible_phone?: string | null
+          status?: "active" | "inactive"
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      stages: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      camps: {
+        Row: {
+          id: string
+          name: string
+          stage_id: string
+          parish_id: string
+          start_date: string
+          end_date: string
+          max_families: number
+          registration_start_date: string
+          registration_end_date: string
+          status: "draft" | "open" | "closed" | "in_progress" | "completed"
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          stage_id: string
+          parish_id: string
+          start_date: string
+          end_date: string
+          max_families?: number
+          registration_start_date: string
+          registration_end_date: string
+          status?: "draft" | "open" | "closed" | "in_progress" | "completed"
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          stage_id?: string
+          parish_id?: string
+          start_date?: string
+          end_date?: string
+          max_families?: number
+          registration_start_date?: string
+          registration_end_date?: string
+          status?: "draft" | "open" | "closed" | "in_progress" | "completed"
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      camp_registrations: {
+        Row: {
+          id: string
+          camp_id: string
+          family_id: string
+          status: "pending" | "confirmed" | "waitlist" | "cancelled"
+          registration_date: string
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          camp_id: string
+          family_id: string
+          status?: "pending" | "confirmed" | "waitlist" | "cancelled"
+          registration_date?: string
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          camp_id?: string
+          family_id?: string
+          status?: "pending" | "confirmed" | "waitlist" | "cancelled"
+          registration_date?: string
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      tents: {
+        Row: {
+          id: string
+          name: string
+          camp_id: string
+          stage_id: string
+          parish_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          camp_id: string
+          stage_id: string
+          parish_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          camp_id?: string
+          stage_id?: string
+          parish_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      tent_members: {
+        Row: {
+          id: string
+          tent_id: string
+          family_id: string
+          role: "leader" | "member"
+          joined_at: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          tent_id: string
+          family_id: string
+          role: "leader" | "member"
+          joined_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          tent_id?: string
+          family_id?: string
+          role?: "leader" | "member"
+          joined_at?: string
+          created_at?: string
+          updated_at?: string
+        }
       }
     }
     Views: {
