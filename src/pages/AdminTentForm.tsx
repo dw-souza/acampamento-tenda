@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
+import { formatDateForInput } from "@/lib/utils";
 
 type Tent = Tables<"tents">;
 type Parish = Tables<"parishes">;
@@ -68,9 +69,14 @@ export default function AdminTentForm() {
       if (error) throw error;
 
       setFormData({
-        ...data,
-        formation_date: data.formation_date.split("T")[0],
-        meeting_date: data.meeting_date ? data.meeting_date.split("T")[0] : "",
+        name: data.name || "",
+        formation_date: formatDateForInput(data.formation_date),
+        guardian_husband_name: data.guardian_husband_name || "",
+        guardian_wife_name: data.guardian_wife_name || "",
+        parish_id: data.parish_id || "",
+        meeting_date: formatDateForInput(data.meeting_date),
+        meeting_location: data.meeting_location || "",
+        status: data.status || "active",
       });
     } catch (error: any) {
       toast.error("Erro ao carregar tenda: " + error.message);

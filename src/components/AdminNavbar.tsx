@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, Users, Church, LogOut, ExternalLink, Layers, Tent } from "lucide-react";
+import { Home, Users, Church, LogOut, ExternalLink, Layers, Tent, Users2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminNavbar() {
@@ -56,6 +56,16 @@ export default function AdminNavbar() {
                 }`}
               >
                 Tendas
+              </Link>
+              <Link
+                to="/admin/work-teams"
+                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                  location.pathname.startsWith("/admin/work-teams")
+                    ? "border-primary text-gray-900"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                }`}
+              >
+                Equipes
               </Link>
               <Link
                 to="/admin/parishes"

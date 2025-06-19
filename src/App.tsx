@@ -17,6 +17,8 @@ import AdminCampForm from "@/pages/AdminCampForm";
 import AdminCampRegistrations from "@/pages/AdminCampRegistrations";
 import AdminCampRegistrationForm from "@/pages/AdminCampRegistrationForm";
 import AdminCampTents from "@/pages/AdminCampTents";
+import AdminCampWorkTeams from "@/pages/AdminCampWorkTeams";
+import AdminWorkTeams from "@/pages/AdminWorkTeams";
 import AdminTents from "@/pages/AdminTents";
 import AdminTentForm from "@/pages/AdminTentForm";
 import AdminTentParticipants from "@/pages/AdminTentParticipants";
@@ -46,13 +48,15 @@ const App = () => (
           <Route path="/admin/camps/new" element={<AdminCampForm />} />
           <Route path="/admin/camps/edit/:id" element={<AdminCampForm />} />
           <Route path="/admin/camps/tents/:id" element={<AdminCampTents />} />
+          <Route path="/admin/camps/work-teams/:campId" element={<AdminCampWorkTeams />} />
           <Route path="/admin/camps/registrations/:id" element={<AdminCampRegistrations />} />
           <Route path="/admin/camps/registrations/:id/new" element={<AdminCampRegistrationForm />} />
+          <Route path="/admin/work-teams" element={<AdminWorkTeams />} />
           <Route path="/admin/tents" element={<AdminTents />} />
           <Route path="/admin/tents/new" element={<AdminTentForm />} />
           <Route path="/admin/tents/edit/:id" element={<AdminTentForm />} />
           <Route path="/admin/tents/:tentId/participants" element={<AdminTentParticipants />} />
-          <Route path="/admin/tents/family/:id" element={<AdminTentFamilyForm />} />
+          <Route path="/admin/tents/:tentId/family/:familyId" element={<AdminTentFamilyForm />} />
           <Route path="/admin/tents/:tentId/family/add" element={<AdminTentFamilyAdd />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -13,21 +13,21 @@ export default function Navbar() {
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="text-2xl font-bold text-tenda-brown">
                 Tenda Família Digital
-              </Link>
-            </div>
+            </Link>
+          </div>
             <div className="hidden sm:ml-8 sm:flex sm:space-x-8">
-              <Link
-                to="/"
+            <Link 
+              to="/" 
                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                   location.pathname === "/"
                     ? "border-tenda-brown text-tenda-brown"
                     : "border-transparent text-gray-600 hover:text-tenda-brown hover:border-tenda-brown/50"
                 }`}
-              >
+            >
                 <Home className="w-4 h-4 mr-2" />
-                Início
-              </Link>
-              <Link
+              Início
+            </Link>
+            <Link 
                 to="/about"
                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                   location.pathname === "/about"
@@ -36,9 +36,9 @@ export default function Navbar() {
                 }`}
               >
                 <Info className="w-4 h-4 mr-2" />
-                Sobre
-              </Link>
-              <Link
+              Sobre
+            </Link>
+            <Link 
                 to="/camps"
                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                   location.pathname === "/camps"
@@ -47,9 +47,9 @@ export default function Navbar() {
                 }`}
               >
                 <Tent className="w-4 h-4 mr-2" />
-                Acampamentos
-              </Link>
-              <Link
+              Acampamentos
+            </Link>
+            <Link 
                 to="/contact"
                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                   location.pathname === "/contact"
@@ -58,8 +58,8 @@ export default function Navbar() {
                 }`}
               >
                 <Mail className="w-4 h-4 mr-2" />
-                Contato
-              </Link>
+              Contato
+            </Link>
             </div>
           </div>
           <div className="flex items-center">

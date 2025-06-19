@@ -22,6 +22,28 @@ export interface FamilyChild {
   updated_at: string;
 }
 
+export interface WorkTeam {
+  id: string;
+  name: string;
+  description?: string;
+  color: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CampWorkAssignment {
+  id: string;
+  camp_id: string;
+  tent_id: string;
+  work_team_id: string;
+  role: "leader" | "member" | "assistant";
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  work_team?: WorkTeam;
+  tent?: Tent;
+}
+
 export interface Camp {
   id: string;
   name: string;
@@ -55,4 +77,17 @@ export interface Family {
   created_at: string;
   updated_at: string;
   family_children?: FamilyChild[];
+}
+
+export interface Tent {
+  id: string;
+  name: string;
+  parish_id: string;
+  meeting_date: string;
+  created_at: string;
+  updated_at: string;
+  parish?: Parish;
+  _count?: {
+    active_families?: number;
+  };
 } 

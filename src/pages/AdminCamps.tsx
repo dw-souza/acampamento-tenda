@@ -24,7 +24,8 @@ import {
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
-import { Plus, Search, Pencil, Trash2, Users } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Users, Users2 } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
@@ -93,10 +94,6 @@ export default function AdminCamps() {
   const filteredCamps = camps.filter((camp) =>
     camp.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("pt-BR");
-  };
 
   if (loading) {
     return (
@@ -182,6 +179,21 @@ export default function AdminCamps() {
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>Ver Inscrições</p>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(`/admin/camps/work-teams/${camp.id}`)}
+                          >
+                            <Users2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ver Equipes</p>
                         </TooltipContent>
                       </Tooltip>
 

@@ -77,7 +77,7 @@ export default function Admin() {
             .from("camp_registrations")
             .select("*", { count: "exact", head: true })
             .eq("camp_id", camp.id);
-
+      
           if (countError) throw countError;
 
           return {
@@ -314,13 +314,13 @@ export default function Admin() {
                       >
                         Inscrições
                       </Button>
-                      <Button
+          <Button 
                         variant="ghost"
                         size="sm"
                         onClick={() => navigate(`/admin/camps/edit/${camp.id}`)}
-                      >
+          >
                         Editar
-                      </Button>
+          </Button>
                     </TableCell>
                   </TableRow>
                 ))

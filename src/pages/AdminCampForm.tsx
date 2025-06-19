@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
+import { formatDateForInput } from "@/lib/utils";
 
 type Camp = Tables<"camps">;
 type Stage = Tables<"stages">;
@@ -87,11 +88,17 @@ export default function AdminCampForm() {
       if (error) throw error;
 
       setFormData({
-        ...data,
-        start_date: data.start_date.split("T")[0],
-        end_date: data.end_date.split("T")[0],
-        registration_start_date: data.registration_start_date.split("T")[0],
-        registration_end_date: data.registration_end_date.split("T")[0],
+        name: data.name || "",
+        stage_id: data.stage_id || "",
+        parish_id: data.parish_id || "",
+        start_date: formatDateForInput(data.start_date),
+        end_date: formatDateForInput(data.end_date),
+        max_families: data.max_families || 0,
+        couple_price: data.couple_price || 250.00,
+        child_price: data.child_price || 25.00,
+        registration_start_date: formatDateForInput(data.registration_start_date),
+        registration_end_date: formatDateForInput(data.registration_end_date),
+        status: data.status || "active",
       });
     } catch (error: any) {
       toast.error("Erro ao carregar acampamento: " + error.message);

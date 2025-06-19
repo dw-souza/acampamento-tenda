@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
 import { Plus, Trash2 } from "lucide-react";
+import { formatDateForInput } from "@/lib/utils";
 
 type TentFamily = Tables<"tent_families"> & {
   tents: Tables<"tents">;
@@ -94,7 +95,7 @@ export default function AdminTentFamilyForm() {
         city: data.city || "",
         state: data.state || "",
         zip_code: data.zip_code || "",
-        data_casamento: data.data_casamento ? data.data_casamento.split("T")[0] : "",
+        data_casamento: formatDateForInput(data.data_casamento),
         contato_principal: data.contato_principal,
         status: data.status,
       });
@@ -103,7 +104,7 @@ export default function AdminTentFamilyForm() {
         data.tent_children.map(child => ({
           id: child.id,
           full_name: child.full_name,
-          birth_date: child.birth_date ? child.birth_date.split("T")[0] : "",
+          birth_date: formatDateForInput(child.birth_date),
           vai_encontros: child.vai_encontros,
           dietary_restrictions: child.dietary_restrictions || "",
           special_needs: child.special_needs || "",

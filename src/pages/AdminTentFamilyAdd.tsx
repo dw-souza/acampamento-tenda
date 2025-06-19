@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
 import { Plus, Trash2, Search } from "lucide-react";
+import { formatDateForInput } from "@/lib/utils";
 
 type Tent = Tables<"tents"> & {
   parishes: Tables<"parishes">;
@@ -93,23 +94,49 @@ export default function AdminTentFamilyAdd() {
 
   const fetchAvailableFamilies = async () => {
     try {
-      // Buscar famílias que completaram acampamentos Kerigma
-      const { data, error } = await supabase
-        .from("families")
+      // Primeiro, buscar os IDs dos acampamentos Kerigma
+      const { data: kerigmaCamps, error: campsError } = await supabase
+        .from("camps")
         .select(`
-          *,
-          family_children (*),
-          camp_registrations (
-            camps (
-              stages (*)
-            )
+          id,
+          stages!inner(name)
+        `)
+        .eq("stages.name", "KERIGMA");
+
+      if (campsError) throw campsError;
+
+      if (!kerigmaCamps || kerigmaCamps.length === 0) {
+        setAvailableFamilies([]);
+        return;
+      }
+
+      const campIds = kerigmaCamps.map(camp => camp.id);
+
+      // Buscar famílias com inscrições confirmadas nos acampamentos Kerigma
+      const { data, error } = await supabase
+        .from("camp_registrations")
+        .select(`
+          family_id,
+          families (
+            *,
+            family_children (*)
           )
         `)
-        .eq("camp_registrations.camps.stages.name", "KERIGMA")
-        .eq("camp_registrations.status", "confirmed");
+        .eq("status", "confirmed")
+        .in("camp_id", campIds);
 
       if (error) throw error;
-      setAvailableFamilies(data || []);
+      
+      // Extrair apenas as famílias únicas
+      const uniqueFamilies = data?.reduce((acc: Family[], registration: any) => {
+        const family = registration.families as Family;
+        if (family && !acc.find(f => f.id === family.id)) {
+          acc.push(family);
+        }
+        return acc;
+      }, []) || [];
+      
+      setAvailableFamilies(uniqueFamilies);
     } catch (error: any) {
       toast.error("Erro ao carregar famílias disponíveis: " + error.message);
     }
@@ -131,14 +158,14 @@ export default function AdminTentFamilyAdd() {
       city: family.city || "",
       state: family.state || "",
       zip_code: family.zip_code || "",
-      data_casamento: family.data_casamento ? family.data_casamento.split("T")[0] : "",
+      data_casamento: formatDateForInput(family.data_casamento),
       contato_principal: family.contato_principal,
     });
 
     setChildren(
       family.family_children.map(child => ({
         full_name: child.full_name,
-        birth_date: child.birth_date ? child.birth_date.split("T")[0] : "",
+        birth_date: formatDateForInput(child.birth_date),
         vai_encontros: true,
         dietary_restrictions: child.dietary_restrictions || "",
         special_needs: child.special_needs || "",
@@ -151,10 +178,60 @@ export default function AdminTentFamilyAdd() {
     setSaving(true);
 
     try {
+      let familyId = selectedFamily?.id;
+
+      // Se for uma nova família, criar primeiro na tabela families
+      if (importMode === "new" || !selectedFamily) {
+        const newFamilyData = {
+          esposo_nome: formData.esposo_nome.toUpperCase(),
+          esposa_nome: formData.esposa_nome.toUpperCase(),
+          esposo_phone: formData.esposo_phone,
+          esposo_email: formData.esposo_email,
+          esposo_profissao: formData.esposo_profissao.toUpperCase(),
+          esposa_phone: formData.esposa_phone,
+          esposa_email: formData.esposa_email,
+          esposa_profissao: formData.esposa_profissao.toUpperCase(),
+          address: formData.address.toUpperCase(),
+          bairro: formData.bairro.toUpperCase(),
+          city: formData.city.toUpperCase(),
+          state: formData.state.toUpperCase(),
+          zip_code: formData.zip_code.toUpperCase(),
+          data_casamento: formData.data_casamento,
+          contato_principal: formData.contato_principal,
+        };
+
+        const { data: newFamily, error: newFamilyError } = await supabase
+          .from("families")
+          .insert(newFamilyData)
+          .select()
+          .single();
+
+        if (newFamilyError) throw newFamilyError;
+        familyId = newFamily.id;
+
+        // Adicionar filhos à família
+        if (children.length > 0) {
+          const familyChildrenData = children.map(child => ({
+            family_id: familyId,
+            full_name: child.full_name.toUpperCase(),
+            birth_date: child.birth_date,
+            vai_acampamento: child.vai_encontros,
+            dietary_restrictions: child.dietary_restrictions,
+            special_needs: child.special_needs,
+          }));
+
+          const { error: familyChildrenError } = await supabase
+            .from("family_children")
+            .insert(familyChildrenData);
+
+          if (familyChildrenError) throw familyChildrenError;
+        }
+      }
+
       // Criar família na tenda
       const tentFamilyData = {
         tent_id: tentId,
-        family_id: selectedFamily?.id || null,
+        family_id: familyId,
         esposo_nome: formData.esposo_nome.toUpperCase(),
         esposa_nome: formData.esposa_nome.toUpperCase(),
         esposo_phone: formData.esposo_phone,
@@ -181,7 +258,7 @@ export default function AdminTentFamilyAdd() {
 
       if (tentFamilyError) throw tentFamilyError;
 
-      // Adicionar filhos
+      // Adicionar filhos à tenda (sempre criar na tent_children para exibição)
       if (children.length > 0) {
         const tentChildrenData = children.map(child => ({
           tent_family_id: tentFamily.id,

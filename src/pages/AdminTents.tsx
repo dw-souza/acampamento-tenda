@@ -31,9 +31,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { formatDate } from "@/lib/utils";
 
 type Tent = Tables<"tents"> & {
   parishes: Tables<"parishes">;
+  _count?: {
+    active_families: number;
+  };
 };
 
 export default function AdminTents() {
@@ -50,7 +54,8 @@ export default function AdminTents() {
 
   const fetchTents = async () => {
     try {
-      const { data, error } = await supabase
+      // Buscar todas as tendas
+      const { data: tentsData, error: tentsError } = await supabase
         .from("tents")
         .select(`
           *,
@@ -58,8 +63,34 @@ export default function AdminTents() {
         `)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setTents(data || []);
+      if (tentsError) throw tentsError;
+
+      // Buscar contagem de famílias ativas por tenda
+      const { data: familiesCount, error: familiesError } = await supabase
+        .from("tent_families")
+        .select(`
+          tent_id,
+          status
+        `)
+        .eq("status", "active");
+
+      if (familiesError) throw familiesError;
+
+      // Processar os dados para incluir a contagem
+      const processedData = tentsData?.map(tent => {
+        const activeFamiliesCount = familiesCount?.filter(
+          family => family.tent_id === tent.id
+        ).length || 0;
+
+        return {
+          ...tent,
+          _count: {
+            active_families: activeFamiliesCount
+          }
+        };
+      }) || [];
+
+      setTents(processedData);
     } catch (error: any) {
       toast.error("Erro ao carregar tendas: " + error.message);
     } finally {
@@ -93,10 +124,6 @@ export default function AdminTents() {
     tent.guardian_husband_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     tent.guardian_wife_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("pt-BR");
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -171,6 +198,7 @@ export default function AdminTents() {
                 <TableHead>Paróquia</TableHead>
                 <TableHead>Data de Formação</TableHead>
                 <TableHead>Data da Reunião</TableHead>
+                <TableHead>Famílias Ativas</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -189,6 +217,11 @@ export default function AdminTents() {
                   <TableCell>{formatDate(tent.formation_date)}</TableCell>
                   <TableCell>
                     {tent.meeting_date ? formatDate(tent.meeting_date) : "-"}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {tent._count?.active_families || 0}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <span
@@ -221,7 +254,7 @@ export default function AdminTents() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => navigate(`/admin/tents/${tent.id}`)}
+                            onClick={() => navigate(`/admin/tents/edit/${tent.id}`)}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>

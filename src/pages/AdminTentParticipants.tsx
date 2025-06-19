@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
 import { Search, Plus, Pencil, Trash2, Users } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 
 type Tent = Tables<"tents"> & {
   parishes: Tables<"parishes">;
@@ -184,10 +185,6 @@ export default function AdminTentParticipants() {
     }
   };
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("pt-BR");
-  };
-
   if (loading) {
     return (
       <Layout>
@@ -298,7 +295,7 @@ export default function AdminTentParticipants() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => navigate(`/admin/tents/family/${participant.id}`)}
+                      onClick={() => navigate(`/admin/tents/${tentId}/family/${participant.id}`)}
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
