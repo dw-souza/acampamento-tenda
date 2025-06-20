@@ -1,5 +1,6 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "comunidade-tenda",
+  "description": "Sistema de gerenciamento para acampamentos da Comunidade Tenda",
   "private": true,
   "version": "0.0.0",
   "type": "module",

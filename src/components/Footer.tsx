@@ -1,4 +1,3 @@
-
 import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -8,6 +7,19 @@ const Footer = () => {
   return (
     <footer className="bg-tenda-brown text-tenda-beige">
       <div className="max-w-7xl mx-auto px-4 pt-12 pb-8">
+        {/* Logo and branding */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/logo_tenda.webp" 
+              alt="Comunidade Tenda" 
+              className="h-16 w-auto"
+            />
+          </div>
+          <h2 className="text-2xl font-bold text-tenda-beige">Comunidade Tenda</h2>
+          <p className="text-tenda-beige/80 mt-2">Ser família em comunhão com Deus e com o próximo</p>
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Contact Info */}
           <div>

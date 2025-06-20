@@ -54,6 +54,7 @@ export default function AdminCampForm() {
       const { data, error } = await supabase
         .from("stages")
         .select("*")
+        .eq("is_camp", true)
         .order("name");
 
       if (error) throw error;

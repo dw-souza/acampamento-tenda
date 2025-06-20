@@ -205,6 +205,7 @@ export interface Database {
           guardian_husband_name: string
           guardian_wife_name: string
           parish_id: string
+          stage_id: string | null
           meeting_date: string | null
           meeting_location: string | null
           status: "active" | "inactive" | "disbanded"
@@ -218,6 +219,7 @@ export interface Database {
           guardian_husband_name: string
           guardian_wife_name: string
           parish_id: string
+          stage_id?: string | null
           meeting_date?: string | null
           meeting_location?: string | null
           status?: "active" | "inactive" | "disbanded"
@@ -231,6 +233,7 @@ export interface Database {
           guardian_husband_name?: string
           guardian_wife_name?: string
           parish_id?: string
+          stage_id?: string | null
           meeting_date?: string | null
           meeting_location?: string | null
           status?: "active" | "inactive" | "disbanded"
@@ -243,6 +246,13 @@ export interface Database {
             columns: ["parish_id"]
             isOneToOne: false
             referencedRelation: "parishes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tents_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "stages"
             referencedColumns: ["id"]
           }
         ]
@@ -327,13 +337,6 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "tents"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tent_families_family_id_fkey"
-            columns: ["family_id"]
-            isOneToOne: false
-            referencedRelation: "families"
-            referencedColumns: ["id"]
           }
         ]
       }
@@ -390,6 +393,7 @@ export interface Database {
           id: string
           name: string
           description: string | null
+          is_camp: boolean
           created_at: string
           updated_at: string
         }
@@ -397,6 +401,7 @@ export interface Database {
           id?: string
           name: string
           description?: string | null
+          is_camp?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -404,6 +409,7 @@ export interface Database {
           id?: string
           name?: string
           description?: string | null
+          is_camp?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -484,6 +490,95 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+      }
+      work_teams: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          color: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          color?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          color?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      camp_work_assignments: {
+        Row: {
+          id: string
+          camp_id: string
+          tent_id: string
+          work_team_id: string
+          coordinator_family_id: string | null
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          camp_id: string
+          tent_id: string
+          work_team_id: string
+          coordinator_family_id?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          camp_id?: string
+          tent_id?: string
+          work_team_id?: string
+          coordinator_family_id?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "camp_work_assignments_camp_id_fkey"
+            columns: ["camp_id"]
+            isOneToOne: false
+            referencedRelation: "camps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "camp_work_assignments_tent_id_fkey"
+            columns: ["tent_id"]
+            isOneToOne: false
+            referencedRelation: "tents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "camp_work_assignments_work_team_id_fkey"
+            columns: ["work_team_id"]
+            isOneToOne: false
+            referencedRelation: "work_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "camp_work_assignments_coordinator_family_id_fkey"
+            columns: ["coordinator_family_id"]
+            isOneToOne: false
+            referencedRelation: "tent_families"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       tent_members: {
         Row: {

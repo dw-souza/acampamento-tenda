@@ -4,6 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -41,8 +48,14 @@ type Camp = Tables<"camps"> & {
 export default function AdminCamps() {
   const navigate = useNavigate();
   const [camps, setCamps] = useState<Camp[]>([]);
+  const [stages, setStages] = useState<Tables<"stages">[]>([]);
+  const [parishes, setParishes] = useState<Tables<"parishes">[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStage, setSelectedStage] = useState<string>("all");
+  const [selectedParish, setSelectedParish] = useState<string>("all");
+  const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [campToDelete, setCampToDelete] = useState<Camp | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -63,6 +76,24 @@ export default function AdminCamps() {
 
       if (error) throw error;
       setCamps(data || []);
+
+      // Buscar etapas para filtros
+      const { data: stagesData, error: stagesError } = await supabase
+        .from("stages")
+        .select("*")
+        .order("name");
+
+      if (stagesError) throw stagesError;
+      setStages(stagesData || []);
+
+      // Buscar paróquias para filtros
+      const { data: parishesData, error: parishesError } = await supabase
+        .from("parishes")
+        .select("*")
+        .order("name");
+
+      if (parishesError) throw parishesError;
+      setParishes(parishesData || []);
     } catch (error: any) {
       toast.error("Erro ao carregar acampamentos: " + error.message);
     } finally {
@@ -91,9 +122,22 @@ export default function AdminCamps() {
     }
   };
 
-  const filteredCamps = camps.filter((camp) =>
-    camp.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCamps = camps.filter((camp) => {
+    const matchesSearch = camp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      camp.stages.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      camp.parishes.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStage = selectedStage === "all" || camp.stage_id === selectedStage;
+    const matchesParish = selectedParish === "all" || camp.parish_id === selectedParish;
+    const matchesYear = selectedYear === "all" || new Date(camp.start_date).getFullYear().toString() === selectedYear;
+    const matchesStatus = selectedStatus === "all" || camp.status === selectedStatus;
+
+    return matchesSearch && matchesStage && matchesParish && matchesYear && matchesStatus;
+  });
+
+  const years = Array.from(
+    new Set(camps.map((camp) => new Date(camp.start_date).getFullYear()))
+  ).sort((a, b) => b - a);
 
   if (loading) {
     return (
@@ -133,23 +177,81 @@ export default function AdminCamps() {
           </div>
         </div>
 
-        <div className="rounded-md border">
+        {/* Filtros Avançados */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
+          <Select value={selectedStage} onValueChange={setSelectedStage}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filtrar por etapa" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as etapas</SelectItem>
+              {stages.map((stage) => (
+                <SelectItem key={stage.id} value={stage.id}>
+                  {stage.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={selectedParish} onValueChange={setSelectedParish}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filtrar por paróquia" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as paróquias</SelectItem>
+              {parishes.map((parish) => (
+                <SelectItem key={parish.id} value={parish.id}>
+                  {parish.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filtrar por ano" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os anos</SelectItem>
+              {years.map((year) => (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filtrar por status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              <SelectItem value="open">Ativo</SelectItem>
+              <SelectItem value="closed">Fechado</SelectItem>
+              <SelectItem value="completed">Concluído</SelectItem>
+              <SelectItem value="draft">Rascunho</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Etapa</TableHead>
-                <TableHead>Paróquia</TableHead>
-                <TableHead>Data de Início</TableHead>
-                <TableHead>Data de Término</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead className="min-w-[150px]">Nome</TableHead>
+                <TableHead className="min-w-[100px]">Etapa</TableHead>
+                <TableHead className="min-w-[120px]">Paróquia</TableHead>
+                <TableHead className="min-w-[100px]">Data de Início</TableHead>
+                <TableHead className="min-w-[100px]">Data de Término</TableHead>
+                <TableHead className="min-w-[80px]">Status</TableHead>
+                <TableHead className="text-right min-w-[150px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredCamps.map((camp) => (
                 <TableRow key={camp.id}>
-                  <TableCell>{camp.name}</TableCell>
+                  <TableCell className="font-medium">{camp.name}</TableCell>
                   <TableCell>{camp.stages.name}</TableCell>
                   <TableCell>{camp.parishes.name}</TableCell>
                   <TableCell>{formatDate(camp.start_date)}</TableCell>
@@ -165,7 +267,7 @@ export default function AdminCamps() {
                       {camp.status === "open" ? "Ativo" : "Inativo"}
                     </span>
                   </TableCell>
-                  <TableCell className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                  <TableCell className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1 sm:space-x-2">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>

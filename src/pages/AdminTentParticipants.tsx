@@ -46,12 +46,7 @@ type Tent = Tables<"tents"> & {
 };
 
 type TentFamily = Tables<"tent_families"> & {
-  families: Tables<"families">;
   tent_children: Tables<"tent_children">[];
-};
-
-type Family = Tables<"families"> & {
-  family_children: Tables<"family_children">[];
 };
 
 export default function AdminTentParticipants() {
@@ -92,19 +87,50 @@ export default function AdminTentParticipants() {
 
   const fetchParticipants = async () => {
     try {
+      // Primeiro, tentar carregar com join
       const { data, error } = await supabase
         .from("tent_families")
         .select(`
           *,
-          families (*),
           tent_children (*)
         `)
         .eq("tent_id", tentId)
         .order("joined_date", { ascending: false });
 
-      if (error) throw error;
-      setParticipants(data || []);
+      if (error) {
+        console.error("Erro no join, tentando carregar separadamente:", error);
+        // Se o join falhar, carregar separadamente
+        const { data: familiesData, error: familiesError } = await supabase
+          .from("tent_families")
+          .select("*")
+          .eq("tent_id", tentId)
+          .order("joined_date", { ascending: false });
+
+        if (familiesError) throw familiesError;
+
+        // Carregar filhos separadamente
+        const familiesWithChildren = await Promise.all(
+          familiesData.map(async (family) => {
+            const { data: childrenData } = await supabase
+              .from("tent_children")
+              .select("*")
+              .eq("tent_family_id", family.id);
+            
+            return {
+              ...family,
+              tent_children: childrenData || []
+            };
+          })
+        );
+
+        console.log("Dados carregados separadamente:", familiesWithChildren);
+        setParticipants(familiesWithChildren);
+      } else {
+        console.log("Dados carregados com join:", data);
+        setParticipants(data || []);
+      }
     } catch (error: any) {
+      console.error("Erro detalhado:", error);
       toast.error("Erro ao carregar participantes: " + error.message);
     } finally {
       setLoading(false);

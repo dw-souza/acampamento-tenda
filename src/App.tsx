@@ -18,6 +18,7 @@ import AdminCampRegistrations from "@/pages/AdminCampRegistrations";
 import AdminCampRegistrationForm from "@/pages/AdminCampRegistrationForm";
 import AdminCampTents from "@/pages/AdminCampTents";
 import AdminCampWorkTeams from "@/pages/AdminCampWorkTeams";
+import AdminCampDashboard from "@/pages/AdminCampDashboard";
 import AdminWorkTeams from "@/pages/AdminWorkTeams";
 import AdminTents from "@/pages/AdminTents";
 import AdminTentForm from "@/pages/AdminTentForm";
@@ -58,6 +59,7 @@ const App = () => (
           <Route path="/admin/tents/:tentId/participants" element={<AdminTentParticipants />} />
           <Route path="/admin/tents/:tentId/family/:familyId" element={<AdminTentFamilyForm />} />
           <Route path="/admin/tents/:tentId/family/add" element={<AdminTentFamilyAdd />} />
+          <Route path="/admin/camps/dashboard/:campId" element={<AdminCampDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

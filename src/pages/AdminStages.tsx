@@ -108,19 +108,20 @@ export default function AdminStages() {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Descrição</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center">
+                  <TableCell colSpan={4} className="text-center">
                     Carregando...
                   </TableCell>
                 </TableRow>
               ) : filteredStages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center">
+                  <TableCell colSpan={4} className="text-center">
                     Nenhuma etapa encontrada
                   </TableCell>
                 </TableRow>
@@ -129,6 +130,15 @@ export default function AdminStages() {
                   <TableRow key={stage.id}>
                     <TableCell>{stage.name}</TableCell>
                     <TableCell>{stage.description || "-"}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        stage.is_camp 
+                          ? "bg-blue-100 text-blue-800" 
+                          : "bg-gray-100 text-gray-800"
+                      }`}>
+                        {stage.is_camp ? "Acampamento" : "Etapa"}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"

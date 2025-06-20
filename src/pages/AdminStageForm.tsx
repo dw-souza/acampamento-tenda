@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
@@ -17,6 +19,7 @@ export default function AdminStageForm() {
   const [formData, setFormData] = useState<Partial<Stage>>({
     name: "",
     description: "",
+    is_camp: false,
   });
 
   useEffect(() => {
@@ -52,6 +55,7 @@ export default function AdminStageForm() {
       const stageData = {
         name: formData.name.toUpperCase(),
         description: formData.description.toUpperCase(),
+        is_camp: formData.is_camp,
       };
 
       if (id) {
@@ -89,48 +93,66 @@ export default function AdminStageForm() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-2xl font-bold mb-6">
             {id ? "Editar Etapa" : "Nova Etapa"}
           </h1>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Nome da Etapa</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="description">Descrição</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="is_camp"
+                  checked={formData.is_camp}
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({ ...prev, is_camp: checked as boolean }))
+                  }
+                />
+                <Label htmlFor="is_camp" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  É um acampamento
+                </Label>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Marque esta opção se esta etapa é um acampamento. Apenas etapas marcadas como acampamento aparecerão na lista ao criar um novo acampamento.
+              </p>
+            </div>
+
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate("/admin/stages")}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
+          </form>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Nome da Etapa</label>
-              <Input
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Descrição</label>
-              <Textarea
-                name="description"
-                value={formData.description || ""}
-                onChange={handleInputChange}
-                rows={4}
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate("/admin/stages")}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Salvando..." : "Salvar"}
-            </Button>
-          </div>
-        </form>
       </div>
     </Layout>
   );

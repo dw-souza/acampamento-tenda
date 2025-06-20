@@ -27,6 +27,7 @@ export interface WorkTeam {
   name: string;
   description?: string;
   color: string;
+  is_special_team?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -36,12 +37,26 @@ export interface CampWorkAssignment {
   camp_id: string;
   tent_id: string;
   work_team_id: string;
-  role: "leader" | "member" | "assistant";
+  coordinator_family_id?: string;
   notes?: string;
   created_at: string;
   updated_at: string;
   work_team?: WorkTeam;
   tent?: Tent;
+  coordinator_family?: TentFamily;
+}
+
+export interface CampFamilyAssignment {
+  id: string;
+  camp_id: string;
+  family_id: string;
+  work_team_id: string;
+  is_coordinator?: boolean;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  work_team?: WorkTeam;
+  family?: TentFamily;
 }
 
 export interface Camp {
@@ -90,4 +105,29 @@ export interface Tent {
   _count?: {
     active_families?: number;
   };
+}
+
+export interface TentFamily {
+  id: string;
+  tent_id: string;
+  family_id: string;
+  esposo_nome: string;
+  esposa_nome: string;
+  esposo_phone?: string;
+  esposo_email?: string;
+  esposo_profissao?: string;
+  esposa_phone?: string;
+  esposa_email?: string;
+  esposa_profissao?: string;
+  address?: string;
+  bairro?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
+  data_casamento?: string;
+  contato_principal: "esposo" | "esposa";
+  joined_date: string;
+  status: "active" | "inactive" | "left";
+  created_at: string;
+  updated_at: string;
 } 

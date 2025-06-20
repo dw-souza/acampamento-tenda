@@ -19,18 +19,21 @@ import { formatDateForInput } from "@/lib/utils";
 
 type Tent = Tables<"tents">;
 type Parish = Tables<"parishes">;
+type Stage = Tables<"stages">;
 
 export default function AdminTentForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
   const [parishes, setParishes] = useState<Parish[]>([]);
+  const [stages, setStages] = useState<Stage[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     formation_date: "",
     guardian_husband_name: "",
     guardian_wife_name: "",
     parish_id: "",
+    stage_id: "",
     meeting_date: "",
     meeting_location: "",
     status: "active" as "active" | "inactive" | "disbanded",
@@ -38,6 +41,7 @@ export default function AdminTentForm() {
 
   useEffect(() => {
     fetchParishes();
+    fetchStages();
     if (id) {
       fetchTent();
     }
@@ -58,6 +62,20 @@ export default function AdminTentForm() {
     }
   };
 
+  const fetchStages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("stages")
+        .select("*")
+        .order("name");
+
+      if (error) throw error;
+      setStages(data || []);
+    } catch (error: any) {
+      toast.error("Erro ao carregar etapas: " + error.message);
+    }
+  };
+
   const fetchTent = async () => {
     try {
       const { data, error } = await supabase
@@ -74,6 +92,7 @@ export default function AdminTentForm() {
         guardian_husband_name: data.guardian_husband_name || "",
         guardian_wife_name: data.guardian_wife_name || "",
         parish_id: data.parish_id || "",
+        stage_id: data.stage_id || "",
         meeting_date: formatDateForInput(data.meeting_date),
         meeting_location: data.meeting_location || "",
         status: data.status || "active",
@@ -95,6 +114,7 @@ export default function AdminTentForm() {
         guardian_husband_name: formData.guardian_husband_name.toUpperCase(),
         guardian_wife_name: formData.guardian_wife_name.toUpperCase(),
         parish_id: formData.parish_id,
+        stage_id: formData.stage_id || null,
         meeting_date: formData.meeting_date || null,
         meeting_location: formData.meeting_location ? formData.meeting_location.toUpperCase() : null,
         status: formData.status,
@@ -175,25 +195,48 @@ export default function AdminTentForm() {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="parish_id">Paróquia</Label>
-                <Select
-                  value={formData.parish_id}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, parish_id: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a paróquia" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {parishes.map((parish) => (
-                      <SelectItem key={parish.id} value={parish.id}>
-                        {parish.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="parish_id">Paróquia</Label>
+                  <Select
+                    value={formData.parish_id}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, parish_id: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a paróquia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {parishes.map((parish) => (
+                        <SelectItem key={parish.id} value={parish.id}>
+                          {parish.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="stage_id">Etapa</Label>
+                  <Select
+                    value={formData.stage_id}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, stage_id: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a etapa" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {stages.map((stage) => (
+                        <SelectItem key={stage.id} value={stage.id}>
+                          {stage.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
