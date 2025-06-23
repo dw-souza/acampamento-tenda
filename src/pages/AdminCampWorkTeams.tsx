@@ -89,7 +89,9 @@ export default function AdminCampWorkTeams() {
         .select(`
           *,
           stage:stages(*),
-          parish:parishes(*)
+          camp_parishes (
+            parish (*)
+          )
         `)
         .eq('id', campId)
         .single();

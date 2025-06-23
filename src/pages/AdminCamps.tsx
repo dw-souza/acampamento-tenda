@@ -31,7 +31,7 @@ import {
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
-import { Plus, Search, Pencil, Trash2, Users, Users2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Users, Users2, Eye } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import {
   Tooltip,
@@ -42,7 +42,9 @@ import {
 
 type Camp = Tables<"camps"> & {
   stages: Tables<"stages">;
-  parishes: Tables<"parishes">;
+  camp_parishes: {
+    parishes: Tables<"parishes">;
+  }[];
 };
 
 export default function AdminCamps() {
@@ -70,7 +72,9 @@ export default function AdminCamps() {
         .select(`
           *,
           stages (*),
-          parishes (*)
+          camp_parishes (
+            parishes (*)
+          )
         `)
         .order("start_date", { ascending: false });
 
@@ -122,13 +126,18 @@ export default function AdminCamps() {
     }
   };
 
+  const getParishNames = (camp: Camp) => {
+    return camp.camp_parishes?.map(cp => cp.parishes.name).join(", ") || "Nenhuma paróquia";
+  };
+
   const filteredCamps = camps.filter((camp) => {
     const matchesSearch = camp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       camp.stages.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      camp.parishes.name.toLowerCase().includes(searchTerm.toLowerCase());
+      getParishNames(camp).toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStage = selectedStage === "all" || camp.stage_id === selectedStage;
-    const matchesParish = selectedParish === "all" || camp.parish_id === selectedParish;
+    const matchesParish = selectedParish === "all" || 
+      camp.camp_parishes?.some(cp => cp.parishes.id === selectedParish);
     const matchesYear = selectedYear === "all" || new Date(camp.start_date).getFullYear().toString() === selectedYear;
     const matchesStatus = selectedStatus === "all" || camp.status === selectedStatus;
 
@@ -253,7 +262,7 @@ export default function AdminCamps() {
                 <TableRow key={camp.id}>
                   <TableCell className="font-medium">{camp.name}</TableCell>
                   <TableCell>{camp.stages.name}</TableCell>
-                  <TableCell>{camp.parishes.name}</TableCell>
+                  <TableCell>{getParishNames(camp)}</TableCell>
                   <TableCell>{formatDate(camp.start_date)}</TableCell>
                   <TableCell>{formatDate(camp.end_date)}</TableCell>
                   <TableCell className="px-6 py-4 whitespace-nowrap">
@@ -269,6 +278,21 @@ export default function AdminCamps() {
                   </TableCell>
                   <TableCell className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1 sm:space-x-2">
                     <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(`/admin/camps/dashboard/${camp.id}`)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ver Dashboard</p>
+                        </TooltipContent>
+                      </Tooltip>
+
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -304,7 +328,7 @@ export default function AdminCamps() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => navigate(`/admin/camps/${camp.id}`)}
+                            onClick={() => navigate(`/admin/camps/edit/${camp.id}`)}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>

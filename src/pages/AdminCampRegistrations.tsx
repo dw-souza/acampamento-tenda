@@ -51,7 +51,9 @@ type CampRegistration = Tables<"camp_registrations"> & {
 
 type Camp = Tables<"camps"> & {
   stages: Tables<"stages">;
-  parishes: Tables<"parishes">;
+  camp_parishes: {
+    parishes: Tables<"parishes">;
+  }[];
   couple_price: number;
   child_price: number;
 };
@@ -82,7 +84,9 @@ export default function AdminCampRegistrations() {
         .select(`
           *,
           stages (*),
-          parishes (*)
+          camp_parishes (
+            parishes (*)
+          )
         `)
         .eq("id", id)
         .single();
@@ -294,7 +298,7 @@ export default function AdminCampRegistrations() {
             Inscrições - {camp?.name}
           </h1>
           <p className="text-gray-600">
-            {camp?.stages.name} - {camp?.parishes.name}
+            {camp?.stages.name} - {camp?.camp_parishes.map(parish => parish.parishes.name).join(', ')}
           </p>
         </div>
 

@@ -27,7 +27,9 @@ import { Tables } from "@/integrations/supabase/types";
 
 type Camp = Tables<"camps"> & {
   stages: Tables<"stages">;
-  parishes: Tables<"parishes">;
+  camp_parishes: {
+    parish: Tables<"parishes">;
+  }[];
 };
 
 type Tent = Tables<"tents"> & {
@@ -60,7 +62,7 @@ export default function AdminCampTents() {
         .select(`
           *,
           stages (*),
-          parishes (*)
+          camp_parishes (*)
         `)
         .eq("id", id)
         .single();
@@ -177,7 +179,7 @@ export default function AdminCampTents() {
             Tendas - {camp?.name}
           </h1>
           <p className="text-gray-600">
-            {camp?.stages.name} - {camp?.parishes.name}
+            {camp?.stages.name} - {camp?.camp_parishes.map(p => p.parish.name).join(', ')}
           </p>
         </div>
 

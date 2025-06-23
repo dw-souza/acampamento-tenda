@@ -39,7 +39,9 @@ import {
 
 type Camp = Tables<"camps"> & {
   stages: Tables<"stages">;
-  parishes: Tables<"parishes">;
+  camp_parishes: {
+    parish: Tables<"parishes">;
+  }[];
   couple_price: number;
   child_price: number;
 };
@@ -152,7 +154,9 @@ export default function AdminCampDashboard() {
         .select(`
           *,
           stages(*),
-          parishes(*)
+          camp_parishes (
+            parish (*)
+          )
         `)
         .eq('id', campId)
         .single();
@@ -363,7 +367,7 @@ export default function AdminCampDashboard() {
               <MapPin className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-lg font-semibold">{camp.parishes?.name}</div>
+              <div className="text-lg font-semibold">{camp.camp_parishes?.map(cp => cp.parish.name).join(', ')}</div>
               <p className="text-xs text-muted-foreground">
                 Capacidade: {camp.max_families} famílias
               </p>

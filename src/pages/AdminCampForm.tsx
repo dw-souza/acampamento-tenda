@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
@@ -27,10 +28,10 @@ export default function AdminCampForm() {
   const [loading, setLoading] = useState(false);
   const [stages, setStages] = useState<Stage[]>([]);
   const [parishes, setParishes] = useState<Parish[]>([]);
+  const [selectedParishes, setSelectedParishes] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     stage_id: "",
-    parish_id: "",
     start_date: "",
     end_date: "",
     max_families: 16,
@@ -82,7 +83,12 @@ export default function AdminCampForm() {
     try {
       const { data, error } = await supabase
         .from("camps")
-        .select("*")
+        .select(`
+          *,
+          camp_parishes (
+            parish_id
+          )
+        `)
         .eq("id", id)
         .single();
 
@@ -91,7 +97,6 @@ export default function AdminCampForm() {
       setFormData({
         name: data.name || "",
         stage_id: data.stage_id || "",
-        parish_id: data.parish_id || "",
         start_date: formatDateForInput(data.start_date),
         end_date: formatDateForInput(data.end_date),
         max_families: data.max_families || 0,
@@ -101,6 +106,10 @@ export default function AdminCampForm() {
         registration_end_date: formatDateForInput(data.registration_end_date),
         status: data.status || "active",
       });
+
+      // Extrair IDs das paróquias selecionadas
+      const parishIds = data.camp_parishes?.map((cp: any) => cp.parish_id) || [];
+      setSelectedParishes(parishIds);
     } catch (error: any) {
       toast.error("Erro ao carregar acampamento: " + error.message);
       navigate("/admin/camps");
@@ -115,7 +124,6 @@ export default function AdminCampForm() {
       const campData = {
         name: formData.name.toUpperCase(),
         stage_id: formData.stage_id,
-        parish_id: formData.parish_id,
         start_date: formData.start_date,
         end_date: formData.end_date,
         max_families: formData.max_families,
@@ -127,19 +135,59 @@ export default function AdminCampForm() {
       };
 
       if (id) {
-        const { error } = await supabase
+        // Atualizar acampamento
+        const { error: campError } = await supabase
           .from("camps")
           .update(campData)
           .eq("id", id);
 
-        if (error) throw error;
+        if (campError) throw campError;
+
+        // Remover relacionamentos existentes
+        await supabase
+          .from("camp_parishes")
+          .delete()
+          .eq("camp_id", id);
+
+        // Inserir novos relacionamentos
+        if (selectedParishes.length > 0) {
+          const parishRelations = selectedParishes.map(parishId => ({
+            camp_id: id,
+            parish_id: parishId
+          }));
+
+          const { error: parishError } = await supabase
+            .from("camp_parishes")
+            .insert(parishRelations);
+
+          if (parishError) throw parishError;
+        }
+
         toast.success("Acampamento atualizado com sucesso!");
       } else {
-        const { error } = await supabase
+        // Criar novo acampamento
+        const { data: newCamp, error: campError } = await supabase
           .from("camps")
-          .insert(campData);
+          .insert(campData)
+          .select()
+          .single();
 
-        if (error) throw error;
+        if (campError) throw campError;
+
+        // Inserir relacionamentos com paróquias
+        if (selectedParishes.length > 0) {
+          const parishRelations = selectedParishes.map(parishId => ({
+            camp_id: newCamp.id,
+            parish_id: parishId
+          }));
+
+          const { error: parishError } = await supabase
+            .from("camp_parishes")
+            .insert(parishRelations);
+
+          if (parishError) throw parishError;
+        }
+
         toast.success("Acampamento criado com sucesso!");
       }
 
@@ -149,6 +197,14 @@ export default function AdminCampForm() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleParishToggle = (parishId: string) => {
+    setSelectedParishes(prev => 
+      prev.includes(parishId)
+        ? prev.filter(id => id !== parishId)
+        : [...prev, parishId]
+    );
   };
 
   return (
@@ -173,48 +229,51 @@ export default function AdminCampForm() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="stage_id">Etapa</Label>
-                  <Select
-                    value={formData.stage_id}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, stage_id: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a etapa" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {stages.map((stage) => (
-                        <SelectItem key={stage.id} value={stage.id}>
-                          {stage.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label htmlFor="stage_id">Etapa</Label>
+                <Select
+                  value={formData.stage_id}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, stage_id: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a etapa" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {stages.map((stage) => (
+                      <SelectItem key={stage.id} value={stage.id}>
+                        {stage.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <div>
-                  <Label htmlFor="parish_id">Paróquia</Label>
-                  <Select
-                    value={formData.parish_id}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, parish_id: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a paróquia" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {parishes.map((parish) => (
-                        <SelectItem key={parish.id} value={parish.id}>
-                          {parish.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <div>
+                <Label>Paróquias</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2 max-h-60 overflow-y-auto border rounded-md p-4">
+                  {parishes.map((parish) => (
+                    <div key={parish.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={parish.id}
+                        checked={selectedParishes.includes(parish.id)}
+                        onCheckedChange={() => handleParishToggle(parish.id)}
+                      />
+                      <Label
+                        htmlFor={parish.id}
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        {parish.name}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
+                {selectedParishes.length === 0 && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Selecione pelo menos uma paróquia
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -365,7 +424,10 @@ export default function AdminCampForm() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button 
+                type="submit" 
+                disabled={loading || selectedParishes.length === 0}
+              >
                 {loading ? "Salvando..." : "Salvar"}
               </Button>
             </div>

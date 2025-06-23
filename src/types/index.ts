@@ -59,11 +59,18 @@ export interface CampFamilyAssignment {
   family?: TentFamily;
 }
 
+export interface CampParish {
+  id: string;
+  camp_id: string;
+  parish_id: string;
+  created_at: string;
+  parish?: Parish;
+}
+
 export interface Camp {
   id: string;
   name: string;
   stage_id: string;
-  parish_id: string;
   start_date: string;
   end_date: string;
   max_families: number;
@@ -75,7 +82,8 @@ export interface Camp {
   created_at: string;
   updated_at: string;
   stage?: Stage;
-  parish?: Parish;
+  parishes?: Parish[];
+  camp_parishes?: CampParish[];
 }
 
 export interface Family {

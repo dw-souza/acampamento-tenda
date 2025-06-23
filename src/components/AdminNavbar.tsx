@@ -85,17 +85,6 @@ export default function AdminNavbar() {
                 Equipes
               </Link>
               <Link
-                to="/admin/blog"
-                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  location.pathname.startsWith("/admin/blog")
-                    ? "border-tenda-beige text-tenda-beige"
-                    : "border-transparent text-tenda-beige/80 hover:border-tenda-beige/50 hover:text-tenda-beige"
-                }`}
-              >
-                <BookOpen className="w-4 h-4 mr-2" />
-                Blog
-              </Link>
-              <Link
                 to="/admin/parishes"
                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                   location.pathname.startsWith("/admin/parishes")
@@ -116,6 +105,17 @@ export default function AdminNavbar() {
               >
                 <Layers className="w-4 h-4 mr-2" />
                 Etapas
+              </Link>
+              <Link
+                to="/admin/blog"
+                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                  location.pathname.startsWith("/admin/blog")
+                    ? "border-tenda-beige text-tenda-beige"
+                    : "border-transparent text-tenda-beige/80 hover:border-tenda-beige/50 hover:text-tenda-beige"
+                }`}
+              >
+                <BookOpen className="w-4 h-4 mr-2" />
+                Blog
               </Link>
             </div>
           </div>
@@ -201,18 +201,6 @@ export default function AdminNavbar() {
                 Equipes
               </Link>
               <Link
-                to="/admin/blog"
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  location.pathname.startsWith("/admin/blog")
-                    ? "bg-tenda-beige text-tenda-brown"
-                    : "text-tenda-beige/80 hover:text-tenda-beige hover:bg-tenda-brown/50"
-                }`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <BookOpen className="w-4 h-4 mr-2 inline" />
-                Blog
-              </Link>
-              <Link
                 to="/admin/parishes"
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   location.pathname.startsWith("/admin/parishes")
@@ -235,6 +223,18 @@ export default function AdminNavbar() {
               >
                 <Layers className="w-4 h-4 mr-2 inline" />
                 Etapas
+              </Link>
+              <Link
+                to="/admin/blog"
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  location.pathname.startsWith("/admin/blog")
+                    ? "bg-tenda-beige text-tenda-brown"
+                    : "text-tenda-beige/80 hover:text-tenda-beige hover:bg-tenda-brown/50"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <BookOpen className="w-4 h-4 mr-2 inline" />
+                Blog
               </Link>
             </div>
           </div>

@@ -36,12 +36,15 @@ import {
   Baby,
   User,
   Eye,
-  Pencil
+  Pencil,
+  Users2
 } from "lucide-react";
 
 type Camp = Tables<"camps"> & {
   stages: Tables<"stages">;
-  parishes: Tables<"parishes">;
+  camp_parishes: {
+    parishes: Tables<"parishes">;
+  }[];
   couple_price: number;
   child_price: number;
   _count?: {
@@ -108,7 +111,9 @@ export default function Admin() {
         .select(`
           *,
           stages (*),
-          parishes (*)
+          camp_parishes (
+            parishes (*)
+          )
         `)
         .order("start_date", { ascending: false });
 
@@ -442,7 +447,7 @@ export default function Admin() {
                       <TableRow key={camp.id}>
                         <TableCell className="font-medium">{camp.name}</TableCell>
                         <TableCell>{camp.stages.name}</TableCell>
-                        <TableCell>{camp.parishes.name}</TableCell>
+                        <TableCell>{camp.camp_parishes.map(p => p.parishes.name).join(', ')}</TableCell>
                         <TableCell>
                           <div className="text-sm">
                             <div>{new Date(camp.start_date).toLocaleDateString()}</div>
@@ -486,6 +491,23 @@ export default function Admin() {
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>Ver Inscrições</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => navigate(`/admin/camps/work-teams/${camp.id}`)}
+                                  >
+                                    <Users2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Ver Equipes</p>
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>

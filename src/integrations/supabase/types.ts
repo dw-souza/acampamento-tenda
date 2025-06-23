@@ -420,13 +420,14 @@ export interface Database {
           id: string
           name: string
           stage_id: string
-          parish_id: string
           start_date: string
           end_date: string
           max_families: number
           registration_start_date: string
           registration_end_date: string
           status: "draft" | "open" | "closed" | "in_progress" | "completed"
+          couple_price: number
+          child_price: number
           created_at: string
           updated_at: string
         }
@@ -434,13 +435,14 @@ export interface Database {
           id?: string
           name: string
           stage_id: string
-          parish_id: string
           start_date: string
           end_date: string
           max_families?: number
           registration_start_date: string
           registration_end_date: string
           status?: "draft" | "open" | "closed" | "in_progress" | "completed"
+          couple_price?: number
+          child_price?: number
           created_at?: string
           updated_at?: string
         }
@@ -448,16 +450,62 @@ export interface Database {
           id?: string
           name?: string
           stage_id?: string
-          parish_id?: string
           start_date?: string
           end_date?: string
           max_families?: number
           registration_start_date?: string
           registration_end_date?: string
           status?: "draft" | "open" | "closed" | "in_progress" | "completed"
+          couple_price?: number
+          child_price?: number
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "camps_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "stages"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      camp_parishes: {
+        Row: {
+          id: string
+          camp_id: string
+          parish_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          camp_id: string
+          parish_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          camp_id?: string
+          parish_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "camp_parishes_camp_id_fkey"
+            columns: ["camp_id"]
+            isOneToOne: false
+            referencedRelation: "camps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "camp_parishes_parish_id_fkey"
+            columns: ["parish_id"]
+            isOneToOne: false
+            referencedRelation: "parishes"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       camp_registrations: {
         Row: {
