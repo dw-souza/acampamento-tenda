@@ -71,3 +71,95 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+# Tenda Família Digital
+
+Sistema de gerenciamento de acampamentos familiares com blog integrado.
+
+## 🖼️ Sistema de Imagens do Blog
+
+### Imagem de Destaque
+- **Upload**: Use o componente `ImageUpload` no formulário de blog
+- **Funcionalidades**: 
+  - Upload com drag & drop
+  - Preview da imagem
+  - Botão de remoção (X vermelho)
+  - Aspect ratio 16:9 (video)
+
+### Imagens no Conteúdo
+- **Upload**: Use o componente `ContentImageUpload` no editor de conteúdo
+- **Funcionalidades**:
+  - Upload múltiplas imagens
+  - Controle de tamanho personalizado
+  - HTML inline com estilos CSS
+  - Botão sempre disponível
+
+#### Opções de Tamanho:
+1. **Automático**: `max-width: 100%; height: auto;`
+2. **Pequeno**: `width: 300px; height: auto;`
+3. **Médio**: `width: 500px; height: auto;`
+4. **Grande**: `width: 800px; height: auto;`
+5. **Largura total**: `width: 100%; height: auto;`
+6. **Personalizado**: Define largura e altura específicas
+
+#### Exemplos de HTML gerado:
+```html
+<!-- Tamanho automático -->
+<img src="url-da-imagem" alt="Descrição" style="max-width: 100%; height: auto;" class="my-4 rounded-lg shadow mx-auto" />
+
+<!-- Tamanho médio -->
+<img src="url-da-imagem" alt="Descrição" style="width: 500px; height: auto;" class="my-4 rounded-lg shadow mx-auto" />
+
+<!-- Tamanho personalizado -->
+<img src="url-da-imagem" alt="Descrição" width="400px" height="300px" class="my-4 rounded-lg shadow mx-auto" />
+```
+
+### Como usar:
+1. **No editor de conteúdo**, clique no botão "Adicionar Imagem"
+2. **Configure as opções** clicando no ícone de engrenagem (⚙️)
+3. **Defina o texto alternativo** para acessibilidade
+4. **Escolha o tamanho** ou defina dimensões personalizadas
+5. **Faça upload** da imagem
+6. **O HTML será inserido** automaticamente no conteúdo
+
+### Suporte a Markdown e HTML:
+- ✅ Markdown padrão: `![alt](url)`
+- ✅ HTML inline: `<img src="url" alt="alt" style="..." />`
+- ✅ Controle total de tamanho e estilo
+- ✅ Preview em tempo real
+- ✅ Renderização correta na página pública
+
+## 🚀 Tecnologias
+
+- React + TypeScript
+- Vite
+- Tailwind CSS
+- Supabase (banco de dados + storage)
+- React Router
+- Lucide Icons
+
+## 📦 Instalação
+
+```bash
+npm install
+npm run dev
+```
+
+## 🗄️ Banco de Dados
+
+Execute as migrações do Supabase:
+
+```bash
+supabase db reset
+```
+
+## 📝 Blog
+
+O sistema inclui um blog completo com:
+- ✅ CRUD de posts
+- ✅ Upload de imagens
+- ✅ Controle de tamanho de imagens
+- ✅ Markdown + HTML inline
+- ✅ SEO otimizado
+- ✅ Tags e categorias
+- ✅ Preview em tempo real

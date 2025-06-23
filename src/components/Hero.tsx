@@ -18,28 +18,9 @@ const Hero = () => {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-tenda-brown mb-6">
             Comunidade Tenda
           </h1>
-          <p className="text-xl md:text-2xl text-tenda-brown/80 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl md:text-2xl text-tenda-brown/80 max-w-3xl mx-auto">
             Ser família em comunhão com Deus e com o próximo
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button 
-              asChild 
-              className="bg-tenda-green hover:bg-tenda-olive text-white px-8 py-3 rounded-md text-lg"
-            >
-              <Link to="/acampamentos">
-                Próximos Acampamentos
-              </Link>
-            </Button>
-            <Button 
-              asChild 
-              variant="outline"
-              className="border-tenda-brown text-tenda-brown hover:bg-tenda-sand px-8 py-3 rounded-md text-lg"
-            >
-              <Link to="/sobre">
-                Conheça Nossa Missão
-              </Link>
-            </Button>
-          </div>
         </div>
       </div>
     </div>

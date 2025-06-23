@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import About from "./pages/About";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
@@ -25,6 +27,8 @@ import AdminTentForm from "@/pages/AdminTentForm";
 import AdminTentParticipants from "@/pages/AdminTentParticipants";
 import AdminTentFamilyForm from "@/pages/AdminTentFamilyForm";
 import AdminTentFamilyAdd from "@/pages/AdminTentFamilyAdd";
+import AdminBlog from "@/pages/AdminBlog";
+import AdminBlogForm from "@/pages/AdminBlogForm";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +41,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/sobre" element={<About />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/parishes" element={<AdminParishes />} />
@@ -60,6 +66,9 @@ const App = () => (
           <Route path="/admin/tents/:tentId/family/:familyId" element={<AdminTentFamilyForm />} />
           <Route path="/admin/tents/:tentId/family/add" element={<AdminTentFamilyAdd />} />
           <Route path="/admin/camps/dashboard/:campId" element={<AdminCampDashboard />} />
+          <Route path="/admin/blog" element={<AdminBlog />} />
+          <Route path="/admin/blog/new" element={<AdminBlogForm />} />
+          <Route path="/admin/blog/edit/:id" element={<AdminBlogForm />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

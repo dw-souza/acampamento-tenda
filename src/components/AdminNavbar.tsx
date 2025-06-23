@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, Users, Church, LogOut, ExternalLink, Layers, Tent, Users2, Menu, X } from "lucide-react";
+import { Home, Users, Church, LogOut, ExternalLink, Layers, Tent, Users2, Menu, X, BookOpen, Calendar, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 
@@ -48,6 +48,7 @@ export default function AdminNavbar() {
                     : "border-transparent text-tenda-beige/80 hover:border-tenda-beige/50 hover:text-tenda-beige"
                 }`}
               >
+                <Home className="w-4 h-4 mr-2" />
                 Dashboard
               </Link>
               <Link
@@ -58,6 +59,7 @@ export default function AdminNavbar() {
                     : "border-transparent text-tenda-beige/80 hover:border-tenda-beige/50 hover:text-tenda-beige"
                 }`}
               >
+                <Calendar className="w-4 h-4 mr-2" />
                 Acampamentos
               </Link>
               <Link
@@ -68,6 +70,7 @@ export default function AdminNavbar() {
                     : "border-transparent text-tenda-beige/80 hover:border-tenda-beige/50 hover:text-tenda-beige"
                 }`}
               >
+                <Tent className="w-4 h-4 mr-2" />
                 Tendas
               </Link>
               <Link
@@ -78,7 +81,19 @@ export default function AdminNavbar() {
                     : "border-transparent text-tenda-beige/80 hover:border-tenda-beige/50 hover:text-tenda-beige"
                 }`}
               >
+                <Users2 className="w-4 h-4 mr-2" />
                 Equipes
+              </Link>
+              <Link
+                to="/admin/blog"
+                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                  location.pathname.startsWith("/admin/blog")
+                    ? "border-tenda-beige text-tenda-beige"
+                    : "border-transparent text-tenda-beige/80 hover:border-tenda-beige/50 hover:text-tenda-beige"
+                }`}
+              >
+                <BookOpen className="w-4 h-4 mr-2" />
+                Blog
               </Link>
               <Link
                 to="/admin/parishes"
@@ -88,6 +103,7 @@ export default function AdminNavbar() {
                     : "border-transparent text-tenda-beige/80 hover:border-tenda-beige/50 hover:text-tenda-beige"
                 }`}
               >
+                <Church className="w-4 h-4 mr-2" />
                 Paróquias
               </Link>
               <Link
@@ -98,6 +114,7 @@ export default function AdminNavbar() {
                     : "border-transparent text-tenda-beige/80 hover:border-tenda-beige/50 hover:text-tenda-beige"
                 }`}
               >
+                <Layers className="w-4 h-4 mr-2" />
                 Etapas
               </Link>
             </div>
@@ -144,6 +161,7 @@ export default function AdminNavbar() {
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
+                <Home className="w-4 h-4 mr-2 inline" />
                 Dashboard
               </Link>
               <Link
@@ -155,6 +173,7 @@ export default function AdminNavbar() {
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
+                <Calendar className="w-4 h-4 mr-2 inline" />
                 Acampamentos
               </Link>
               <Link
@@ -166,6 +185,7 @@ export default function AdminNavbar() {
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
+                <Tent className="w-4 h-4 mr-2 inline" />
                 Tendas
               </Link>
               <Link
@@ -177,7 +197,20 @@ export default function AdminNavbar() {
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
+                <Users2 className="w-4 h-4 mr-2 inline" />
                 Equipes
+              </Link>
+              <Link
+                to="/admin/blog"
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  location.pathname.startsWith("/admin/blog")
+                    ? "bg-tenda-beige text-tenda-brown"
+                    : "text-tenda-beige/80 hover:text-tenda-beige hover:bg-tenda-brown/50"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <BookOpen className="w-4 h-4 mr-2 inline" />
+                Blog
               </Link>
               <Link
                 to="/admin/parishes"
@@ -188,6 +221,7 @@ export default function AdminNavbar() {
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
+                <Church className="w-4 h-4 mr-2 inline" />
                 Paróquias
               </Link>
               <Link
@@ -199,15 +233,8 @@ export default function AdminNavbar() {
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
+                <Layers className="w-4 h-4 mr-2 inline" />
                 Etapas
-              </Link>
-              <Link
-                to="/"
-                target="_blank"
-                className="block px-3 py-2 rounded-md text-base font-medium text-tenda-beige/80 hover:text-tenda-beige hover:bg-tenda-brown/50"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Ver Site
               </Link>
             </div>
           </div>

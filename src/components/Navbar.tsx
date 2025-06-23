@@ -1,9 +1,16 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, Info, Tent, Mail, LogIn } from "lucide-react";
+import { Home, Info, Mail, LogIn, BookOpen } from "lucide-react";
 
 export default function Navbar() {
   const location = useLocation();
+
+  const scrollToMission = () => {
+    const missionSection = document.getElementById('mission');
+    if (missionSection) {
+      missionSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <nav className="bg-tenda-brown/95 backdrop-blur-sm border-b border-tenda-brown/20">
@@ -34,27 +41,23 @@ export default function Navbar() {
                 <Home className="w-4 h-4 mr-2" />
               Início
             </Link>
-            <Link 
-                to="/about"
-                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  location.pathname === "/about"
-                    ? "border-tenda-beige text-tenda-beige"
-                    : "border-transparent text-tenda-beige/80 hover:text-tenda-beige hover:border-tenda-beige/50"
-                }`}
+            <button
+                onClick={scrollToMission}
+                className="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium border-transparent text-tenda-beige/80 hover:text-tenda-beige hover:border-tenda-beige/50"
               >
                 <Info className="w-4 h-4 mr-2" />
-              Sobre
-            </Link>
+              Nossa Missão
+            </button>
             <Link 
-                to="/camps"
+                to="/blog"
                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  location.pathname === "/camps"
+                  location.pathname.startsWith("/blog")
                     ? "border-tenda-beige text-tenda-beige"
                     : "border-transparent text-tenda-beige/80 hover:text-tenda-beige hover:border-tenda-beige/50"
                 }`}
               >
-                <Tent className="w-4 h-4 mr-2" />
-              Acampamentos
+                <BookOpen className="w-4 h-4 mr-2" />
+              Blog
             </Link>
             <Link 
                 to="/contact"

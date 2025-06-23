@@ -130,4 +130,22 @@ export interface TentFamily {
   status: "active" | "inactive" | "left";
   created_at: string;
   updated_at: string;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content: string;
+  featured_image_url?: string;
+  author_name: string;
+  status: "draft" | "published" | "archived";
+  published_at?: string;
+  meta_title?: string;
+  meta_description?: string;
+  tags?: string[];
+  reading_time?: number;
+  created_at: string;
+  updated_at: string;
 } 

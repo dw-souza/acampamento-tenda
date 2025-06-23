@@ -1,10 +1,8 @@
-
 import Layout from "@/components/Layout";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import Mission from "@/components/Mission";
-import UpcomingEvents from "@/components/UpcomingEvents";
-import Testimonials from "@/components/Testimonials";
+import LatestBlogPosts from "@/components/LatestBlogPosts";
 import GalleryPreview from "@/components/GalleryPreview";
 import RegistrationCTA from "@/components/RegistrationCTA";
 
@@ -14,8 +12,7 @@ const Index = () => {
       <Hero />
       <Features />
       <Mission />
-      <UpcomingEvents />
-      <Testimonials />
+      <LatestBlogPosts />
       <GalleryPreview />
       <RegistrationCTA />
     </Layout>

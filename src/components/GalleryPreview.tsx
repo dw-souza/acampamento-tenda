@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -14,11 +13,11 @@ const GalleryPreview = () => {
   ];
   
   return (
-    <section className="py-16 bg-tenda-beige">
+    <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-tenda-brown mb-3">Galeria de Momentos</h2>
-          <p className="text-tenda-brown/80 max-w-3xl mx-auto">
+          <p className="text-gray-600 max-w-3xl mx-auto">
             Lembranças especiais de nossos acampamentos e encontros em família
           </p>
         </div>
@@ -27,7 +26,7 @@ const GalleryPreview = () => {
           {images.map((image, index) => (
             <div 
               key={index} 
-              className="relative aspect-square overflow-hidden rounded-md hover:opacity-90 transition-opacity"
+              className="relative aspect-square overflow-hidden rounded-md hover:opacity-90 transition-opacity shadow-md"
             >
               <img 
                 src={image} 
