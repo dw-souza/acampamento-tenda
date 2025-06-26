@@ -30,7 +30,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 type Camp = Tables<"camps"> & {
   stages: Tables<"stages">;
   camp_parishes: {
-    parish: Tables<"parishes">;
+    parishes: Tables<"parishes">;
   }[];
 };
 
@@ -99,7 +99,9 @@ export default function AdminCampRegistrationForm() {
         .select(`
           *,
           stages (*),
-          camp_parishes (*)
+          camp_parishes (
+            parishes (*)
+          )
         `)
         .eq("id", id)
         .single();
@@ -332,7 +334,7 @@ export default function AdminCampRegistrationForm() {
           <div>
             <h1 className="text-2xl font-bold">Nova Inscrição - {camp.name}</h1>
             <p className="text-gray-500">
-              {camp.stages.name} - {camp.camp_parishes.map(p => p.parish.name).join(', ')}
+              {camp?.stages?.name || ""} - {camp?.camp_parishes?.map(p => p.parishes?.name).join(', ') || ""}
             </p>
           </div>
         </div>

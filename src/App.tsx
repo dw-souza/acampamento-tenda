@@ -20,6 +20,7 @@ import AdminCampRegistrations from "@/pages/AdminCampRegistrations";
 import AdminCampRegistrationForm from "@/pages/AdminCampRegistrationForm";
 import AdminCampTents from "@/pages/AdminCampTents";
 import AdminCampWorkTeams from "@/pages/AdminCampWorkTeams";
+import AdminCampBadges from "@/pages/AdminCampBadges";
 import AdminCampDashboard from "@/pages/AdminCampDashboard";
 import AdminWorkTeams from "@/pages/AdminWorkTeams";
 import AdminTents from "@/pages/AdminTents";
@@ -56,6 +57,8 @@ const App = () => (
           <Route path="/admin/camps/edit/:id" element={<AdminCampForm />} />
           <Route path="/admin/camps/tents/:id" element={<AdminCampTents />} />
           <Route path="/admin/camps/work-teams/:campId" element={<AdminCampWorkTeams />} />
+          <Route path="/admin/camps/badges/:campId" element={<AdminCampBadges />} />
+          <Route path="/admin/camps/dashboard/:campId" element={<AdminCampDashboard />} />
           <Route path="/admin/camps/registrations/:id" element={<AdminCampRegistrations />} />
           <Route path="/admin/camps/registrations/:id/new" element={<AdminCampRegistrationForm />} />
           <Route path="/admin/work-teams" element={<AdminWorkTeams />} />
@@ -65,7 +68,6 @@ const App = () => (
           <Route path="/admin/tents/:tentId/participants" element={<AdminTentParticipants />} />
           <Route path="/admin/tents/:tentId/family/:familyId" element={<AdminTentFamilyForm />} />
           <Route path="/admin/tents/:tentId/family/add" element={<AdminTentFamilyAdd />} />
-          <Route path="/admin/camps/dashboard/:campId" element={<AdminCampDashboard />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/admin/blog/new" element={<AdminBlogForm />} />
           <Route path="/admin/blog/edit/:id" element={<AdminBlogForm />} />

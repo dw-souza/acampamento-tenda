@@ -28,13 +28,14 @@ import { Tables } from "@/integrations/supabase/types";
 type Camp = Tables<"camps"> & {
   stages: Tables<"stages">;
   camp_parishes: {
-    parish: Tables<"parishes">;
+    parishes: Tables<"parishes">;
   }[];
 };
 
 type Tent = Tables<"tents"> & {
-  tent_children: Tables<"tent_children">[];
-  capacity: number;
+  tent_families: (Tables<"tent_families"> & {
+    tent_children: Tables<"tent_children">[];
+  })[];
 };
 
 export default function AdminCampTents() {
@@ -45,7 +46,6 @@ export default function AdminCampTents() {
   const [tents, setTents] = useState<Tent[]>([]);
   const [selectedTent, setSelectedTent] = useState<Tent | null>(null);
   const [tentName, setTentName] = useState("");
-  const [tentCapacity, setTentCapacity] = useState(4);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
@@ -62,7 +62,9 @@ export default function AdminCampTents() {
         .select(`
           *,
           stages (*),
-          camp_parishes (*)
+          camp_parishes (
+            parishes (*)
+          )
         `)
         .eq("id", id)
         .single();
@@ -78,16 +80,24 @@ export default function AdminCampTents() {
   const fetchTents = async () => {
     try {
       const { data, error } = await supabase
-        .from("tents")
+        .from("camp_tents")
         .select(`
-          *,
-          tent_children (*)
+          tents (
+            *,
+            tent_families (
+              *,
+              tent_children (*)
+            )
+          )
         `)
-        .eq("camp_id", id)
-        .order("name", { ascending: true });
+        .eq("camp_id", id);
 
       if (error) throw error;
-      setTents(data || []);
+      
+      // Extrair as tendas dos dados retornados e ordenar
+      const tentsData = data?.map(item => item.tents).filter(Boolean) || [];
+      tentsData.sort((a: any, b: any) => a.name.localeCompare(b.name));
+      setTents(tentsData as unknown as Tent[]);
     } catch (error: any) {
       toast.error("Erro ao carregar tendas: " + error.message);
     } finally {
@@ -106,28 +116,43 @@ export default function AdminCampTents() {
           .from("tents")
           .update({
             name: tentName,
-            capacity: tentCapacity,
           })
           .eq("id", selectedTent.id);
 
         if (error) throw error;
         toast.success("Tenda atualizada com sucesso!");
       } else {
-        // Criar nova tenda
-        const { error } = await supabase.from("tents").insert({
-          camp_id: camp.id,
-          name: tentName,
-          capacity: tentCapacity,
-        });
+        // Criar nova tenda e relacionar com o acampamento
+        const { data: tentData, error: tentError } = await supabase
+          .from("tents")
+          .insert({
+            name: tentName,
+            formation_date: new Date().toISOString().split('T')[0],
+            guardian_husband_name: 'A definir',
+            guardian_wife_name: 'A definir',
+            parish_id: camp.camp_parishes[0]?.parishes.id || '',
+            status: 'active'
+          })
+          .select()
+          .single();
 
-        if (error) throw error;
+        if (tentError) throw tentError;
+
+        // Relacionar a tenda com o acampamento
+        const { error: relationError } = await supabase
+          .from("camp_tents")
+          .insert({
+            camp_id: camp.id,
+            tent_id: tentData.id
+          });
+
+        if (relationError) throw relationError;
         toast.success("Tenda criada com sucesso!");
       }
 
       fetchTents();
       setSelectedTent(null);
       setTentName("");
-      setTentCapacity(4);
     } catch (error: any) {
       toast.error("Erro ao salvar tenda: " + error.message);
     }
@@ -137,6 +162,16 @@ export default function AdminCampTents() {
     if (!selectedTent) return;
 
     try {
+      // Remover o relacionamento com o acampamento
+      const { error: relationError } = await supabase
+        .from("camp_tents")
+        .delete()
+        .eq("camp_id", camp?.id)
+        .eq("tent_id", selectedTent.id);
+
+      if (relationError) throw relationError;
+
+      // Remover a tenda
       const { error } = await supabase
         .from("tents")
         .delete()
@@ -179,7 +214,7 @@ export default function AdminCampTents() {
             Tendas - {camp?.name}
           </h1>
           <p className="text-gray-600">
-            {camp?.stages.name} - {camp?.camp_parishes.map(p => p.parish.name).join(', ')}
+            {camp?.stages.name} - {camp?.camp_parishes.map(p => p.parishes.name).join(', ')}
           </p>
         </div>
 
@@ -194,24 +229,6 @@ export default function AdminCampTents() {
                 required
               />
             </div>
-
-            <div>
-              <label className="text-sm font-medium">Capacidade</label>
-              <Select
-                value={tentCapacity.toString()}
-                onValueChange={(value) => setTentCapacity(parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2">2 pessoas</SelectItem>
-                  <SelectItem value="4">4 pessoas</SelectItem>
-                  <SelectItem value="6">6 pessoas</SelectItem>
-                  <SelectItem value="8">8 pessoas</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
           <div className="flex justify-end space-x-4">
@@ -221,7 +238,6 @@ export default function AdminCampTents() {
               onClick={() => {
                 setSelectedTent(null);
                 setTentName("");
-                setTentCapacity(4);
               }}
             >
               Cancelar
@@ -238,9 +254,6 @@ export default function AdminCampTents() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Nome
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Capacidade
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Participantes
@@ -260,12 +273,9 @@ export default function AdminCampTents() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">
-                      {tent.capacity} pessoas
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {tent.tent_children?.length || 0} / {tent.capacity}
+                      {tent.tent_families?.reduce((total, family) => 
+                        total + (family.tent_children?.length || 0), 0
+                      ) || 0} participantes
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -275,7 +285,6 @@ export default function AdminCampTents() {
                         onClick={() => {
                           setSelectedTent(tent);
                           setTentName(tent.name);
-                          setTentCapacity(tent.capacity);
                         }}
                       >
                         Editar

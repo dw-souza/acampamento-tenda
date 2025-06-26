@@ -21,6 +21,9 @@ import { formatDateForInput } from "@/lib/utils";
 type Camp = Tables<"camps">;
 type Stage = Tables<"stages">;
 type Parish = Tables<"parishes">;
+type Tent = Tables<"tents"> & {
+  parishes: Tables<"parishes">;
+};
 
 export default function AdminCampForm() {
   const navigate = useNavigate();
@@ -28,7 +31,10 @@ export default function AdminCampForm() {
   const [loading, setLoading] = useState(false);
   const [stages, setStages] = useState<Stage[]>([]);
   const [parishes, setParishes] = useState<Parish[]>([]);
+  const [tents, setTents] = useState<Tent[]>([]);
   const [selectedParishes, setSelectedParishes] = useState<string[]>([]);
+  const [selectedTents, setSelectedTents] = useState<string[]>([]);
+  const [isKergimaStage, setIsKergimaStage] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     stage_id: "",
@@ -45,10 +51,18 @@ export default function AdminCampForm() {
   useEffect(() => {
     fetchStages();
     fetchParishes();
+    fetchTents();
     if (id) {
       fetchCamp();
     }
   }, [id]);
+
+  // Verificar se é Kergima quando a etapa muda
+  useEffect(() => {
+    if (formData.stage_id) {
+      checkIfKergimaStage(formData.stage_id);
+    }
+  }, [formData.stage_id, stages]);
 
   const fetchStages = async () => {
     try {
@@ -79,6 +93,24 @@ export default function AdminCampForm() {
     }
   };
 
+  const fetchTents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("tents")
+        .select(`
+          *,
+          parishes (*)
+        `)
+        .eq("status", "active")
+        .order("name");
+
+      if (error) throw error;
+      setTents(data || []);
+    } catch (error: any) {
+      toast.error("Erro ao carregar tendas: " + error.message);
+    }
+  };
+
   const fetchCamp = async () => {
     try {
       const { data, error } = await supabase
@@ -87,6 +119,9 @@ export default function AdminCampForm() {
           *,
           camp_parishes (
             parish_id
+          ),
+          camp_tents (
+            tent_id
           )
         `)
         .eq("id", id)
@@ -107,9 +142,16 @@ export default function AdminCampForm() {
         status: data.status || "active",
       });
 
+      // Verificar se é Kergima
+      checkIfKergimaStage(data.stage_id);
+
       // Extrair IDs das paróquias selecionadas
       const parishIds = data.camp_parishes?.map((cp: any) => cp.parish_id) || [];
       setSelectedParishes(parishIds);
+
+      // Extrair IDs das tendas selecionadas
+      const tentIds = data.camp_tents?.map((ct: any) => ct.tent_id) || [];
+      setSelectedTents(tentIds);
     } catch (error: any) {
       toast.error("Erro ao carregar acampamento: " + error.message);
       navigate("/admin/camps");
@@ -126,11 +168,11 @@ export default function AdminCampForm() {
         stage_id: formData.stage_id,
         start_date: formData.start_date,
         end_date: formData.end_date,
-        max_families: formData.max_families,
+        max_families: isKergimaStage ? formData.max_families : 0,
         couple_price: formData.couple_price,
         child_price: formData.child_price,
-        registration_start_date: formData.registration_start_date,
-        registration_end_date: formData.registration_end_date,
+        registration_start_date: isKergimaStage ? formData.registration_start_date : null,
+        registration_end_date: isKergimaStage ? formData.registration_end_date : null,
         status: formData.status,
       };
 
@@ -143,24 +185,46 @@ export default function AdminCampForm() {
 
         if (campError) throw campError;
 
-        // Remover relacionamentos existentes
-        await supabase
-          .from("camp_parishes")
-          .delete()
-          .eq("camp_id", id);
-
-        // Inserir novos relacionamentos
-        if (selectedParishes.length > 0) {
-          const parishRelations = selectedParishes.map(parishId => ({
-            camp_id: id,
-            parish_id: parishId
-          }));
-
-          const { error: parishError } = await supabase
+        if (isKergimaStage) {
+          // Remover relacionamentos existentes de paróquias
+          await supabase
             .from("camp_parishes")
-            .insert(parishRelations);
+            .delete()
+            .eq("camp_id", id);
 
-          if (parishError) throw parishError;
+          // Inserir novos relacionamentos com paróquias
+          if (selectedParishes.length > 0) {
+            const parishRelations = selectedParishes.map(parishId => ({
+              camp_id: id,
+              parish_id: parishId
+            }));
+
+            const { error: parishError } = await supabase
+              .from("camp_parishes")
+              .insert(parishRelations);
+
+            if (parishError) throw parishError;
+          }
+        } else {
+          // Remover relacionamentos existentes de tendas
+          await supabase
+            .from("camp_tents")
+            .delete()
+            .eq("camp_id", id);
+
+          // Inserir novos relacionamentos com tendas
+          if (selectedTents.length > 0) {
+            const tentRelations = selectedTents.map(tentId => ({
+              camp_id: id,
+              tent_id: tentId
+            }));
+
+            const { error: tentError } = await supabase
+              .from("camp_tents")
+              .insert(tentRelations);
+
+            if (tentError) throw tentError;
+          }
         }
 
         toast.success("Acampamento atualizado com sucesso!");
@@ -174,18 +238,34 @@ export default function AdminCampForm() {
 
         if (campError) throw campError;
 
-        // Inserir relacionamentos com paróquias
-        if (selectedParishes.length > 0) {
-          const parishRelations = selectedParishes.map(parishId => ({
-            camp_id: newCamp.id,
-            parish_id: parishId
-          }));
+        if (isKergimaStage) {
+          // Inserir relacionamentos com paróquias
+          if (selectedParishes.length > 0) {
+            const parishRelations = selectedParishes.map(parishId => ({
+              camp_id: newCamp.id,
+              parish_id: parishId
+            }));
 
-          const { error: parishError } = await supabase
-            .from("camp_parishes")
-            .insert(parishRelations);
+            const { error: parishError } = await supabase
+              .from("camp_parishes")
+              .insert(parishRelations);
 
-          if (parishError) throw parishError;
+            if (parishError) throw parishError;
+          }
+        } else {
+          // Inserir relacionamentos com tendas
+          if (selectedTents.length > 0) {
+            const tentRelations = selectedTents.map(tentId => ({
+              camp_id: newCamp.id,
+              tent_id: tentId
+            }));
+
+            const { error: tentError } = await supabase
+              .from("camp_tents")
+              .insert(tentRelations);
+
+            if (tentError) throw tentError;
+          }
         }
 
         toast.success("Acampamento criado com sucesso!");
@@ -205,6 +285,32 @@ export default function AdminCampForm() {
         ? prev.filter(id => id !== parishId)
         : [...prev, parishId]
     );
+  };
+
+  const handleTentToggle = (tentId: string) => {
+    setSelectedTents(prev => 
+      prev.includes(tentId)
+        ? prev.filter(id => id !== tentId)
+        : [...prev, tentId]
+    );
+  };
+
+  // Verificar se a etapa selecionada é Kergima
+  const checkIfKergimaStage = (stageId: string) => {
+    const selectedStage = stages.find(stage => stage.id === stageId);
+    const isKergima = selectedStage?.name?.toLowerCase().includes('kergima') || 
+                     selectedStage?.name?.toLowerCase().includes('kerigma');
+    setIsKergimaStage(isKergima);
+    
+    // Se não for Kergima, limpar datas de inscrição
+    if (!isKergima) {
+      setFormData(prev => ({
+        ...prev,
+        registration_start_date: "",
+        registration_end_date: "",
+        max_families: 0
+      }));
+    }
   };
 
   return (
@@ -251,27 +357,47 @@ export default function AdminCampForm() {
               </div>
 
               <div>
-                <Label>Paróquias</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2 max-h-60 overflow-y-auto border rounded-md p-4">
-                  {parishes.map((parish) => (
-                    <div key={parish.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={parish.id}
-                        checked={selectedParishes.includes(parish.id)}
-                        onCheckedChange={() => handleParishToggle(parish.id)}
-                      />
-                      <Label
-                        htmlFor={parish.id}
-                        className="text-sm font-normal cursor-pointer"
-                      >
-                        {parish.name}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-                {selectedParishes.length === 0 && (
+                <Label>{isKergimaStage ? "Paróquias" : "Tendas Participantes"}</Label>
+                {isKergimaStage ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2 max-h-60 overflow-y-auto border rounded-md p-4">
+                    {parishes.map((parish) => (
+                      <div key={parish.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={parish.id}
+                          checked={selectedParishes.includes(parish.id)}
+                          onCheckedChange={() => handleParishToggle(parish.id)}
+                        />
+                        <Label
+                          htmlFor={parish.id}
+                          className="text-sm font-normal cursor-pointer"
+                        >
+                          {parish.name}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2 max-h-60 overflow-y-auto border rounded-md p-4">
+                    {tents.map((tent) => (
+                      <div key={tent.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={tent.id}
+                          checked={selectedTents.includes(tent.id)}
+                          onCheckedChange={() => handleTentToggle(tent.id)}
+                        />
+                        <Label
+                          htmlFor={tent.id}
+                          className="text-sm font-normal cursor-pointer"
+                        >
+                          {tent.name} - {tent.parishes?.name || "Paróquia não definida"}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {(isKergimaStage ? selectedParishes.length === 0 : selectedTents.length === 0) && (
                   <p className="text-sm text-muted-foreground mt-1">
-                    Selecione pelo menos uma paróquia
+                    {isKergimaStage ? "Selecione pelo menos uma paróquia" : "Selecione pelo menos uma tenda"}
                   </p>
                 )}
               </div>
@@ -304,60 +430,64 @@ export default function AdminCampForm() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="registration_start_date">
-                    Data de Início das Inscrições
-                  </Label>
-                  <Input
-                    id="registration_start_date"
-                    type="date"
-                    value={formData.registration_start_date}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        registration_start_date: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
+              {isKergimaStage && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="registration_start_date">
+                      Data de Início das Inscrições
+                    </Label>
+                    <Input
+                      id="registration_start_date"
+                      type="date"
+                      value={formData.registration_start_date}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          registration_start_date: e.target.value,
+                        })
+                      }
+                      required={isKergimaStage}
+                    />
+                  </div>
 
-                <div>
-                  <Label htmlFor="registration_end_date">
-                    Data de Término das Inscrições
-                  </Label>
-                  <Input
-                    id="registration_end_date"
-                    type="date"
-                    value={formData.registration_end_date}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        registration_end_date: e.target.value,
-                      })
-                    }
-                    required
-                  />
+                  <div>
+                    <Label htmlFor="registration_end_date">
+                      Data de Término das Inscrições
+                    </Label>
+                    <Input
+                      id="registration_end_date"
+                      type="date"
+                      value={formData.registration_end_date}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          registration_end_date: e.target.value,
+                        })
+                      }
+                      required={isKergimaStage}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="max_families">Máximo de Famílias</Label>
-                  <Input
-                    id="max_families"
-                    type="number"
-                    value={formData.max_families}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        max_families: parseInt(e.target.value),
-                      })
-                    }
-                    required
-                  />
-                </div>
+                {isKergimaStage && (
+                  <div>
+                    <Label htmlFor="max_families">Máximo de Famílias</Label>
+                    <Input
+                      id="max_families"
+                      type="number"
+                      value={formData.max_families}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          max_families: parseInt(e.target.value),
+                        })
+                      }
+                      required={isKergimaStage}
+                    />
+                  </div>
+                )}
 
                 <div>
                   <Label htmlFor="couple_price">Valor por Casal (R$)</Label>
@@ -426,7 +556,7 @@ export default function AdminCampForm() {
               </Button>
               <Button 
                 type="submit" 
-                disabled={loading || selectedParishes.length === 0}
+                disabled={loading || (isKergimaStage ? selectedParishes.length === 0 : selectedTents.length === 0)}
               >
                 {loading ? "Salvando..." : "Salvar"}
               </Button>
