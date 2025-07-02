@@ -1,159 +1,45 @@
-export interface Stage {
-  id: string;
-  name: string;
-  created_at: string;
-  updated_at: string;
-}
 
-export interface Parish {
-  id: string;
-  name: string;
-  created_at: string;
-  updated_at: string;
-}
+import { Tables } from "@/integrations/supabase/types";
 
-export interface FamilyChild {
-  id: string;
-  family_id: string;
-  name: string;
-  age: number;
-  vai_acampamento: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface WorkTeam {
-  id: string;
-  name: string;
-  description?: string;
-  color: string;
-  is_special_team?: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CampWorkAssignment {
-  id: string;
-  camp_id: string;
-  tent_id: string;
-  work_team_id: string;
-  coordinator_family_id?: string;
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-  work_team?: WorkTeam;
-  tent?: Tent;
-  coordinator_family?: TentFamily;
-}
-
-export interface CampFamilyAssignment {
-  id: string;
-  camp_id: string;
-  family_id: string;
-  work_team_id: string;
-  is_coordinator?: boolean;
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-  work_team?: WorkTeam;
-  family?: TentFamily;
-}
-
-export interface CampParish {
-  id: string;
-  camp_id: string;
-  parish_id: string;
-  created_at: string;
-  parish?: Parish;
-}
-
-export interface Camp {
-  id: string;
-  name: string;
-  stage_id: string;
-  start_date: string;
-  end_date: string;
-  max_families: number;
-  registration_start_date: string;
-  registration_end_date: string;
-  status: "draft" | "open" | "closed" | "completed";
-  couple_price: number;
-  child_price: number;
-  created_at: string;
-  updated_at: string;
-  stage?: Stage;
-  parishes?: Parish[];
-  camp_parishes?: CampParish[];
-}
-
-export interface Family {
-  id: string;
-  esposo_nome: string;
-  esposa_nome: string;
-  contato_principal: "esposo" | "esposa";
-  address: string;
-  bairro: string;
-  city: string;
-  state: string;
-  zip_code: string;
-  data_casamento: string;
-  created_at: string;
-  updated_at: string;
-  family_children?: FamilyChild[];
-}
-
-export interface Tent {
-  id: string;
-  name: string;
-  parish_id: string;
-  meeting_date: string;
-  created_at: string;
-  updated_at: string;
-  parish?: Parish;
-  _count?: {
-    active_families?: number;
-  };
-}
-
-export interface TentFamily {
-  id: string;
-  tent_id: string;
-  family_id: string;
-  esposo_nome: string;
-  esposa_nome: string;
-  esposo_phone?: string;
-  esposo_email?: string;
-  esposo_profissao?: string;
-  esposa_phone?: string;
-  esposa_email?: string;
-  esposa_profissao?: string;
-  address?: string;
-  bairro?: string;
-  city?: string;
-  state?: string;
-  zip_code?: string;
-  data_casamento?: string;
-  contato_principal: "esposo" | "esposa";
-  joined_date: string;
-  status: "active" | "inactive" | "left";
-  created_at: string;
-  updated_at: string;
-}
-
-export interface BlogPost {
+export type BlogPost = {
   id: string;
   title: string;
   slug: string;
-  excerpt?: string;
+  excerpt: string | null;
   content: string;
-  featured_image_url?: string;
+  featured_image_url: string | null;
   author_name: string;
-  status: "draft" | "published" | "archived";
-  published_at?: string;
-  meta_title?: string;
-  meta_description?: string;
-  tags?: string[];
-  reading_time?: number;
-  created_at: string;
-  updated_at: string;
-} 
+  status: "published" | "draft" | "archived";
+  tags: string[] | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  reading_time: number | null;
+  published_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type CampWorkAssignment = Tables<"camp_work_assignments"> & {
+  work_teams: Tables<"work_teams">;
+  tents: Tables<"tents"> & {
+    tent_families: (Tables<"tent_families"> & {
+      tent_children: Tables<"tent_children">[];
+    })[];
+  };
+  tent_families: (Tables<"tent_families"> & {
+    tent_children: Tables<"tent_children">[];
+  })[];
+};
+
+export type CampFamilyAssignment = Tables<"camp_family_assignments"> & {
+  work_teams: Tables<"work_teams">;
+  tent_families: Tables<"tent_families"> & {
+    tent_children: Tables<"tent_children">[];
+  };
+};
+
+export type CampRegistration = Tables<"camp_registrations"> & {
+  families: Tables<"families"> & {
+    family_children?: Tables<"family_children">[];
+  };
+};

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,14 +41,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-type CampRegistration = Tables<"camp_registrations"> & {
-  families: Tables<"families"> & {
-    family_children?: Tables<"family_children">[];
-  };
-  is_paid: boolean;
-  payment_method: "pix" | "dinheiro" | "cartao" | "transferencia" | null;
-};
+import { CampRegistration } from "@/types";
 
 type Camp = Tables<"camps"> & {
   stages: Tables<"stages">;
@@ -79,6 +73,7 @@ export default function AdminCampRegistrations() {
 
   const fetchCamp = async () => {
     try {
+      console.log("Fetching camp with ID:", id);
       const { data, error } = await supabase
         .from("camps")
         .select(`
@@ -91,9 +86,15 @@ export default function AdminCampRegistrations() {
         .eq("id", id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching camp:", error);
+        throw error;
+      }
+      
+      console.log("Camp data:", data);
       setCamp(data);
     } catch (error: any) {
+      console.error("Failed to fetch camp:", error);
       toast.error("Erro ao carregar acampamento: " + error.message);
       navigate("/admin/camps");
     }
@@ -101,6 +102,7 @@ export default function AdminCampRegistrations() {
 
   const fetchRegistrations = async () => {
     try {
+      console.log("Fetching registrations for camp:", id);
       const { data, error } = await supabase
         .from("camp_registrations")
         .select(`
@@ -113,9 +115,15 @@ export default function AdminCampRegistrations() {
         .eq("camp_id", id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching registrations:", error);
+        throw error;
+      }
+      
+      console.log("Registrations data:", data);
       setRegistrations(data || []);
     } catch (error: any) {
+      console.error("Failed to fetch registrations:", error);
       toast.error("Erro ao carregar inscrições: " + error.message);
     } finally {
       setLoading(false);
@@ -284,6 +292,28 @@ export default function AdminCampRegistrations() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
               <p className="mt-4 text-gray-600">Carregando...</p>
             </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!camp) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Acampamento não encontrado</h1>
+            <Button onClick={() => navigate("/admin/camps")}>
+              Voltar para Acampamentos
+            </Button>
+            <Button 
+              variant="outline" 
+              className="ml-2"
+              onClick={() => window.location.reload()}
+            >
+              Tentar Novamente
+            </Button>
           </div>
         </div>
       </Layout>
@@ -519,4 +549,4 @@ export default function AdminCampRegistrations() {
       </div>
     </Layout>
   );
-} 
+}
