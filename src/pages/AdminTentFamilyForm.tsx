@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -94,8 +95,8 @@ export default function AdminTentFamilyForm() {
       setDataCasamento(data.data_casamento || "");
       setContatoPrincipal(data.contato_principal as "esposo" | "esposa");
       setStatus(data.status as "active" | "inactive");
-      setJoinedDate(data.joined_date);
-      setNotes(data.notes || "");
+      setJoinedDate(data.joined_date || "");
+      // Removido setNotes pois a propriedade notes não existe na tabela tent_families
     } catch (error: any) {
       toast.error("Erro ao carregar família: " + error.message);
       navigate("/admin/tents");
@@ -118,8 +119,8 @@ export default function AdminTentFamilyForm() {
         esposa_phone: esposaPhone,
         esposa_email: esposaEmail,
         esposa_profissao: esposaProfissao?.toUpperCase(),
-        contato_principal: contatoPrincipal as string, // Cast to string
-        status: status as string, // Cast to string
+        contato_principal: contatoPrincipal as string,
+        status: status as string,
         data_casamento: dataCasamento || null,
         address: address?.toUpperCase(),
         bairro: bairro?.toUpperCase(),
@@ -331,7 +332,7 @@ export default function AdminTentFamilyForm() {
               </div>
             </div>
 
-            {/* Status e Observações */}
+            {/* Status */}
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Status</label>
@@ -347,15 +348,6 @@ export default function AdminTentFamilyForm() {
                     <SelectItem value="inactive">Inativo</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Observações</label>
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={4}
-                />
               </div>
             </div>
 
