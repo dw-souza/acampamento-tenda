@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       admins: {
@@ -30,465 +30,133 @@ export interface Database {
         }
         Relationships: []
       }
-      families: {
+      blog_posts: {
         Row: {
+          author_name: string
+          content: string
+          created_at: string | null
+          excerpt: string | null
+          featured_image_url: string | null
           id: string
-          esposo_nome: string
-          esposa_nome: string
-          contato_principal: "esposo" | "esposa"
-          address: string | null
-          bairro: string | null
-          city: string | null
-          state: string | null
-          zip_code: string | null
-          data_casamento: string | null
-          esposo_phone: string | null
-          esposo_email: string | null
-          esposo_profissao: string | null
-          esposa_phone: string | null
-          esposa_email: string | null
-          esposa_profissao: string | null
-          needs_pajem: boolean
-          notes: string | null
-          created_at: string
-          updated_at: string
+          meta_description: string | null
+          meta_title: string | null
+          published_at: string | null
+          reading_time: number | null
+          slug: string
+          status: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
         }
         Insert: {
+          author_name: string
+          content: string
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image_url?: string | null
           id?: string
-          esposo_nome: string
-          esposa_nome: string
-          contato_principal: "esposo" | "esposa"
-          address?: string | null
-          bairro?: string | null
-          city?: string | null
-          state?: string | null
-          zip_code?: string | null
-          data_casamento?: string | null
-          esposo_phone?: string | null
-          esposo_email?: string | null
-          esposo_profissao?: string | null
-          esposa_phone?: string | null
-          esposa_email?: string | null
-          esposa_profissao?: string | null
-          needs_pajem?: boolean
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          reading_time?: number | null
+          slug: string
+          status?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
         }
         Update: {
+          author_name?: string
+          content?: string
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image_url?: string | null
           id?: string
-          esposo_nome?: string
-          esposa_nome?: string
-          contato_principal?: "esposo" | "esposa"
-          address?: string | null
-          bairro?: string | null
-          city?: string | null
-          state?: string | null
-          zip_code?: string | null
-          data_casamento?: string | null
-          esposo_phone?: string | null
-          esposo_email?: string | null
-          esposo_profissao?: string | null
-          esposa_phone?: string | null
-          esposa_email?: string | null
-          esposa_profissao?: string | null
-          needs_pajem?: boolean
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          reading_time?: number | null
+          slug?: string
+          status?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
-      family_children: {
+      camp_family_assignments: {
         Row: {
-          id: string
-          family_id: string
-          full_name: string
-          birth_date: string | null
-          vai_acampamento: boolean
-          dietary_restrictions: string | null
-          special_needs: string | null
+          camp_id: string
           created_at: string
+          family_id: string
+          id: string
+          is_coordinator: boolean | null
+          notes: string | null
           updated_at: string
+          work_team_id: string
         }
         Insert: {
-          id?: string
-          family_id: string
-          full_name: string
-          birth_date?: string | null
-          vai_acampamento?: boolean
-          dietary_restrictions?: string | null
-          special_needs?: string | null
+          camp_id: string
           created_at?: string
+          family_id: string
+          id?: string
+          is_coordinator?: boolean | null
+          notes?: string | null
           updated_at?: string
+          work_team_id: string
         }
         Update: {
-          id?: string
+          camp_id?: string
+          created_at?: string
           family_id?: string
-          full_name?: string
-          birth_date?: string | null
-          vai_acampamento?: boolean
-          dietary_restrictions?: string | null
-          special_needs?: string | null
-          created_at?: string
+          id?: string
+          is_coordinator?: boolean | null
+          notes?: string | null
           updated_at?: string
+          work_team_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "family_children_family_id_fkey"
-            columns: ["family_id"]
+            foreignKeyName: "camp_family_assignments_camp_id_fkey"
+            columns: ["camp_id"]
             isOneToOne: false
-            referencedRelation: "families"
+            referencedRelation: "camps"
             referencedColumns: ["id"]
-          }
-        ]
-      }
-      tent_children: {
-        Row: {
-          id: string
-          tent_family_id: string
-          family_child_id: string | null
-          full_name: string
-          birth_date: string | null
-          vai_encontros: boolean
-          dietary_restrictions: string | null
-          special_needs: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          tent_family_id: string
-          family_child_id?: string | null
-          full_name: string
-          birth_date?: string | null
-          vai_encontros?: boolean
-          dietary_restrictions?: string | null
-          special_needs?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          tent_family_id?: string
-          family_child_id?: string | null
-          full_name?: string
-          birth_date?: string | null
-          vai_encontros?: boolean
-          dietary_restrictions?: string | null
-          special_needs?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
+          },
           {
-            foreignKeyName: "tent_children_tent_family_id_fkey"
-            columns: ["tent_family_id"]
+            foreignKeyName: "camp_family_assignments_family_id_fkey"
+            columns: ["family_id"]
             isOneToOne: false
             referencedRelation: "tent_families"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tent_children_family_child_id_fkey"
-            columns: ["family_child_id"]
+            foreignKeyName: "camp_family_assignments_work_team_id_fkey"
+            columns: ["work_team_id"]
             isOneToOne: false
-            referencedRelation: "family_children"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      tents: {
-        Row: {
-          id: string
-          name: string
-          formation_date: string
-          guardian_husband_name: string
-          guardian_wife_name: string
-          parish_id: string
-          stage_id: string | null
-          meeting_date: string | null
-          meeting_location: string | null
-          status: "active" | "inactive" | "disbanded"
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          formation_date: string
-          guardian_husband_name: string
-          guardian_wife_name: string
-          parish_id: string
-          stage_id?: string | null
-          meeting_date?: string | null
-          meeting_location?: string | null
-          status?: "active" | "inactive" | "disbanded"
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          formation_date?: string
-          guardian_husband_name?: string
-          guardian_wife_name?: string
-          parish_id?: string
-          stage_id?: string | null
-          meeting_date?: string | null
-          meeting_location?: string | null
-          status?: "active" | "inactive" | "disbanded"
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tents_parish_id_fkey"
-            columns: ["parish_id"]
-            isOneToOne: false
-            referencedRelation: "parishes"
+            referencedRelation: "work_teams"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "tents_stage_id_fkey"
-            columns: ["stage_id"]
-            isOneToOne: false
-            referencedRelation: "stages"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      tent_families: {
-        Row: {
-          id: string
-          tent_id: string
-          family_id: string
-          esposo_nome: string
-          esposa_nome: string
-          esposo_phone: string | null
-          esposo_email: string | null
-          esposo_profissao: string | null
-          esposa_phone: string | null
-          esposa_email: string | null
-          esposa_profissao: string | null
-          address: string | null
-          bairro: string | null
-          city: string | null
-          state: string | null
-          zip_code: string | null
-          data_casamento: string | null
-          contato_principal: "esposo" | "esposa"
-          joined_date: string
-          status: "active" | "inactive" | "left"
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          tent_id: string
-          family_id: string
-          esposo_nome: string
-          esposa_nome: string
-          esposo_phone?: string | null
-          esposo_email?: string | null
-          esposo_profissao?: string | null
-          esposa_phone?: string | null
-          esposa_email?: string | null
-          esposa_profissao?: string | null
-          address?: string | null
-          bairro?: string | null
-          city?: string | null
-          state?: string | null
-          zip_code?: string | null
-          data_casamento?: string | null
-          contato_principal: "esposo" | "esposa"
-          joined_date?: string
-          status?: "active" | "inactive" | "left"
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          tent_id?: string
-          family_id?: string
-          esposo_nome?: string
-          esposa_nome?: string
-          esposo_phone?: string | null
-          esposo_email?: string | null
-          esposo_profissao?: string | null
-          esposa_phone?: string | null
-          esposa_email?: string | null
-          esposa_profissao?: string | null
-          address?: string | null
-          bairro?: string | null
-          city?: string | null
-          state?: string | null
-          zip_code?: string | null
-          data_casamento?: string | null
-          contato_principal?: "esposo" | "esposa"
-          joined_date?: string
-          status?: "active" | "inactive" | "left"
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tent_families_tent_id_fkey"
-            columns: ["tent_id"]
-            isOneToOne: false
-            referencedRelation: "tents"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      parishes: {
-        Row: {
-          id: string
-          name: string
-          address: string | null
-          city: string
-          state: string
-          zip_code: string | null
-          phone: string | null
-          email: string | null
-          responsible_name: string | null
-          responsible_phone: string | null
-          status: "active" | "inactive"
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          address?: string | null
-          city: string
-          state: string
-          zip_code?: string | null
-          phone?: string | null
-          email?: string | null
-          responsible_name?: string | null
-          responsible_phone?: string | null
-          status?: "active" | "inactive"
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          address?: string | null
-          city?: string
-          state?: string
-          zip_code?: string | null
-          phone?: string | null
-          email?: string | null
-          responsible_name?: string | null
-          responsible_phone?: string | null
-          status?: "active" | "inactive"
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      stages: {
-        Row: {
-          id: string
-          name: string
-          description: string | null
-          is_camp: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          description?: string | null
-          is_camp?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          description?: string | null
-          is_camp?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      camps: {
-        Row: {
-          id: string
-          name: string
-          stage_id: string
-          start_date: string
-          end_date: string
-          max_families: number
-          registration_start_date: string
-          registration_end_date: string
-          status: "draft" | "open" | "closed" | "in_progress" | "completed"
-          couple_price: number
-          child_price: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          stage_id: string
-          start_date: string
-          end_date: string
-          max_families?: number
-          registration_start_date: string
-          registration_end_date: string
-          status?: "draft" | "open" | "closed" | "in_progress" | "completed"
-          couple_price?: number
-          child_price?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          stage_id?: string
-          start_date?: string
-          end_date?: string
-          max_families?: number
-          registration_start_date?: string
-          registration_end_date?: string
-          status?: "draft" | "open" | "closed" | "in_progress" | "completed"
-          couple_price?: number
-          child_price?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "camps_stage_id_fkey"
-            columns: ["stage_id"]
-            isOneToOne: false
-            referencedRelation: "stages"
-            referencedColumns: ["id"]
-          }
         ]
       }
       camp_parishes: {
         Row: {
-          id: string
           camp_id: string
-          parish_id: string
           created_at: string
+          id: string
+          parish_id: string
         }
         Insert: {
-          id?: string
           camp_id: string
-          parish_id: string
           created_at?: string
+          id?: string
+          parish_id: string
         }
         Update: {
-          id?: string
           camp_id?: string
-          parish_id?: string
           created_at?: string
+          id?: string
+          parish_id?: string
         }
         Relationships: [
           {
@@ -504,98 +172,129 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "parishes"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       camp_registrations: {
         Row: {
-          id: string
           camp_id: string
+          created_at: string
           family_id: string
-          status: "pending" | "confirmed" | "waitlist" | "cancelled"
-          registration_date: string
+          id: string
+          is_paid: boolean
           notes: string | null
-          created_at: string
+          payment_method: string | null
+          registration_date: string
+          status: string
           updated_at: string
         }
         Insert: {
-          id?: string
           camp_id: string
-          family_id: string
-          status?: "pending" | "confirmed" | "waitlist" | "cancelled"
-          registration_date?: string
-          notes?: string | null
           created_at?: string
+          family_id: string
+          id?: string
+          is_paid?: boolean
+          notes?: string | null
+          payment_method?: string | null
+          registration_date?: string
+          status: string
           updated_at?: string
         }
         Update: {
-          id?: string
           camp_id?: string
-          family_id?: string
-          status?: "pending" | "confirmed" | "waitlist" | "cancelled"
-          registration_date?: string
-          notes?: string | null
           created_at?: string
+          family_id?: string
+          id?: string
+          is_paid?: boolean
+          notes?: string | null
+          payment_method?: string | null
+          registration_date?: string
+          status?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "camp_registrations_camp_id_fkey"
+            columns: ["camp_id"]
+            isOneToOne: false
+            referencedRelation: "camps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "camp_registrations_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      work_teams: {
+      camp_tents: {
         Row: {
-          id: string
-          name: string
-          description: string | null
-          color: string
+          camp_id: string
           created_at: string
-          updated_at: string
+          id: string
+          tent_id: string
         }
         Insert: {
-          id?: string
-          name: string
-          description?: string | null
-          color?: string
+          camp_id: string
           created_at?: string
-          updated_at?: string
+          id?: string
+          tent_id: string
         }
         Update: {
-          id?: string
-          name?: string
-          description?: string | null
-          color?: string
+          camp_id?: string
           created_at?: string
-          updated_at?: string
+          id?: string
+          tent_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "camp_tents_camp_id_fkey"
+            columns: ["camp_id"]
+            isOneToOne: false
+            referencedRelation: "camps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "camp_tents_tent_id_fkey"
+            columns: ["tent_id"]
+            isOneToOne: false
+            referencedRelation: "tents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       camp_work_assignments: {
         Row: {
-          id: string
           camp_id: string
-          tent_id: string
-          work_team_id: string
           coordinator_family_id: string | null
-          notes: string | null
           created_at: string
+          id: string
+          notes: string | null
+          tent_id: string
           updated_at: string
+          work_team_id: string
         }
         Insert: {
-          id?: string
           camp_id: string
-          tent_id: string
-          work_team_id: string
           coordinator_family_id?: string | null
-          notes?: string | null
           created_at?: string
+          id?: string
+          notes?: string | null
+          tent_id: string
           updated_at?: string
+          work_team_id: string
         }
         Update: {
-          id?: string
           camp_id?: string
-          tent_id?: string
-          work_team_id?: string
           coordinator_family_id?: string | null
-          notes?: string | null
           created_at?: string
+          id?: string
+          notes?: string | null
+          tent_id?: string
           updated_at?: string
+          work_team_id?: string
         }
         Relationships: [
           {
@@ -603,6 +302,13 @@ export interface Database {
             columns: ["camp_id"]
             isOneToOne: false
             referencedRelation: "camps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "camp_work_assignments_coordinator_family_id_fkey"
+            columns: ["coordinator_family_id"]
+            isOneToOne: false
+            referencedRelation: "tent_families"
             referencedColumns: ["id"]
           },
           {
@@ -619,53 +325,521 @@ export interface Database {
             referencedRelation: "work_teams"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      camps: {
+        Row: {
+          child_price: number
+          couple_price: number
+          created_at: string | null
+          end_date: string
+          id: string
+          max_families: number
+          name: string
+          registration_end_date: string | null
+          registration_start_date: string | null
+          stage_id: string
+          start_date: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          child_price?: number
+          couple_price?: number
+          created_at?: string | null
+          end_date: string
+          id?: string
+          max_families?: number
+          name: string
+          registration_end_date?: string | null
+          registration_start_date?: string | null
+          stage_id: string
+          start_date: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          child_price?: number
+          couple_price?: number
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          max_families?: number
+          name?: string
+          registration_end_date?: string | null
+          registration_start_date?: string | null
+          stage_id?: string
+          start_date?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
           {
-            foreignKeyName: "camp_work_assignments_coordinator_family_id_fkey"
-            columns: ["coordinator_family_id"]
+            foreignKeyName: "camps_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      families: {
+        Row: {
+          address: string | null
+          bairro: string | null
+          city: string | null
+          contato_principal: string
+          created_at: string | null
+          data_casamento: string | null
+          esposa_email: string | null
+          esposa_nome: string
+          esposa_phone: string | null
+          esposa_profissao: string | null
+          esposo_email: string | null
+          esposo_nome: string
+          esposo_phone: string | null
+          esposo_profissao: string | null
+          forma_pagamento: string | null
+          id: string
+          needs_pajem: boolean | null
+          notes: string | null
+          payment_proof_url: string | null
+          payment_status: string | null
+          phone_esposa: string | null
+          phone_esposo: string | null
+          profissao_esposa: string | null
+          profissao_esposo: string | null
+          registration_status: string | null
+          state: string | null
+          total_amount: number | null
+          updated_at: string | null
+          valor_casal: number | null
+          valor_filhos: number | null
+          valor_pago: number | null
+          valor_pajem: number | null
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          bairro?: string | null
+          city?: string | null
+          contato_principal: string
+          created_at?: string | null
+          data_casamento?: string | null
+          esposa_email?: string | null
+          esposa_nome: string
+          esposa_phone?: string | null
+          esposa_profissao?: string | null
+          esposo_email?: string | null
+          esposo_nome: string
+          esposo_phone?: string | null
+          esposo_profissao?: string | null
+          forma_pagamento?: string | null
+          id?: string
+          needs_pajem?: boolean | null
+          notes?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string | null
+          phone_esposa?: string | null
+          phone_esposo?: string | null
+          profissao_esposa?: string | null
+          profissao_esposo?: string | null
+          registration_status?: string | null
+          state?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+          valor_casal?: number | null
+          valor_filhos?: number | null
+          valor_pago?: number | null
+          valor_pajem?: number | null
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          bairro?: string | null
+          city?: string | null
+          contato_principal?: string
+          created_at?: string | null
+          data_casamento?: string | null
+          esposa_email?: string | null
+          esposa_nome?: string
+          esposa_phone?: string | null
+          esposa_profissao?: string | null
+          esposo_email?: string | null
+          esposo_nome?: string
+          esposo_phone?: string | null
+          esposo_profissao?: string | null
+          forma_pagamento?: string | null
+          id?: string
+          needs_pajem?: boolean | null
+          notes?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string | null
+          phone_esposa?: string | null
+          phone_esposo?: string | null
+          profissao_esposa?: string | null
+          profissao_esposo?: string | null
+          registration_status?: string | null
+          state?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+          valor_casal?: number | null
+          valor_filhos?: number | null
+          valor_pago?: number | null
+          valor_pajem?: number | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      family_children: {
+        Row: {
+          birth_date: string | null
+          created_at: string
+          dietary_restrictions: string | null
+          family_id: string
+          full_name: string
+          id: string
+          special_needs: string | null
+          updated_at: string
+          vai_acampamento: boolean | null
+        }
+        Insert: {
+          birth_date?: string | null
+          created_at?: string
+          dietary_restrictions?: string | null
+          family_id: string
+          full_name: string
+          id?: string
+          special_needs?: string | null
+          updated_at?: string
+          vai_acampamento?: boolean | null
+        }
+        Update: {
+          birth_date?: string | null
+          created_at?: string
+          dietary_restrictions?: string | null
+          family_id?: string
+          full_name?: string
+          id?: string
+          special_needs?: string | null
+          updated_at?: string
+          vai_acampamento?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_children_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parishes: {
+        Row: {
+          address: string | null
+          city: string
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          responsible_name: string | null
+          responsible_phone: string | null
+          state: string
+          status: Database["public"]["Enums"]["parish_status"] | null
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          city: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          responsible_name?: string | null
+          responsible_phone?: string | null
+          state: string
+          status?: Database["public"]["Enums"]["parish_status"] | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          responsible_name?: string | null
+          responsible_phone?: string | null
+          state?: string
+          status?: Database["public"]["Enums"]["parish_status"] | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      stages: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_camp: boolean
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_camp?: boolean
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_camp?: boolean
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      tent_children: {
+        Row: {
+          birth_date: string | null
+          created_at: string
+          dietary_restrictions: string | null
+          full_name: string
+          id: string
+          special_needs: string | null
+          tent_family_id: string
+          updated_at: string
+          vai_encontros: boolean | null
+        }
+        Insert: {
+          birth_date?: string | null
+          created_at?: string
+          dietary_restrictions?: string | null
+          full_name: string
+          id?: string
+          special_needs?: string | null
+          tent_family_id: string
+          updated_at?: string
+          vai_encontros?: boolean | null
+        }
+        Update: {
+          birth_date?: string | null
+          created_at?: string
+          dietary_restrictions?: string | null
+          full_name?: string
+          id?: string
+          special_needs?: string | null
+          tent_family_id?: string
+          updated_at?: string
+          vai_encontros?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tent_children_tent_family_id_fkey"
+            columns: ["tent_family_id"]
             isOneToOne: false
             referencedRelation: "tent_families"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
-      tent_members: {
+      tent_families: {
         Row: {
-          id: string
-          tent_id: string
-          family_id: string
-          role: "leader" | "member"
-          joined_at: string
+          address: string | null
+          bairro: string | null
+          city: string | null
+          contato_principal: string
           created_at: string
+          data_casamento: string | null
+          esposa_email: string | null
+          esposa_nome: string
+          esposa_phone: string | null
+          esposa_profissao: string | null
+          esposo_email: string | null
+          esposo_nome: string
+          esposo_phone: string | null
+          esposo_profissao: string | null
+          family_id: string | null
+          id: string
+          joined_date: string | null
+          state: string | null
+          status: string
+          tent_id: string
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          bairro?: string | null
+          city?: string | null
+          contato_principal: string
+          created_at?: string
+          data_casamento?: string | null
+          esposa_email?: string | null
+          esposa_nome: string
+          esposa_phone?: string | null
+          esposa_profissao?: string | null
+          esposo_email?: string | null
+          esposo_nome: string
+          esposo_phone?: string | null
+          esposo_profissao?: string | null
+          family_id?: string | null
+          id?: string
+          joined_date?: string | null
+          state?: string | null
+          status?: string
+          tent_id: string
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          bairro?: string | null
+          city?: string | null
+          contato_principal?: string
+          created_at?: string
+          data_casamento?: string | null
+          esposa_email?: string | null
+          esposa_nome?: string
+          esposa_phone?: string | null
+          esposa_profissao?: string | null
+          esposo_email?: string | null
+          esposo_nome?: string
+          esposo_phone?: string | null
+          esposo_profissao?: string | null
+          family_id?: string | null
+          id?: string
+          joined_date?: string | null
+          state?: string | null
+          status?: string
+          tent_id?: string
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tent_families_tent_id_fkey"
+            columns: ["tent_id"]
+            isOneToOne: false
+            referencedRelation: "tents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tents: {
+        Row: {
+          created_at: string
+          formation_date: string
+          guardian_husband_name: string
+          guardian_wife_name: string
+          id: string
+          meeting_date: string | null
+          meeting_location: string | null
+          name: string
+          parish_id: string
+          stage_id: string | null
+          status: string
           updated_at: string
         }
         Insert: {
-          id?: string
-          tent_id: string
-          family_id: string
-          role: "leader" | "member"
-          joined_at?: string
           created_at?: string
+          formation_date: string
+          guardian_husband_name: string
+          guardian_wife_name: string
+          id?: string
+          meeting_date?: string | null
+          meeting_location?: string | null
+          name: string
+          parish_id: string
+          stage_id?: string | null
+          status?: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          tent_id?: string
-          family_id?: string
-          role?: "leader" | "member"
-          joined_at?: string
           created_at?: string
+          formation_date?: string
+          guardian_husband_name?: string
+          guardian_wife_name?: string
+          id?: string
+          meeting_date?: string | null
+          meeting_location?: string | null
+          name?: string
+          parish_id?: string
+          stage_id?: string | null
+          status?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "tents_parish_id_fkey"
+            columns: ["parish_id"]
+            isOneToOne: false
+            referencedRelation: "parishes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tents_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_teams: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_special_team: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_special_team?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_special_team?: boolean | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_slug: {
+        Args: { title: string }
+        Returns: string
+      }
     }
     Enums: {
       marital_status: "solteiro" | "casado" | "divorciado" | "viuvo" | "outro"
+      parish_status: "active" | "inactive"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -782,6 +956,7 @@ export const Constants = {
   public: {
     Enums: {
       marital_status: ["solteiro", "casado", "divorciado", "viuvo", "outro"],
+      parish_status: ["active", "inactive"],
     },
   },
 } as const

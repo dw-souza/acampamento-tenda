@@ -82,21 +82,27 @@ export default function AdminCampWorkTeams() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      console.log('Buscando dados para o acampamento:', campId);
       
-      // Buscar dados do acampamento
+      // Buscar dados do acampamento com query mais simples
       const { data: campData, error: campError } = await supabase
         .from('camps')
         .select(`
           *,
-          stage:stages(*),
+          stages(*),
           camp_parishes (
-            parish (*)
+            parishes (*)
           )
         `)
         .eq('id', campId)
         .single();
 
-      if (campError) throw campError;
+      if (campError) {
+        console.error('Erro ao buscar acampamento:', campError);
+        throw campError;
+      }
+      
+      console.log('Dados do acampamento carregados:', campData);
       setCamp(campData);
 
       // Buscar paróquias
@@ -122,7 +128,7 @@ export default function AdminCampWorkTeams() {
         .from('tents')
         .select(`
           *,
-          parish:parishes(*)
+          parishes(*)
         `)
         .order('name');
 
@@ -144,12 +150,12 @@ export default function AdminCampWorkTeams() {
         .from('camp_work_assignments')
         .select(`
           *,
-          work_team:work_teams(*),
-          tent:tents(
+          work_teams(*),
+          tents(
             *,
-            parish:parishes(*)
+            parishes(*)
           ),
-          coordinator_family:tent_families(*)
+          tent_families(*)
         `)
         .eq('camp_id', campId)
         .order('created_at');
@@ -162,8 +168,8 @@ export default function AdminCampWorkTeams() {
         .from('camp_family_assignments')
         .select(`
           *,
-          work_team:work_teams(*),
-          family:tent_families(*)
+          work_teams(*),
+          tent_families(*)
         `)
         .eq('camp_id', campId)
         .order('created_at');
@@ -171,9 +177,9 @@ export default function AdminCampWorkTeams() {
       if (familyAssignmentsError) throw familyAssignmentsError;
       setFamilyAssignments(familyAssignmentsData || []);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
-      toast.error('Erro ao carregar dados do acampamento');
+      toast.error('Erro ao carregar dados do acampamento: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -253,7 +259,7 @@ export default function AdminCampWorkTeams() {
 
       resetForm();
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar designação:', error);
       toast.error('Erro ao salvar designação');
     }
@@ -432,7 +438,7 @@ export default function AdminCampWorkTeams() {
       <Layout>
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
-            <div className="text-lg">Carregando...</div>
+            <div className="text-lg">Carregando dados do acampamento...</div>
           </div>
         </div>
       </Layout>
@@ -445,9 +451,22 @@ export default function AdminCampWorkTeams() {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-red-600">Acampamento não encontrado</h1>
-            <Button onClick={() => navigate('/admin/camps')} className="mt-4">
-              Voltar para Acampamentos
-            </Button>
+            <p className="text-gray-600 mt-2">ID do acampamento: {campId}</p>
+            <div className="mt-4 space-x-4">
+              <Button onClick={() => navigate('/admin/camps')} className="mt-4">
+                Voltar para Acampamentos
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  console.log('Tentando recarregar dados...');
+                  fetchData();
+                }}
+                className="mt-4"
+              >
+                Tentar Novamente
+              </Button>
+            </div>
           </div>
         </div>
       </Layout>
@@ -458,7 +477,7 @@ export default function AdminCampWorkTeams() {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" onClick={() => navigate('/admin/camps')}>
+          <Button variant="outline" onClick={() => navigate(`/admin/camps/dashboard/${campId}`)}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar
           </Button>
@@ -916,4 +935,4 @@ export default function AdminCampWorkTeams() {
       </div>
     </Layout>
   );
-} 
+}
