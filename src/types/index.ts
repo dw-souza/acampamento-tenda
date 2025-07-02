@@ -9,7 +9,7 @@ export type BlogPost = {
   content: string;
   featured_image_url: string | null;
   author_name: string;
-  status: "published" | "draft" | "archived";
+  status: string; // Changed from union type to string to accept any value
   tags: string[] | null;
   meta_title: string | null;
   meta_description: string | null;
