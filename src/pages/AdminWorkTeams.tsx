@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -49,7 +50,8 @@ export default function AdminWorkTeams() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    color: '#3B82F6'
+    color: '#3B82F6',
+    is_special_team: false
   });
 
   useEffect(() => {
@@ -88,7 +90,8 @@ export default function AdminWorkTeams() {
           .update({
             name: formData.name.trim(),
             description: formData.description.trim() || null,
-            color: formData.color
+            color: formData.color,
+            is_special_team: formData.is_special_team
           })
           .eq('id', editingTeam.id);
 
@@ -100,7 +103,8 @@ export default function AdminWorkTeams() {
           .insert({
             name: formData.name.trim(),
             description: formData.description.trim() || null,
-            color: formData.color
+            color: formData.color,
+            is_special_team: formData.is_special_team
           });
 
         if (error) throw error;
@@ -120,7 +124,8 @@ export default function AdminWorkTeams() {
     setFormData({
       name: team.name,
       description: team.description || '',
-      color: team.color
+      color: team.color,
+      is_special_team: team.is_special_team
     });
     setIsDialogOpen(true);
   };
@@ -147,7 +152,8 @@ export default function AdminWorkTeams() {
     setFormData({
       name: '',
       description: '',
-      color: '#3B82F6'
+      color: '#3B82F6',
+      is_special_team: false
     });
     setEditingTeam(null);
     setIsDialogOpen(false);
@@ -229,6 +235,23 @@ export default function AdminWorkTeams() {
                       />
                     </div>
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="is_special_team"
+                      checked={formData.is_special_team}
+                      onCheckedChange={(checked) => 
+                        setFormData({ ...formData, is_special_team: checked as boolean })
+                      }
+                    />
+                    <div className="space-y-1">
+                      <Label htmlFor="is_special_team" className="text-sm font-normal">
+                        Equipe especial (designação por família)
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Equipes especiais são designadas por família individual, não por tenda completa
+                      </p>
+                    </div>
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={resetForm}>
@@ -259,6 +282,7 @@ export default function AdminWorkTeams() {
                     <TableHead>Equipe</TableHead>
                     <TableHead>Descrição</TableHead>
                     <TableHead>Cor</TableHead>
+                    <TableHead>Tipo</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -284,6 +308,17 @@ export default function AdminWorkTeams() {
                             {team.color}
                           </Badge>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {team.is_special_team ? (
+                          <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                            Equipe Especial
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">
+                            Equipe Comum
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">

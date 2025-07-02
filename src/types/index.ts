@@ -39,7 +39,7 @@ export type CampFamilyAssignment = Tables<"camp_family_assignments"> & {
 };
 
 export type CampRegistration = Tables<"camp_registrations"> & {
-  families: Tables<"families"> & {
+  families: (Tables<"families"> & {
     family_children?: Tables<"family_children">[];
-  };
+  }) | null;
 };

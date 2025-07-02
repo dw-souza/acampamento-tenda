@@ -131,11 +131,11 @@ export default function AdminCampBadges() {
       setCamp(campWithRelations);
 
       // Verificar se é um acampamento Kergima ou outro tipo
-      const isKergima = campWithRelations.stages.name.toUpperCase() === 'KERIGMA';
-      console.log('🔍 Tipo de acampamento:', isKergima ? 'Kergima' : 'Outro');
+      const isKerigma = campWithRelations.stages.name.toUpperCase() === 'KERIGMA';
+      console.log('🔍 Tipo de acampamento:', isKerigma ? 'Kergima' : 'Outro');
       console.log('🔍 Nome do stage:', campWithRelations.stages.name);
 
-      if (isKergima) {
+      if (isKerigma) {
         console.log('🔄 Iniciando fetchKergimaData');
         await fetchKergimaData();
       } else {

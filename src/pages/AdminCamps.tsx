@@ -45,6 +45,11 @@ type Camp = Tables<"camps"> & {
   camp_parishes: {
     parishes: Tables<"parishes">;
   }[];
+  camp_tents: {
+    tents: Tables<"tents"> & {
+      parishes: Tables<"parishes">;
+    };
+  }[];
 };
 
 export default function AdminCamps() {
@@ -74,6 +79,12 @@ export default function AdminCamps() {
           stages (*),
           camp_parishes (
             parishes (*)
+          ),
+          camp_tents (
+            tents (
+              *,
+              parishes (*)
+            )
           )
         `)
         .order("start_date", { ascending: false });
@@ -127,17 +138,31 @@ export default function AdminCamps() {
   };
 
   const getParishNames = (camp: Camp) => {
-    return camp.camp_parishes?.map(cp => cp.parishes.name).join(", ") || "Nenhuma paróquia";
+    return camp.camp_parishes?.map(cp => cp.parishes.name).join("\n") || "Nenhuma paróquia";
+  };
+
+  const getTentInfo = (camp: Camp) => {
+    if (camp.stages.name.toUpperCase() === 'KERIGMA') {
+      return getParishNames(camp);
+    } else {
+      const tentInfo = camp.camp_tents?.map(ct => 
+        `${ct.tents.name} - ${ct.tents.parishes.name}`
+      ).join("\n");
+      return tentInfo || "Nenhuma tenda";
+    }
   };
 
   const filteredCamps = camps.filter((camp) => {
     const matchesSearch = camp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       camp.stages.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      getParishNames(camp).toLowerCase().includes(searchTerm.toLowerCase());
+      getTentInfo(camp).toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStage = selectedStage === "all" || camp.stage_id === selectedStage;
     const matchesParish = selectedParish === "all" || 
-      camp.camp_parishes?.some(cp => cp.parishes.id === selectedParish);
+      (camp.stages.name.toUpperCase() === 'KERIGMA' 
+        ? camp.camp_parishes?.some(cp => cp.parishes.id === selectedParish)
+        : camp.camp_tents?.some(ct => ct.tents.parishes.id === selectedParish)
+      );
     const matchesYear = selectedYear === "all" || new Date(camp.start_date).getFullYear().toString() === selectedYear;
     const matchesStatus = selectedStatus === "all" || camp.status === selectedStatus;
 
@@ -250,7 +275,7 @@ export default function AdminCamps() {
               <TableRow>
                 <TableHead className="min-w-[150px]">Nome</TableHead>
                 <TableHead className="min-w-[100px]">Etapa</TableHead>
-                <TableHead className="min-w-[120px]">Paróquia</TableHead>
+                <TableHead className="min-w-[120px]">Paróquia/Tendas</TableHead>
                 <TableHead className="min-w-[100px]">Data de Início</TableHead>
                 <TableHead className="min-w-[100px]">Data de Término</TableHead>
                 <TableHead className="min-w-[80px]">Status</TableHead>
@@ -262,7 +287,7 @@ export default function AdminCamps() {
                 <TableRow key={camp.id}>
                   <TableCell className="font-medium">{camp.name}</TableCell>
                   <TableCell>{camp.stages.name}</TableCell>
-                  <TableCell>{getParishNames(camp)}</TableCell>
+                  <TableCell className="whitespace-pre-line">{getTentInfo(camp)}</TableCell>
                   <TableCell>{formatDate(camp.start_date)}</TableCell>
                   <TableCell>{formatDate(camp.end_date)}</TableCell>
                   <TableCell className="px-6 py-4 whitespace-nowrap">

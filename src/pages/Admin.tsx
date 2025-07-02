@@ -45,6 +45,12 @@ type Camp = Tables<"camps"> & {
   camp_parishes: {
     parishes: Tables<"parishes">;
   }[];
+  camp_tents?: {
+    tent_id: string;
+    tents: Tables<"tents"> & {
+      parishes: Tables<"parishes">;
+    };
+  }[];
   couple_price: number;
   child_price: number;
   _count?: {
@@ -113,6 +119,13 @@ export default function Admin() {
           stages (*),
           camp_parishes (
             parishes (*)
+          ),
+          camp_tents (
+            tent_id,
+            tents (
+              *,
+              parishes (*)
+            )
           )
         `)
         .order("start_date", { ascending: false });
@@ -270,6 +283,24 @@ export default function Admin() {
     if (percentage >= 100) return "bg-red-100 text-red-800";
     if (percentage >= 80) return "bg-yellow-100 text-yellow-800";
     return "bg-green-100 text-green-800";
+  };
+
+  const formatParishColumn = (camp: Camp) => {
+    const isKerigma = camp.stages.name.toUpperCase() === 'KERIGMA';
+    
+    if (isKerigma) {
+      // Para acampamentos Kerigma: mostrar paróquias com quebra de linha
+      return camp.camp_parishes.map(p => p.parishes.name).join('\n');
+    } else {
+      // Para outros acampamentos: mostrar tendas com suas paróquias
+      if (camp.camp_tents && camp.camp_tents.length > 0) {
+        return camp.camp_tents.map((ct: any) => 
+          `${ct.tents?.name} - ${ct.tents?.parishes?.name || "Paróquia não definida"}`
+        ).join('\n');
+      } else {
+        return camp.camp_parishes.map(p => p.parishes.name).join('\n');
+      }
+    }
   };
 
   // Filtrar apenas acampamentos ativos
@@ -447,7 +478,7 @@ export default function Admin() {
                       <TableRow key={camp.id}>
                         <TableCell className="font-medium">{camp.name}</TableCell>
                         <TableCell>{camp.stages.name}</TableCell>
-                        <TableCell>{camp.camp_parishes.map(p => p.parishes.name).join(', ')}</TableCell>
+                        <TableCell className="whitespace-pre-line text-sm">{formatParishColumn(camp)}</TableCell>
                         <TableCell>
                           <div className="text-sm">
                             <div>{new Date(camp.start_date).toLocaleDateString()}</div>

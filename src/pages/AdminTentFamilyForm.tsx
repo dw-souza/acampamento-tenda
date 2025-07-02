@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,16 +26,21 @@ import Layout from "@/components/Layout";
 import { Tables } from "@/integrations/supabase/types";
 import { Plus, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/hooks/useAuth";
 
 type TentFamily = Tables<"tent_families">;
 
 export default function AdminTentFamilyForm() {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { familyId, tentId } = useParams();
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [tentFamily, setTentFamily] = useState<TentFamily | null>(null);
   const [status, setStatus] = useState<"active" | "inactive">("active");
   const [notes, setNotes] = useState("");
+
+  console.log("URL params:", { familyId, tentId });
+  console.log("Auth state:", { user, authLoading });
 
   // Campos do esposo
   const [esposoNome, setEsposoNome] = useState("");
@@ -61,18 +65,43 @@ export default function AdminTentFamilyForm() {
   const [joinedDate, setJoinedDate] = useState("");
 
   useEffect(() => {
-    if (id) {
+    if (familyId && !authLoading) {
       fetchTentFamily();
     }
-  }, [id]);
+  }, [familyId, authLoading]);
 
   const fetchTentFamily = async () => {
     try {
+      console.log("Fetching family with ID:", familyId);
+      
+      // Primeiro, vamos verificar se a família existe
+      const { data: familyExists, error: checkError } = await supabase
+        .from("tent_families")
+        .select("id")
+        .eq("id", familyId)
+        .maybeSingle();
+
+      console.log("Family exists check:", { familyExists, checkError });
+
+      if (checkError) {
+        console.error("Error checking if family exists:", checkError);
+        throw checkError;
+      }
+
+      if (!familyExists) {
+        console.error("Family not found");
+        toast.error("Família não encontrada");
+        navigate("/admin/tents");
+        return;
+      }
+
       const { data, error } = await supabase
         .from("tent_families")
         .select("*")
-        .eq("id", id)
+        .eq("id", familyId)
         .single();
+
+      console.log("Supabase response:", { data, error });
 
       if (error) throw error;
 
@@ -98,6 +127,7 @@ export default function AdminTentFamilyForm() {
       setJoinedDate(data.joined_date || "");
       // Removido setNotes pois a propriedade notes não existe na tabela tent_families
     } catch (error: any) {
+      console.error("Error fetching family:", error);
       toast.error("Erro ao carregar família: " + error.message);
       navigate("/admin/tents");
     } finally {
@@ -133,7 +163,7 @@ export default function AdminTentFamilyForm() {
       const { error } = await supabase
         .from("tent_families")
         .update(updateData)
-        .eq("id", id);
+        .eq("id", familyId);
 
       if (error) throw error;
 

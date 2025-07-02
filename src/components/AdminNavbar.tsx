@@ -11,7 +11,7 @@ export default function AdminNavbar() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate("/login");
+    navigate("/admin/login");
   };
 
   const isActive = (path: string) => {

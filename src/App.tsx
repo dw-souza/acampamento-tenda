@@ -18,7 +18,6 @@ import AdminCamps from "@/pages/AdminCamps";
 import AdminCampForm from "@/pages/AdminCampForm";
 import AdminCampRegistrations from "@/pages/AdminCampRegistrations";
 import AdminCampRegistrationForm from "@/pages/AdminCampRegistrationForm";
-import AdminCampTents from "@/pages/AdminCampTents";
 import AdminCampWorkTeams from "@/pages/AdminCampWorkTeams";
 import AdminCampBadges from "@/pages/AdminCampBadges";
 import AdminCampDashboard from "@/pages/AdminCampDashboard";
@@ -30,6 +29,7 @@ import AdminTentFamilyForm from "@/pages/AdminTentFamilyForm";
 import AdminTentFamilyAdd from "@/pages/AdminTentFamilyAdd";
 import AdminBlog from "@/pages/AdminBlog";
 import AdminBlogForm from "@/pages/AdminBlogForm";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -45,32 +45,31 @@ const App = () => (
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/parishes" element={<AdminParishes />} />
-          <Route path="/admin/parishes/new" element={<AdminParishForm />} />
-          <Route path="/admin/parishes/edit/:id" element={<AdminParishForm />} />
-          <Route path="/admin/stages" element={<AdminStages />} />
-          <Route path="/admin/stages/new" element={<AdminStageForm />} />
-          <Route path="/admin/stages/edit/:id" element={<AdminStageForm />} />
-          <Route path="/admin/camps" element={<AdminCamps />} />
-          <Route path="/admin/camps/new" element={<AdminCampForm />} />
-          <Route path="/admin/camps/edit/:id" element={<AdminCampForm />} />
-          <Route path="/admin/camps/tents/:id" element={<AdminCampTents />} />
-          <Route path="/admin/camps/work-teams/:campId" element={<AdminCampWorkTeams />} />
-          <Route path="/admin/camps/badges/:campId" element={<AdminCampBadges />} />
-          <Route path="/admin/camps/dashboard/:campId" element={<AdminCampDashboard />} />
-          <Route path="/admin/camps/registrations/:id" element={<AdminCampRegistrations />} />
-          <Route path="/admin/camps/registrations/:id/new" element={<AdminCampRegistrationForm />} />
-          <Route path="/admin/work-teams" element={<AdminWorkTeams />} />
-          <Route path="/admin/tents" element={<AdminTents />} />
-          <Route path="/admin/tents/new" element={<AdminTentForm />} />
-          <Route path="/admin/tents/edit/:id" element={<AdminTentForm />} />
-          <Route path="/admin/tents/:tentId/participants" element={<AdminTentParticipants />} />
-          <Route path="/admin/tents/:tentId/family/:familyId" element={<AdminTentFamilyForm />} />
-          <Route path="/admin/tents/:tentId/family/add" element={<AdminTentFamilyAdd />} />
-          <Route path="/admin/blog" element={<AdminBlog />} />
-          <Route path="/admin/blog/new" element={<AdminBlogForm />} />
-          <Route path="/admin/blog/edit/:id" element={<AdminBlogForm />} />
+          <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+          <Route path="/admin/parishes" element={<ProtectedRoute><AdminParishes /></ProtectedRoute>} />
+          <Route path="/admin/parishes/new" element={<ProtectedRoute><AdminParishForm /></ProtectedRoute>} />
+          <Route path="/admin/parishes/edit/:id" element={<ProtectedRoute><AdminParishForm /></ProtectedRoute>} />
+          <Route path="/admin/stages" element={<ProtectedRoute><AdminStages /></ProtectedRoute>} />
+          <Route path="/admin/stages/new" element={<ProtectedRoute><AdminStageForm /></ProtectedRoute>} />
+          <Route path="/admin/stages/edit/:id" element={<ProtectedRoute><AdminStageForm /></ProtectedRoute>} />
+          <Route path="/admin/camps" element={<ProtectedRoute><AdminCamps /></ProtectedRoute>} />
+          <Route path="/admin/camps/new" element={<ProtectedRoute><AdminCampForm /></ProtectedRoute>} />
+          <Route path="/admin/camps/edit/:id" element={<ProtectedRoute><AdminCampForm /></ProtectedRoute>} />
+          <Route path="/admin/camps/work-teams/:campId" element={<ProtectedRoute><AdminCampWorkTeams /></ProtectedRoute>} />
+          <Route path="/admin/camps/badges/:campId" element={<ProtectedRoute><AdminCampBadges /></ProtectedRoute>} />
+          <Route path="/admin/camps/dashboard/:campId" element={<ProtectedRoute><AdminCampDashboard /></ProtectedRoute>} />
+          <Route path="/admin/camps/registrations/:id" element={<ProtectedRoute><AdminCampRegistrations /></ProtectedRoute>} />
+          <Route path="/admin/camps/registrations/:id/new" element={<ProtectedRoute><AdminCampRegistrationForm /></ProtectedRoute>} />
+          <Route path="/admin/work-teams" element={<ProtectedRoute><AdminWorkTeams /></ProtectedRoute>} />
+          <Route path="/admin/tents" element={<ProtectedRoute><AdminTents /></ProtectedRoute>} />
+          <Route path="/admin/tents/new" element={<ProtectedRoute><AdminTentForm /></ProtectedRoute>} />
+          <Route path="/admin/tents/edit/:id" element={<ProtectedRoute><AdminTentForm /></ProtectedRoute>} />
+          <Route path="/admin/tents/:tentId/participants" element={<ProtectedRoute><AdminTentParticipants /></ProtectedRoute>} />
+          <Route path="/admin/tents/:tentId/family/:familyId" element={<ProtectedRoute><AdminTentFamilyForm /></ProtectedRoute>} />
+          <Route path="/admin/tents/:tentId/family/add" element={<ProtectedRoute><AdminTentFamilyAdd /></ProtectedRoute>} />
+          <Route path="/admin/blog" element={<ProtectedRoute><AdminBlog /></ProtectedRoute>} />
+          <Route path="/admin/blog/new" element={<ProtectedRoute><AdminBlogForm /></ProtectedRoute>} />
+          <Route path="/admin/blog/edit/:id" element={<ProtectedRoute><AdminBlogForm /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
