@@ -2,8 +2,33 @@
 import { type AttendeeForPricing, type CampPrices, expectedAmountCents, isToddler } from "./pricing";
 
 export type ParticipantStatus = "pending" | "confirmed" | "waitlist" | "cancelled";
+export type ParticipantRole = "camper" | "server";
+
+/** Campistas e servos podem ter valores diferentes no mesmo acampamento. */
+export type CampPricing = {
+  startDate: string;
+  adultPriceCents: number;
+  childPriceCents: number;
+  serverAdultPriceCents: number;
+  serverChildPriceCents: number;
+};
+
+export function pricesFor(camp: CampPricing, role: ParticipantRole): CampPrices {
+  return role === "camper"
+    ? {
+        startDate: camp.startDate,
+        adultPriceCents: camp.adultPriceCents,
+        childPriceCents: camp.childPriceCents,
+      }
+    : {
+        startDate: camp.startDate,
+        adultPriceCents: camp.serverAdultPriceCents,
+        childPriceCents: camp.serverChildPriceCents,
+      };
+}
 
 export type ParticipantForSummary = {
+  role: ParticipantRole;
   status: ParticipantStatus;
   paidCents: number;
   attendees: AttendeeForPricing[];
@@ -24,7 +49,8 @@ export function countsTowardCamp(status: ParticipantStatus) {
   return status === "pending" || status === "confirmed";
 }
 
-export function summarizeParticipant(participant: ParticipantForSummary, camp: CampPrices) {
+export function summarizeParticipant(participant: ParticipantForSummary, camp: CampPricing) {
+  const prices = pricesFor(camp, participant.role);
   const adults = participant.attendees.filter((person) => person.role !== "child").length;
   const toddlers = participant.attendees.filter((person) => isToddler(person, camp.startDate)).length;
   const children = participant.attendees.length - adults;
@@ -32,11 +58,13 @@ export function summarizeParticipant(participant: ParticipantForSummary, camp: C
     adults,
     children,
     toddlers,
-    expectedCents: expectedAmountCents(participant.attendees, camp),
+    expectedCents: countsTowardCamp(participant.status)
+      ? expectedAmountCents(participant.attendees, prices)
+      : 0,
   };
 }
 
-export function summarizeCamp(participants: ParticipantForSummary[], camp: CampPrices): Totals {
+export function summarizeCamp(participants: ParticipantForSummary[], camp: CampPricing): Totals {
   const totals: Totals = { families: 0, adults: 0, children: 0, toddlers: 0, expectedCents: 0, paidCents: 0 };
   for (const participant of participants) {
     // O que já foi pago entra no caixa mesmo se a família cancelou depois.

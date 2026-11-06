@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, eq, ilike, inArray, type SQL } from "drizzle-orm";
+import { and, asc, eq, inArray, type SQL, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { families, people } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
@@ -15,7 +15,8 @@ export async function listFamilies({ q, parishId, tentId }: FamilyFilters) {
     const matching = db
       .select({ id: people.familyId })
       .from(people)
-      .where(ilike(people.fullName, `%${q.trim()}%`));
+      // unaccent: "joao" encontra "JOÃO" (extensão criada na migration 0003).
+      .where(sql`unaccent(${people.fullName}) ilike unaccent(${`%${q.trim()}%`})`);
     conditions.push(inArray(families.id, matching));
   }
 

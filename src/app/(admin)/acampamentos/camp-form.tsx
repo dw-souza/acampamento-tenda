@@ -4,7 +4,7 @@ import Link from "next/link";
 import { type Option, SelectField, TextareaField, TextField } from "@/components/form/fields";
 import { useActionForm } from "@/components/form/use-action-form";
 import { Button } from "@/components/ui/button";
-import { FieldGroup } from "@/components/ui/field";
+import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
 import { type CampInput, campSchema } from "@/lib/validation/camp";
 import { saveCamp } from "./actions";
 
@@ -35,24 +35,27 @@ export function CampForm({
           <TextField control={control} name="startDate" label="Início" type="date" />
           <TextField control={control} name="endDate" label="Fim" type="date" />
         </div>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <TextField control={control} name="adultPrice" label="Valor por adulto (R$)" inputMode="decimal" />
-          <TextField
-            control={control}
-            name="childPrice"
-            label="Valor por filho (R$)"
-            inputMode="decimal"
-            description="Menores de 3 anos não pagam."
-          />
-          <TextField
-            control={control}
-            name="expectedFamilies"
-            label="Famílias previstas"
-            type="number"
-            min={0}
-            description="Só referência; não limita."
-          />
-        </div>
+        <FieldSet>
+          <FieldLegend variant="label">Valores por pessoa (R$)</FieldLegend>
+          <FieldDescription>
+            Menores de 3 anos não pagam. O pagamento é um pedido, nunca uma condição.
+          </FieldDescription>
+          <div className="grid gap-4 sm:grid-cols-4">
+            <TextField control={control} name="adultPrice" label="Adulto campista" inputMode="decimal" />
+            <TextField control={control} name="childPrice" label="Filho campista" inputMode="decimal" />
+            <TextField control={control} name="serverAdultPrice" label="Adulto servo" inputMode="decimal" />
+            <TextField control={control} name="serverChildPrice" label="Filho servo" inputMode="decimal" />
+          </div>
+        </FieldSet>
+        <TextField
+          control={control}
+          name="expectedFamilies"
+          label="Famílias campistas previstas"
+          type="number"
+          min={0}
+          className="sm:w-64"
+          description="Só referência; não limita."
+        />
         <TextareaField control={control} name="notes" label="Observações" />
         <div className="flex gap-2">
           <Button type="submit" disabled={pending}>

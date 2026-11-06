@@ -11,6 +11,7 @@ export function CampTabs({ campId }: { campId: string }) {
     { href: base, label: "Visão geral" },
     { href: `${base}/campistas`, label: "Campistas" },
     { href: `${base}/equipes`, label: "Equipes" },
+    { href: `${base}/tesouraria`, label: "Tesouraria" },
   ];
 
   return (

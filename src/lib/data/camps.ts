@@ -62,6 +62,7 @@ export type CampParticipant = Awaited<ReturnType<typeof getCampParticipants>>[nu
 
 export function toSummaryInput(participant: CampParticipant): ParticipantForSummary {
   return {
+    role: participant.role,
     status: participant.status,
     paidCents: participant.paidCents,
     attendees: participant.attendees.map(({ person }) => ({

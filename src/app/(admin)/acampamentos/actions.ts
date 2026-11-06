@@ -35,8 +35,14 @@ export async function saveCamp(id: string | null, input: CampInput): Promise<Act
   await requireUser();
   const parsed = parseOrError(campSchema, input);
   if (!parsed.ok) return { error: parsed.error };
-  const { adultPrice, childPrice, ...rest } = parsed.data;
-  const values = { ...rest, adultPriceCents: adultPrice, childPriceCents: childPrice };
+  const { adultPrice, childPrice, serverAdultPrice, serverChildPrice, ...rest } = parsed.data;
+  const values = {
+    ...rest,
+    adultPriceCents: adultPrice,
+    childPriceCents: childPrice,
+    serverAdultPriceCents: serverAdultPrice,
+    serverChildPriceCents: serverChildPrice,
+  };
 
   let campId = id;
   try {

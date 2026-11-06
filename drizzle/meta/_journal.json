@@ -15,6 +15,20 @@
       "when": 1793972697081,
       "tag": "0001_stage_forms_tents",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793974098717,
+      "tag": "0002_server_prices",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793974205373,
+      "tag": "0003_unaccent",
+      "breakpoints": true
     }
   ]
 }

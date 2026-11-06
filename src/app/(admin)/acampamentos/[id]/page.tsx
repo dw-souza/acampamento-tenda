@@ -55,7 +55,7 @@ export default async function CampOverviewPage({ params }: PageProps<"/acampamen
           <Card key={stat.label} size="sm">
             <CardHeader>
               <CardDescription>{stat.label}</CardDescription>
-              <CardTitle className="text-2xl tabular-nums">{stat.value}</CardTitle>
+              <CardTitle className="text-2xl! tabular-nums">{stat.value}</CardTitle>
             </CardHeader>
           </Card>
         ))}

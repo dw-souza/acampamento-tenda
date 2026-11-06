@@ -19,6 +19,8 @@ export default async function EditCampPage({ params }: PageProps<"/acampamentos/
         endDate: camp.endDate,
         adultPrice: centsToInput(camp.adultPriceCents),
         childPrice: centsToInput(camp.childPriceCents),
+        serverAdultPrice: centsToInput(camp.serverAdultPriceCents),
+        serverChildPrice: centsToInput(camp.serverChildPriceCents),
         expectedFamilies: camp.expectedFamilies ?? "",
         notes: camp.notes ?? "",
       }}

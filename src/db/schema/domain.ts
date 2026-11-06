@@ -164,8 +164,11 @@ export const camps = pgTable("camps", {
   startDate: date().notNull(),
   endDate: date().notNull(),
   // Valores em centavos, por pessoa. Crianças menores de 3 anos não pagam.
+  // adult/child: campistas; serverAdult/serverChild: quem serve nas equipes.
   adultPriceCents: integer().notNull().default(0),
   childPriceCents: integer().notNull().default(0),
+  serverAdultPriceCents: integer().notNull().default(0),
+  serverChildPriceCents: integer().notNull().default(0),
   // Só referência (ex.: 16 famílias por paróquia); nunca bloqueia inscrição.
   expectedFamilies: integer(),
   status: campStatus().notNull().default("draft"),

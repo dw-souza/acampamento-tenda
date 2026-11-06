@@ -17,6 +17,8 @@ export default async function NewCampPage() {
           endDate: "",
           adultPrice: "125,00",
           childPrice: "25,00",
+          serverAdultPrice: "125,00",
+          serverChildPrice: "25,00",
           expectedFamilies: "",
           notes: "",
         }}

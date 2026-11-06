@@ -26,6 +26,8 @@ export const campSchema = z
     endDate: requiredDate,
     adultPrice: money,
     childPrice: money,
+    serverAdultPrice: money,
+    serverChildPrice: money,
     expectedFamilies: optionalInt,
     notes: optionalText,
   })
