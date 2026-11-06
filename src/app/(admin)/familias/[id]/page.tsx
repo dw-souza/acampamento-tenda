@@ -1,17 +1,26 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/delete-button";
 import { PageHeader } from "@/components/page-header";
-import { getFamily } from "@/lib/data/families";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getFamily, getFamilyHistory } from "@/lib/data/families";
 import { parishOptions } from "@/lib/data/parishes";
 import { tentOptions } from "@/lib/data/tents";
-import { coupleName, tentLabel } from "@/lib/format/labels";
+import { coupleName, formatDate, plural, tentLabel } from "@/lib/format/labels";
+import { participantStatusLabels } from "@/lib/validation/camp";
 import { deleteFamily, saveFamily } from "../actions";
 import { FamilyForm } from "../family-form";
 import { familyValues } from "../form-values";
 
 export default async function FamilyPage({ params }: PageProps<"/familias/[id]">) {
   const { id } = await params;
-  const [family, parishes, tents] = await Promise.all([getFamily(id), parishOptions(), tentOptions()]);
+  const [family, parishes, tents, history] = await Promise.all([
+    getFamily(id),
+    parishOptions(),
+    tentOptions(),
+    getFamilyHistory(id),
+  ]);
   if (!family) notFound();
 
   const name = coupleName(family.people);
@@ -28,13 +37,45 @@ export default async function FamilyPage({ params }: PageProps<"/familias/[id]">
           />
         }
       />
-      <FamilyForm
-        action={saveFamily.bind(null, family.id)}
-        cancelHref="/familias"
-        parishOptions={parishes}
-        tentOptions={tents}
-        defaultValues={familyValues(family)}
-      />
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(16rem,1fr)]">
+        <FamilyForm
+          action={saveFamily.bind(null, family.id)}
+          cancelHref="/familias"
+          parishOptions={parishes}
+          tentOptions={tents}
+          defaultValues={familyValues(family)}
+        />
+        <Card className="h-fit lg:sticky lg:top-4" size="sm">
+          <CardHeader>
+            <CardTitle>Acampamentos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {history.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum acampamento ainda.</p>
+            ) : (
+              <ul className="flex flex-col gap-3 text-sm">
+                {history.map((entry) => (
+                  <li key={entry.id}>
+                    <Link href={`/acampamentos/${entry.campId}`} className="font-medium hover:underline">
+                      {entry.camp.name}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">
+                      {entry.role === "camper" ? "Campista" : (entry.team?.name ?? "Servo")}
+                      {entry.isCoordinator && " · coordenador"} · {formatDate(entry.camp.startDate)} ·{" "}
+                      {plural(entry.attendees.length, "pessoa", "pessoas")}
+                    </p>
+                    {entry.status !== "confirmed" && (
+                      <Badge variant="outline" className="mt-1">
+                        {participantStatusLabels[entry.status]}
+                      </Badge>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </>
   );
 }

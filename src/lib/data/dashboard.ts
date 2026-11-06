@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, count, desc, eq, gte, isNull, lt, ne, notExists, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, isNull, lt, max, ne, notExists, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   campParishes,
@@ -10,6 +10,7 @@ import {
   people,
   stages,
   tents,
+  tentStageHistory,
 } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
 
@@ -137,6 +138,9 @@ export async function recentCampsByStage(limit = 3) {
   return [...byStage.values()];
 }
 
+/** Tenda parada: sem avançar de etapa há mais que isso (e ainda antes da última etapa). */
+export const STALLED_YEARS = 2;
+
 /** Situações que pedem ação da secretaria. */
 export async function attentionPoints() {
   await requireUser();
@@ -147,7 +151,15 @@ export async function attentionPoints() {
     .innerJoin(campParishes, eq(campParishes.campId, campParticipants.campId))
     .where(eq(campParticipants.familyId, families.id));
 
-  const [noGuardian, noStage, noTent] = await Promise.all([
+  // Último avanço da tenda: a etapa mais recente registrada ou a data de formação.
+  const progress = db
+    .select({ tentId: tentStageHistory.tentId, last: max(tentStageHistory.date).as("last") })
+    .from(tentStageHistory)
+    .groupBy(tentStageHistory.tentId)
+    .as("progress");
+  const lastProgress = sql<string>`greatest(${progress.last}, ${tents.formedAt})`;
+
+  const [noGuardian, noStage, noTent, stalled] = await Promise.all([
     db.query.tents.findMany({
       where: and(eq(tents.status, "active"), isNull(tents.guardianFamilyId)),
       with: { parish: true },
@@ -162,8 +174,29 @@ export async function attentionPoints() {
       .select({ n: count() })
       .from(families)
       .where(and(isNull(families.tentId), notExists(inFormingCamp))),
+    db
+      .select({
+        id: tents.id,
+        number: tents.number,
+        name: tents.name,
+        parishName: parishes.name,
+        stageName: stages.name,
+        since: lastProgress.as("since"),
+      })
+      .from(tents)
+      .innerJoin(parishes, eq(parishes.id, tents.parishId))
+      .innerJoin(stages, eq(stages.id, tents.currentStageId))
+      .leftJoin(progress, eq(progress.tentId, tents.id))
+      .where(
+        and(
+          eq(tents.status, "active"),
+          lt(stages.position, sql`(select max(${stages.position}) from ${stages})`),
+          lt(lastProgress, sql`current_date - make_interval(years => ${STALLED_YEARS})`),
+        ),
+      )
+      .orderBy(asc(lastProgress)),
   ]);
-  return { noGuardian, noStage, familiesWithoutTent: noTent[0].n };
+  return { noGuardian, noStage, familiesWithoutTent: noTent[0].n, stalled };
 }
 
 export async function parishSummary() {

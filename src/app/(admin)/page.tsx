@@ -10,6 +10,7 @@ import {
   communityTotals,
   parishSummary,
   recentCampsByStage,
+  STALLED_YEARS,
   tentsByStage,
   upcomingCamps,
 } from "@/lib/data/dashboard";
@@ -196,6 +197,27 @@ function AttentionCard({ attention }: { attention: Awaited<ReturnType<typeof att
               {i > 0 && ", "}
               <Link href={`/tendas/${tent.id}/editar`} className="hover:underline">
                 {tentLabel(tent)} ({tent.parish.name})
+              </Link>
+            </span>
+          ))}
+        </>
+      ),
+    });
+  }
+  if (attention.stalled.length > 0) {
+    items.push({
+      key: "stalled",
+      text: (
+        <>
+          <span className="font-medium">
+            {plural(attention.stalled.length, "tenda", "tendas")} há mais de {STALLED_YEARS} anos na mesma
+            etapa:
+          </span>{" "}
+          {attention.stalled.map((tent, i) => (
+            <span key={tent.id}>
+              {i > 0 && ", "}
+              <Link href={`/tendas/${tent.id}`} className="hover:underline">
+                {tentLabel(tent)} ({tent.parishName}, {tent.stageName} desde {formatDate(tent.since)})
               </Link>
             </span>
           ))}

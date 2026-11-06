@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, eq, inArray, isNull, type SQL, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { families, people } from "@/db/schema";
+import { campParticipants, families, people } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
 
 /** tentId "nenhuma" = famílias sem tenda. */
@@ -39,4 +39,14 @@ export async function getFamily(id: string) {
     where: eq(families.id, id),
     with: { people: { orderBy: asc(people.birthDate) }, tent: true, parish: true },
   });
+}
+
+/** Acampamentos de que a família participou, do mais recente para o mais antigo. */
+export async function getFamilyHistory(familyId: string) {
+  await requireUser();
+  const rows = await db.query.campParticipants.findMany({
+    where: eq(campParticipants.familyId, familyId),
+    with: { camp: { with: { stage: true } }, team: true, attendees: true },
+  });
+  return rows.sort((a, b) => b.camp.startDate.localeCompare(a.camp.startDate));
 }

@@ -21,6 +21,22 @@ npm run user:create -- "Seu Nome" voce@exemplo.com uma-senha
 npm run dev
 ```
 
+## Deploy (Vercel + Neon)
+
+1. Importe o repositório na Vercel (preset Next.js).
+2. Em **Storage**, crie um banco **Neon** e conecte ao projeto: a integração injeta
+   `DATABASE_URL` e `DATABASE_URL_UNPOOLED`. Ative o branch de banco por preview.
+3. Defina `BETTER_AUTH_SECRET` (`openssl rand -base64 32`) e `BETTER_AUTH_URL`
+   (URL de produção) nas variáveis de ambiente.
+4. Deploy. O build (`vercel-build`) aplica as migrations antes do `next build`.
+5. Uma vez, com a [CLI da Vercel](https://vercel.com/docs/cli) logada e o projeto linkado (`vercel link`):
+
+```bash
+npm run prod:env                                   # baixa as variáveis para .env.production.local
+npm run prod:seed                                  # etapas e equipes
+npm run prod:user:create -- "Nome" email@exemplo.com senha
+```
+
 ## Scripts
 
 | Script                | O que faz                                  |
