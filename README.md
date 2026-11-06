@@ -37,6 +37,13 @@ npm run prod:seed                                  # etapas e equipes
 npm run prod:user:create -- "Nome" email@exemplo.com senha
 ```
 
+### Dados de demonstração
+
+`npm run db:seed:demo` (local) ou `npm run prod:seed:demo` cria ~4 paróquias, ~24 tendas em todas
+as etapas, ~200 famílias e acampamentos realizados e próximos, usando as etapas e equipes já
+cadastradas. Não roda se já houver paróquias. Para apagar os cadastros (mantém etapas, equipes e
+usuários): `npm run db:clean -- --yes` ou `npm run prod:clean -- --yes`.
+
 > O arquivo se chama `.env.vercel.production` de propósito: o Next carrega `.env.production.local`
 > automaticamente em `next start`, o que faria o servidor local usar o banco de produção.
 

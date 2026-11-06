@@ -17,9 +17,13 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
+    "db:seed:demo": "tsx --env-file=.env.local scripts/seed-demo.ts",
+    "db:clean": "tsx --env-file=.env.local scripts/clean-data.ts",
     "user:create": "tsx --env-file=.env.local scripts/create-user.ts",
     "prod:env": "vercel env pull .env.vercel.production --environment=production",
     "prod:seed": "tsx --env-file=.env.vercel.production scripts/seed.ts",
+    "prod:seed:demo": "tsx --env-file=.env.vercel.production scripts/seed-demo.ts",
+    "prod:clean": "tsx --env-file=.env.vercel.production scripts/clean-data.ts",
     "prod:user:create": "tsx --env-file=.env.vercel.production scripts/create-user.ts"
   },
   "dependencies": {
