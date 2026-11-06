@@ -2,7 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { type ReactNode } from "react";
 
-const links = [{ href: "/", label: "Início" }];
+const links = [
+  { href: "/", label: "Início" },
+  { href: "/familias", label: "Famílias" },
+  { href: "/tendas", label: "Tendas" },
+  { href: "/paroquias", label: "Paróquias" },
+  { href: "/equipes", label: "Equipes" },
+  { href: "/etapas", label: "Etapas" },
+];
 
 export function AdminNav({ userMenu }: { userMenu: ReactNode }) {
   return (

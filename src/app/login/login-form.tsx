@@ -39,7 +39,7 @@ export function LoginForm() {
         <CardTitle className="text-center text-xl">Secretaria</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit}>
+        <form method="post" onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="email">E-mail</FieldLabel>
