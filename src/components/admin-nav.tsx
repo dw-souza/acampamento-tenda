@@ -15,8 +15,8 @@ const links = [
 export function AdminNav({ userMenu }: { userMenu: ReactNode }) {
   return (
     <header className="border-b bg-background print:hidden">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:gap-6">
+        <Link href="/" className="flex shrink-0 items-center gap-2 font-semibold">
           {/* O logo é branco: precisa de fundo escuro. */}
           <Image
             src="/logo_tenda.webp"
@@ -25,9 +25,9 @@ export function AdminNav({ userMenu }: { userMenu: ReactNode }) {
             height={28}
             className="rounded-md bg-primary p-0.5"
           />
-          Acampamento Tenda
+          <span className="sr-only sm:not-sr-only">Acampamento Tenda</span>
         </Link>
-        <nav className="flex flex-1 items-center gap-4 text-sm text-muted-foreground">
+        <nav className="flex min-w-0 flex-1 items-center gap-4 overflow-x-auto text-sm whitespace-nowrap text-muted-foreground">
           {links.map((link) => (
             <Link key={link.href} href={link.href} className="hover:text-foreground">
               {link.label}

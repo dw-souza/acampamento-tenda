@@ -10,11 +10,12 @@ import { parishOptions } from "@/lib/data/parishes";
 import { coupleName, tentLabel } from "@/lib/format/labels";
 
 export default async function FamiliesPage({ searchParams }: PageProps<"/familias">) {
-  const { q, paroquia } = await searchParams;
+  const { q, paroquia, tenda } = await searchParams;
   const [families, parishes] = await Promise.all([
     listFamilies({
       q: typeof q === "string" ? q : undefined,
       parishId: typeof paroquia === "string" ? paroquia : undefined,
+      tentId: typeof tenda === "string" ? tenda : undefined,
     }),
     parishOptions(),
   ]);
@@ -43,6 +44,11 @@ export default async function FamiliesPage({ searchParams }: PageProps<"/familia
         <Suspense>
           <SearchFilter placeholder="Buscar por nome..." />
           <SelectFilter param="paroquia" options={parishes} allLabel="Todas as paróquias" />
+          <SelectFilter
+            param="tenda"
+            options={[{ value: "nenhuma", label: "Sem tenda" }]}
+            allLabel="Com ou sem tenda"
+          />
         </Suspense>
       </div>
       <Table>

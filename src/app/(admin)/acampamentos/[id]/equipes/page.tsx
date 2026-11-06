@@ -7,10 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  familiesAvailableForCamp,
+  familiesEligibleToServe,
   getCamp,
   getCampParticipants,
-  tentsAvailableForCamp,
+  tentsEligibleToServe,
   toSummaryInput,
 } from "@/lib/data/camps";
 import { listWorkTeams } from "@/lib/data/work-teams";
@@ -31,8 +31,8 @@ export default async function CampTeamsPage({ params }: PageProps<"/acampamentos
   const [participants, teams, tents, families] = await Promise.all([
     getCampParticipants(id),
     listWorkTeams(),
-    tentsAvailableForCamp(camp),
-    familiesAvailableForCamp(id),
+    tentsEligibleToServe(camp),
+    familiesEligibleToServe(camp),
   ]);
   const servers = participants.filter((participant) => participant.role === "server");
   const editable = camp.status !== "finished";
@@ -48,6 +48,9 @@ export default async function CampTeamsPage({ params }: PageProps<"/acampamentos
       <p className="text-sm text-muted-foreground">
         Servindo: {peopleSummary(total)}
         {total.toddlers > 0 && ` (${total.toddlers} com pajem)`}
+        <br />
+        Para servir, a tenda precisa já ter passado pelo {camp.stage.name}. Tendas sem etapa registrada não
+        aparecem.
       </p>
 
       {[...teams]

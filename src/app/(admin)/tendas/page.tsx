@@ -6,13 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { parishOptions } from "@/lib/data/parishes";
+import { stageOptions } from "@/lib/data/stages";
 import { listTents } from "@/lib/data/tents";
 import { tentLabel, tentStatusLabels } from "@/lib/format/labels";
 
 export default async function TentsPage({ searchParams }: PageProps<"/tendas">) {
-  const { paroquia } = await searchParams;
+  const { paroquia, etapa } = await searchParams;
   const parishId = typeof paroquia === "string" ? paroquia : undefined;
-  const [tents, parishes] = await Promise.all([listTents({ parishId }), parishOptions()]);
+  const stageId = typeof etapa === "string" ? etapa : undefined;
+  const [tents, parishes, stages] = await Promise.all([
+    listTents({ parishId, stageId }),
+    parishOptions(),
+    stageOptions(),
+  ]);
 
   return (
     <>
@@ -24,9 +30,14 @@ export default async function TentsPage({ searchParams }: PageProps<"/tendas">) 
           </Button>
         }
       />
-      <div className="mb-4">
+      <div className="mb-4 flex flex-wrap gap-2">
         <Suspense>
           <SelectFilter param="paroquia" options={parishes} allLabel="Todas as paróquias" />
+          <SelectFilter
+            param="etapa"
+            options={[...stages, { value: "nenhuma", label: "Sem etapa" }]}
+            allLabel="Todas as etapas"
+          />
         </Suspense>
       </div>
       <Table>

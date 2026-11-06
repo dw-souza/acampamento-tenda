@@ -3,29 +3,36 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { campParticipants, camps, campTents, families, workTeams } from "@/db/schema";
+import { campParticipants, camps, campTents, families, tents, workTeams } from "@/db/schema";
 import { type ActionResult, dbErrorMessage } from "@/lib/action-result";
 import { addFamiliesToCamp } from "@/lib/camp-participation";
 import { requireUser } from "@/lib/dal";
+import { canServe } from "@/lib/domain/eligibility";
 
 function revalidateCamp(campId: string) {
   revalidatePath(`/acampamentos/${campId}`, "layout");
 }
 
-async function assertEditable(campId: string, teamId: string) {
-  const [camp, team] = await Promise.all([
-    db.query.camps.findFirst({ where: eq(camps.id, campId) }),
+/** Confere se a equipe pode receber servos e se a tenda já passou pela etapa do acampamento. */
+async function assertCanServe(campId: string, teamId: string, tentId: string | null) {
+  const [camp, team, tent] = await Promise.all([
+    db.query.camps.findFirst({ where: eq(camps.id, campId), with: { stage: true } }),
     db.query.workTeams.findFirst({ where: eq(workTeams.id, teamId) }),
+    tentId ? db.query.tents.findFirst({ where: eq(tents.id, tentId), with: { currentStage: true } }) : null,
   ]);
   if (!camp || !team) return "Acampamento ou equipe não encontrados.";
   if (camp.status === "finished") return "O acampamento já foi realizado.";
+  if (!tent || tent.status !== "active") return "Só famílias de tendas ativas podem servir.";
+  if (!canServe(tent.currentStage?.position, camp.stage.position)) {
+    return `A tenda ainda não passou pelo ${camp.stage.name}; só serve quem já passou por esta etapa.`;
+  }
   return null;
 }
 
 /** A tenda inteira serve na equipe: cada família entra como servo, com todos os membros. */
 export async function addTeamTent(campId: string, teamId: string, tentId: string): Promise<ActionResult> {
   await requireUser();
-  const problem = await assertEditable(campId, teamId);
+  const problem = await assertCanServe(campId, teamId, tentId);
   if (problem) return { error: problem };
 
   let skipped = 0;
@@ -83,7 +90,8 @@ export async function removeTeamTent(campId: string, tentId: string): Promise<Ac
 /** Um casal avulso serve na equipe (ex.: música, ensino). */
 export async function addTeamFamily(campId: string, teamId: string, familyId: string): Promise<ActionResult> {
   await requireUser();
-  const problem = await assertEditable(campId, teamId);
+  const family = await db.query.families.findFirst({ where: eq(families.id, familyId) });
+  const problem = await assertCanServe(campId, teamId, family?.tentId ?? null);
   if (problem) return { error: problem };
 
   try {

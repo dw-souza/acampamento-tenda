@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { campParticipants, camps, families, stages, tents } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
 import type { ParticipantForSummary } from "@/lib/domain/camp-summary";
+import { canServe } from "@/lib/domain/eligibility";
 import { coupleName, tentLabel } from "@/lib/format/labels";
 
 export async function listCamps() {
@@ -103,8 +104,15 @@ export async function tentsAvailableForCamp(camp: Camp) {
     }));
 }
 
-/** Famílias de tendas ativas que ainda não têm função neste acampamento. */
-export async function familiesAvailableForCamp(campId: string) {
+/** Tendas que podem servir: ativas, ainda sem vínculo e que já passaram pela etapa do acampamento. */
+export async function tentsEligibleToServe(camp: Camp) {
+  const tents = await tentsAvailableForCamp(camp);
+  return tents.filter((tent) => canServe(tent.currentStage?.position, camp.stage.position));
+}
+
+/** Famílias que podem servir: tenda ativa que já passou pela etapa e ainda sem função no acampamento. */
+export async function familiesEligibleToServe(camp: Camp) {
+  const campId = camp.id;
   await requireUser();
   const rows = await db.query.families.findMany({
     where: and(
@@ -116,10 +124,13 @@ export async function familiesAvailableForCamp(campId: string) {
           .where(and(eq(campParticipants.campId, campId), eq(campParticipants.familyId, families.id))),
       ),
     ),
-    with: { people: true, tent: true, parish: true },
+    with: { people: true, tent: { with: { currentStage: true } }, parish: true },
   });
   return rows
-    .filter((family) => family.tent?.status === "active")
+    .filter(
+      (family) =>
+        family.tent?.status === "active" && canServe(family.tent.currentStage?.position, camp.stage.position),
+    )
     .map((family) => ({
       value: family.id,
       label: `${coupleName(family.people)} · ${tentLabel(family.tent!)} · ${family.parish.name}`,

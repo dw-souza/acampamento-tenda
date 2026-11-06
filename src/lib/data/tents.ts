@@ -1,11 +1,12 @@
 import "server-only";
-import { asc, count, eq } from "drizzle-orm";
+import { and, asc, count, eq, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { families, parishes, stages, tents } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
 import { tentLabel } from "@/lib/format/labels";
 
-export async function listTents(filters: { parishId?: string } = {}) {
+/** stageId "nenhuma" = tendas sem etapa registrada. */
+export async function listTents(filters: { parishId?: string; stageId?: string } = {}) {
   await requireUser();
   const familyCount = db
     .select({ tentId: families.tentId, n: count().as("n") })
@@ -27,7 +28,16 @@ export async function listTents(filters: { parishId?: string } = {}) {
     .innerJoin(parishes, eq(parishes.id, tents.parishId))
     .leftJoin(stages, eq(stages.id, tents.currentStageId))
     .leftJoin(familyCount, eq(familyCount.tentId, tents.id))
-    .where(filters.parishId ? eq(tents.parishId, filters.parishId) : undefined)
+    .where(
+      and(
+        filters.parishId ? eq(tents.parishId, filters.parishId) : undefined,
+        filters.stageId === "nenhuma"
+          ? isNull(tents.currentStageId)
+          : filters.stageId
+            ? eq(tents.currentStageId, filters.stageId)
+            : undefined,
+      ),
+    )
     .orderBy(asc(parishes.name), asc(tents.number));
 }
 

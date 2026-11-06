@@ -1,16 +1,18 @@
 import "server-only";
-import { and, asc, eq, inArray, type SQL, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, type SQL, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { families, people } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
 
+/** tentId "nenhuma" = famílias sem tenda. */
 export type FamilyFilters = { q?: string; parishId?: string; tentId?: string };
 
 export async function listFamilies({ q, parishId, tentId }: FamilyFilters) {
   await requireUser();
   const conditions: SQL[] = [];
   if (parishId) conditions.push(eq(families.parishId, parishId));
-  if (tentId) conditions.push(eq(families.tentId, tentId));
+  if (tentId === "nenhuma") conditions.push(isNull(families.tentId));
+  else if (tentId) conditions.push(eq(families.tentId, tentId));
   if (q?.trim()) {
     const matching = db
       .select({ id: people.familyId })
