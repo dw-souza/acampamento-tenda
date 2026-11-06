@@ -16,25 +16,27 @@ export default async function CampLayout({ children, params }: LayoutProps<"/aca
 
   return (
     <>
-      <PageHeader
-        title={camp.name}
-        description={
-          <>
-            {camp.stage.name} · {formatDate(camp.startDate)} a {formatDate(camp.endDate)}{" "}
-            <Badge variant={camp.status === "open" ? "default" : "secondary"} className="ml-1">
-              {campStatusLabels[camp.status]}
-            </Badge>
-          </>
-        }
-        actions={
-          <Button variant="outline" render={<Link href={`/acampamentos/${camp.id}/editar`} />}>
-            Editar
-          </Button>
-        }
-      />
-      <Suspense>
-        <CampTabs campId={camp.id} />
-      </Suspense>
+      <div className="print:hidden">
+        <PageHeader
+          title={camp.name}
+          description={
+            <>
+              {camp.stage.name} · {formatDate(camp.startDate)} a {formatDate(camp.endDate)}{" "}
+              <Badge variant={camp.status === "open" ? "default" : "secondary"} className="ml-1">
+                {campStatusLabels[camp.status]}
+              </Badge>
+            </>
+          }
+          actions={
+            <Button variant="outline" render={<Link href={`/acampamentos/${camp.id}/editar`} />}>
+              Editar
+            </Button>
+          }
+        />
+        <Suspense>
+          <CampTabs campId={camp.id} />
+        </Suspense>
+      </div>
       {children}
     </>
   );

@@ -14,7 +14,7 @@ const links = [
 
 export function AdminNav({ userMenu }: { userMenu: ReactNode }) {
   return (
-    <header className="border-b bg-background">
+    <header className="border-b bg-background print:hidden">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           {/* O logo é branco: precisa de fundo escuro. */}

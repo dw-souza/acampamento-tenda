@@ -12,7 +12,7 @@ export default function AdminLayout({ children }: LayoutProps<"/">) {
           </Suspense>
         }
       />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 print:max-w-none print:p-0">{children}</main>
     </>
   );
 }
