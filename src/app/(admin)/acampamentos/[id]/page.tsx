@@ -26,6 +26,9 @@ import {
   removeCampParish,
   removeCampTent,
 } from "../actions";
+import { StatTile } from "@/components/stat-tile";
+import { HeartHandshake, Tent, UsersRound, Wallet } from "lucide-react";
+import { plural } from "@/lib/format/labels";
 
 export default async function CampOverviewPage({ params }: PageProps<"/acampamentos/[id]">) {
   const { id } = await params;
@@ -37,27 +40,41 @@ export default async function CampOverviewPage({ params }: PageProps<"/acampamen
 
   const stats = [
     {
-      label: "Famílias campistas",
-      value: camp.expectedFamilies ? `${campers.families} / ${camp.expectedFamilies}` : campers.families,
+      icon: Tent,
+      label: "Campistas",
+      value: plural(campers.families, "família", "famílias"),
+      detail: camp.expectedFamilies ? `de ${camp.expectedFamilies} previstas` : undefined,
     },
-    { label: "Famílias servindo", value: totals.families - campers.families },
-    { label: "Adultos", value: totals.adults },
-    { label: "Filhos", value: totals.children },
-    { label: "Pajem (menores de 3)", value: totals.toddlers },
-    { label: "Valor esperado", value: formatMoney(totals.expectedCents) },
-    { label: "Arrecadado", value: formatMoney(totals.paidCents) },
+    {
+      icon: HeartHandshake,
+      label: "Servindo",
+      value: plural(totals.families - campers.families, "família", "famílias"),
+    },
+    {
+      icon: UsersRound,
+      label: "Pessoas",
+      value: totals.adults + totals.children,
+      detail: `${plural(totals.adults, "adulto", "adultos")} · ${plural(totals.children, "filho", "filhos")} · ${totals.toddlers} no pajem`,
+    },
+    {
+      icon: Wallet,
+      label: "Caixa",
+      value: formatMoney(totals.paidCents),
+      detail: `de ${formatMoney(totals.expectedCents)} esperados`,
+    },
   ];
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.label} size="sm">
-            <CardHeader>
-              <CardDescription>{stat.label}</CardDescription>
-              <CardTitle className="text-2xl! tabular-nums">{stat.value}</CardTitle>
-            </CardHeader>
-          </Card>
+          <StatTile
+            key={stat.label}
+            icon={stat.icon}
+            label={stat.label}
+            value={stat.value}
+            detail={stat.detail}
+          />
         ))}
       </div>
 

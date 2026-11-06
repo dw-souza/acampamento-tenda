@@ -1,8 +1,8 @@
+import { Users } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/delete-button";
 import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getFamily, getFamilyHistory } from "@/lib/data/families";
 import { parishOptions } from "@/lib/data/parishes";
@@ -12,6 +12,8 @@ import { participantStatusLabels } from "@/lib/validation/camp";
 import { deleteFamily, saveFamily } from "../actions";
 import { FamilyForm } from "../family-form";
 import { familyValues } from "../form-values";
+import { StatusBadge } from "@/components/status-badge";
+import { participantStatusTone } from "@/lib/format/status";
 
 export default async function FamilyPage({ params }: PageProps<"/familias/[id]">) {
   const { id } = await params;
@@ -27,6 +29,7 @@ export default async function FamilyPage({ params }: PageProps<"/familias/[id]">
   return (
     <>
       <PageHeader
+        icon={Users}
         title={name}
         description={[family.parish.name, family.tent && tentLabel(family.tent)].filter(Boolean).join(" · ")}
         actions={
@@ -65,9 +68,9 @@ export default async function FamilyPage({ params }: PageProps<"/familias/[id]">
                       {plural(entry.attendees.length, "pessoa", "pessoas")}
                     </p>
                     {entry.status !== "confirmed" && (
-                      <Badge variant="outline" className="mt-1">
+                      <StatusBadge tone={participantStatusTone[entry.status]} className="mt-1">
                         {participantStatusLabels[entry.status]}
-                      </Badge>
+                      </StatusBadge>
                     )}
                   </li>
                 ))}

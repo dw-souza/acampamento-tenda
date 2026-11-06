@@ -9,8 +9,8 @@ type Row = {
   tents: { id: string; number: number; name: string | null; parish: { name: string } }[];
 };
 
-// Uma série só (tendas por etapa): uma cor, sem legenda; o título diz o que é.
-const BAR_COLOR = "#2a78d6";
+// Uma série só (tendas por etapa): uma cor (o marrom da marca), sem legenda; o título diz o que é.
+const BAR_COLOR = "var(--primary)";
 
 /**
  * Barras horizontais: quantas tendas ativas estão em cada etapa do caminho.

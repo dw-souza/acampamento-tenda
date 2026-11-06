@@ -1,3 +1,4 @@
+import { Users } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { parishOptions } from "@/lib/data/parishes";
 import { tentOptions } from "@/lib/data/tents";
@@ -11,7 +12,7 @@ export default async function NewFamilyPage({ searchParams }: PageProps<"/famili
 
   return (
     <>
-      <PageHeader title="Nova família" />
+      <PageHeader icon={Users} title="Nova família" />
       <FamilyForm
         action={saveFamily.bind(null, null)}
         cancelHref="/familias"

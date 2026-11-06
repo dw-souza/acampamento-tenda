@@ -1,3 +1,4 @@
+import { HeartHandshake } from "lucide-react";
 import Link from "next/link";
 import { DeleteButton } from "@/components/delete-button";
 import { PageHeader } from "@/components/page-header";
@@ -13,6 +14,7 @@ export default async function WorkTeamsPage() {
   return (
     <>
       <PageHeader
+        icon={HeartHandshake}
         title="Equipes de trabalho"
         actions={<Button render={<Link href="/equipes/nova" />}>Nova equipe</Button>}
       />

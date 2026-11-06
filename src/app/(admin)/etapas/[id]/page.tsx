@@ -1,3 +1,4 @@
+import { Route } from "lucide-react";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { getStage } from "@/lib/data/stages";
@@ -10,7 +11,7 @@ export default async function EditStagePage({ params }: PageProps<"/etapas/[id]"
 
   return (
     <>
-      <PageHeader title={stage.name} />
+      <PageHeader icon={Route} title={stage.name} />
       <StageForm
         id={stage.id}
         defaultValues={{

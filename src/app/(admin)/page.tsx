@@ -1,8 +1,6 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Church, Plus, Tent, Users, UsersRound } from "lucide-react";
 import Link from "next/link";
 import { type ReactNode } from "react";
-import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -17,6 +15,9 @@ import {
 import { formatDate, plural, tentLabel } from "@/lib/format/labels";
 import { campStatusLabels } from "@/lib/validation/camp";
 import { StageBars } from "./_dashboard/stage-bars";
+import { StatusBadge } from "@/components/status-badge";
+import { campStatusTone } from "@/lib/format/status";
+import { StatTile } from "@/components/stat-tile";
 
 export default async function HomePage() {
   const [totals, stages, upcoming, recent, attention, parishes] = await Promise.all([
@@ -30,33 +31,58 @@ export default async function HomePage() {
 
   const tiles = [
     {
+      icon: Tent,
       label: "Tendas ativas",
       value: totals.activeTents,
       detail:
         totals.formingTents > 0 ? `+ ${plural(totals.formingTents, "em formação", "em formação")}` : null,
     },
-    { label: "Famílias", value: totals.families, detail: "nas tendas ativas" },
+    { icon: Users, label: "Famílias", value: totals.families, detail: "nas tendas ativas" },
     {
+      icon: UsersRound,
       label: "Pessoas",
       value: totals.adults + totals.children,
       detail: `${plural(totals.adults, "adulto", "adultos")} · ${plural(totals.children, "filho", "filhos")}`,
     },
-    { label: "Paróquias", value: totals.parishes, detail: null },
+    { icon: Church, label: "Paróquias", value: totals.parishes, detail: null },
   ];
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Comunidade Tenda" />
+      <section className="tenda-pattern flex flex-wrap items-center justify-between gap-4 rounded-2xl px-6 py-6 text-primary-foreground shadow-sm">
+        <div>
+          <h1 className="text-2xl font-bold">Comunidade Tenda</h1>
+          <p className="mt-1 text-sm text-primary-foreground/80">
+            Ser família em comunhão com Deus e com o próximo.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="secondary"
+            render={<Link href="/acampamentos/novo" />}
+            className="bg-tenda-yellow text-tenda-brown hover:bg-tenda-yellow/90"
+          >
+            <Plus /> Novo acampamento
+          </Button>
+          <Button
+            variant="outline"
+            render={<Link href="/familias/nova" />}
+            className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+          >
+            <Plus /> Nova família
+          </Button>
+        </div>
+      </section>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {tiles.map((tile) => (
-          <Card key={tile.label} size="sm">
-            <CardHeader>
-              <CardDescription>{tile.label}</CardDescription>
-              <CardTitle className="text-3xl! tabular-nums">{tile.value}</CardTitle>
-              {tile.detail && <CardDescription className="text-xs">{tile.detail}</CardDescription>}
-            </CardHeader>
-          </Card>
+          <StatTile
+            key={tile.label}
+            icon={tile.icon}
+            label={tile.label}
+            value={tile.value}
+            detail={tile.detail}
+          />
         ))}
       </div>
 
@@ -88,9 +114,9 @@ export default async function HomePage() {
                 <ul className="flex flex-col gap-3">
                   {upcoming.map((camp) => (
                     <CampItem key={camp.id} camp={camp}>
-                      <Badge variant={camp.status === "open" ? "default" : "secondary"}>
+                      <StatusBadge tone={campStatusTone[camp.status]}>
                         {campStatusLabels[camp.status]}
-                      </Badge>
+                      </StatusBadge>
                     </CampItem>
                   ))}
                 </ul>

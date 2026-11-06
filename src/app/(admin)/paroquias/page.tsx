@@ -1,11 +1,12 @@
+import { Church } from "lucide-react";
 import Link from "next/link";
 import { DeleteButton } from "@/components/delete-button";
 import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listParishes } from "@/lib/data/parishes";
 import { deleteParish } from "./actions";
+import { StatusBadge } from "@/components/status-badge";
 
 export default async function ParishesPage() {
   const parishes = await listParishes();
@@ -13,6 +14,7 @@ export default async function ParishesPage() {
   return (
     <>
       <PageHeader
+        icon={Church}
         title="Paróquias"
         actions={<Button render={<Link href="/paroquias/nova" />}>Nova paróquia</Button>}
       />
@@ -40,9 +42,9 @@ export default async function ParishesPage() {
                   {parish.name}
                 </Link>
                 {!parish.active && (
-                  <Badge variant="secondary" className="ml-2">
+                  <StatusBadge tone="neutral" className="ml-2">
                     Inativa
-                  </Badge>
+                  </StatusBadge>
                 )}
               </TableCell>
               <TableCell>

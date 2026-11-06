@@ -1,14 +1,16 @@
+import { Tent } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { SelectFilter } from "@/components/filters/select-filter";
 import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { parishOptions } from "@/lib/data/parishes";
 import { stageOptions } from "@/lib/data/stages";
 import { listTents } from "@/lib/data/tents";
 import { tentLabel, tentStatusLabels } from "@/lib/format/labels";
+import { StatusBadge } from "@/components/status-badge";
+import { tentStatusTone } from "@/lib/format/status";
 
 export default async function TentsPage({ searchParams }: PageProps<"/tendas">) {
   const { paroquia, etapa } = await searchParams;
@@ -23,6 +25,7 @@ export default async function TentsPage({ searchParams }: PageProps<"/tendas">) 
   return (
     <>
       <PageHeader
+        icon={Tent}
         title="Tendas"
         actions={
           <Button render={<Link href={parishId ? `/tendas/nova?paroquia=${parishId}` : "/tendas/nova"} />}>
@@ -64,9 +67,9 @@ export default async function TentsPage({ searchParams }: PageProps<"/tendas">) 
                   {tentLabel(tent)}
                 </Link>
                 {tent.status !== "active" && (
-                  <Badge variant="outline" className="ml-2">
+                  <StatusBadge tone={tentStatusTone[tent.status]} className="ml-2">
                     {tentStatusLabels[tent.status]}
-                  </Badge>
+                  </StatusBadge>
                 )}
               </TableCell>
               <TableCell>{tent.parishName}</TableCell>

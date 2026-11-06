@@ -1,3 +1,4 @@
+import { HeartHandshake } from "lucide-react";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { getWorkTeam } from "@/lib/data/work-teams";
@@ -10,7 +11,7 @@ export default async function EditWorkTeamPage({ params }: PageProps<"/equipes/[
 
   return (
     <>
-      <PageHeader title={team.name} />
+      <PageHeader icon={HeartHandshake} title={team.name} />
       <WorkTeamForm
         id={team.id}
         defaultValues={{

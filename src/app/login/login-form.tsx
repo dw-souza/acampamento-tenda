@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
@@ -34,11 +34,8 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-center text-xl">Secretaria</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Card className="w-full shadow-lg">
+      <CardContent className="pt-2">
         <form method="post" onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>

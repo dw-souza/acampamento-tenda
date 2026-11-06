@@ -3,8 +3,6 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { SearchFilter } from "@/components/filters/search-filter";
 import { SelectFilter } from "@/components/filters/select-filter";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getCamp, getCampParticipants, toSummaryInput } from "@/lib/data/camps";
 import { countsTowardCamp, summarizeParticipant } from "@/lib/domain/camp-summary";
@@ -17,6 +15,10 @@ import {
 import { coupleName, plural, tentLabel } from "@/lib/format/labels";
 import { formatMoney } from "@/lib/format/money";
 import { PaymentEditor } from "./payment-editor";
+import { StatusBadge } from "@/components/status-badge";
+import { paymentStatusTone } from "@/lib/format/status";
+import { StatTile } from "@/components/stat-tile";
+import { Hourglass, Target, Wallet } from "lucide-react";
 
 const roleFilter = [
   { value: "campistas", label: "Campistas" },
@@ -27,12 +29,6 @@ const statusFilter: { value: PaymentStatus; label: string }[] = [
   { value: "partial", label: "Parcial" },
   { value: "paid", label: "Pago" },
 ];
-const statusBadge: Record<PaymentStatus, "default" | "secondary" | "outline" | "destructive"> = {
-  paid: "default",
-  partial: "secondary",
-  unpaid: "outline",
-  free: "outline",
-};
 
 export default async function TreasuryPage({
   params,
@@ -90,16 +86,19 @@ export default async function TreasuryPage({
 
   const cards = [
     {
+      icon: Target,
       label: "Esperado",
       value: formatMoney(totals.expectedCents),
       detail: `Campistas ${formatMoney(totals.byRole.camper.expectedCents)} · Servos ${formatMoney(totals.byRole.server.expectedCents)}`,
     },
     {
+      icon: Wallet,
       label: "Arrecadado",
       value: formatMoney(totals.paidCents),
       detail: `PIX ${formatMoney(totals.byMethod.pix)} · Dinheiro ${formatMoney(totals.byMethod.cash)}`,
     },
     {
+      icon: Hourglass,
       label: "Falta receber",
       value: formatMoney(totals.missingCents),
       detail: plural(
@@ -114,13 +113,13 @@ export default async function TreasuryPage({
     <div className="flex flex-col gap-6">
       <div className="grid gap-4 md:grid-cols-3">
         {cards.map((card) => (
-          <Card key={card.label} size="sm">
-            <CardHeader>
-              <CardDescription>{card.label}</CardDescription>
-              <CardTitle className="text-2xl! tabular-nums">{card.value}</CardTitle>
-              <CardDescription className="text-xs">{card.detail}</CardDescription>
-            </CardHeader>
-          </Card>
+          <StatTile
+            key={card.label}
+            icon={card.icon}
+            label={card.label}
+            value={card.value}
+            detail={card.detail}
+          />
         ))}
       </div>
 
@@ -175,7 +174,7 @@ export default async function TreasuryPage({
                 />
               </TableCell>
               <TableCell>
-                <Badge variant={statusBadge[status]}>{paymentStatusLabels[status]}</Badge>
+                <StatusBadge tone={paymentStatusTone[status]}>{paymentStatusLabels[status]}</StatusBadge>
               </TableCell>
             </TableRow>
           ))}

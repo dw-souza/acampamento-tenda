@@ -1,3 +1,4 @@
+import { Route } from "lucide-react";
 import Link from "next/link";
 import { DeleteButton } from "@/components/delete-button";
 import { PageHeader } from "@/components/page-header";
@@ -13,6 +14,7 @@ export default async function StagesPage() {
   return (
     <>
       <PageHeader
+        icon={Route}
         title="Etapas"
         description="O caminho que cada tenda percorre, em ordem."
         actions={<Button render={<Link href="/etapas/nova" />}>Nova etapa</Button>}

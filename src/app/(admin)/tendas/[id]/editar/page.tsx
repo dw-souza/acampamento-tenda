@@ -1,3 +1,4 @@
+import { Tent } from "lucide-react";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { parishOptions } from "@/lib/data/parishes";
@@ -18,7 +19,7 @@ export default async function EditTentPage({ params }: PageProps<"/tendas/[id]/e
 
   return (
     <>
-      <PageHeader title={`Editar ${tentLabel(tent)}`} description={tent.parish.name} />
+      <PageHeader icon={Tent} title={`Editar ${tentLabel(tent)}`} description={tent.parish.name} />
       <TentForm
         id={tent.id}
         parishOptions={parishes}

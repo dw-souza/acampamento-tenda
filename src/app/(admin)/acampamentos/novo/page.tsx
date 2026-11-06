@@ -1,3 +1,4 @@
+import { CalendarDays } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { campStageOptions } from "@/lib/data/camps";
 import { CampForm } from "../camp-form";
@@ -6,7 +7,7 @@ export default async function NewCampPage() {
   const stages = await campStageOptions();
   return (
     <>
-      <PageHeader title="Novo acampamento" />
+      <PageHeader icon={CalendarDays} title="Novo acampamento" />
       <CampForm
         id={null}
         stageOptions={stages}

@@ -1,11 +1,13 @@
+import { CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listCamps } from "@/lib/data/camps";
 import { formatDate } from "@/lib/format/labels";
 import { campStatusLabels } from "@/lib/validation/camp";
+import { StatusBadge } from "@/components/status-badge";
+import { campStatusTone } from "@/lib/format/status";
 
 export default async function CampsPage() {
   const camps = await listCamps();
@@ -13,6 +15,7 @@ export default async function CampsPage() {
   return (
     <>
       <PageHeader
+        icon={CalendarDays}
         title="Acampamentos"
         actions={<Button render={<Link href="/acampamentos/novo" />}>Novo acampamento</Button>}
       />
@@ -46,9 +49,7 @@ export default async function CampsPage() {
                 {formatDate(camp.startDate)} a {formatDate(camp.endDate)}
               </TableCell>
               <TableCell>
-                <Badge variant={camp.status === "open" ? "default" : "secondary"}>
-                  {campStatusLabels[camp.status]}
-                </Badge>
+                <StatusBadge tone={campStatusTone[camp.status]}>{campStatusLabels[camp.status]}</StatusBadge>
               </TableCell>
               <TableCell className="text-right tabular-nums">{camp.families ?? 0}</TableCell>
             </TableRow>

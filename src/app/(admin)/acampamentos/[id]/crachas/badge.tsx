@@ -4,7 +4,8 @@ import type { CampPerson } from "../people";
 
 /** Crachá de 9 × 6,5 cm: 8 por folha A4. */
 export function Badge({ person, campName }: { person: CampPerson; campName: string }) {
-  const color = person.groupColor ?? "#171717";
+  // Campistas na cor da marca; servos na cor da equipe.
+  const color = person.groupColor ?? "var(--tenda-brown)";
   const subtitle =
     person.role === "child"
       ? person.parentsNames && `Filho(a) de ${person.parentsNames}`

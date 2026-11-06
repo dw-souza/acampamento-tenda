@@ -32,10 +32,13 @@ npm run dev
 5. Uma vez, com a [CLI da Vercel](https://vercel.com/docs/cli) logada e o projeto linkado (`vercel link`):
 
 ```bash
-npm run prod:env                                   # baixa as variáveis para .env.production.local
+npm run prod:env                                   # baixa as variáveis para .env.vercel.production
 npm run prod:seed                                  # etapas e equipes
 npm run prod:user:create -- "Nome" email@exemplo.com senha
 ```
+
+> O arquivo se chama `.env.vercel.production` de propósito: o Next carrega `.env.production.local`
+> automaticamente em `next start`, o que faria o servidor local usar o banco de produção.
 
 ## Scripts
 

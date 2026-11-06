@@ -1,3 +1,4 @@
+import { Users } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { SearchFilter } from "@/components/filters/search-filter";
@@ -37,6 +38,7 @@ export default async function FamiliesPage({ searchParams }: PageProps<"/familia
   return (
     <>
       <PageHeader
+        icon={Users}
         title="Famílias"
         actions={<Button render={<Link href="/familias/nova" />}>Nova família</Button>}
       />

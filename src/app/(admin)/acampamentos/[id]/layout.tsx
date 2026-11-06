@@ -1,13 +1,15 @@
+import { CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getCamp } from "@/lib/data/camps";
 import { formatDate } from "@/lib/format/labels";
 import { campStatusLabels } from "@/lib/validation/camp";
 import { CampTabs } from "./camp-tabs";
+import { StatusBadge } from "@/components/status-badge";
+import { campStatusTone } from "@/lib/format/status";
 
 export default async function CampLayout({ children, params }: LayoutProps<"/acampamentos/[id]">) {
   const { id } = await params;
@@ -18,13 +20,14 @@ export default async function CampLayout({ children, params }: LayoutProps<"/aca
     <>
       <div className="print:hidden">
         <PageHeader
+          icon={CalendarDays}
           title={camp.name}
           description={
             <>
               {camp.stage.name} · {formatDate(camp.startDate)} a {formatDate(camp.endDate)}{" "}
-              <Badge variant={camp.status === "open" ? "default" : "secondary"} className="ml-1">
+              <StatusBadge tone={campStatusTone[camp.status]} className="ml-1">
                 {campStatusLabels[camp.status]}
-              </Badge>
+              </StatusBadge>
             </>
           }
           actions={

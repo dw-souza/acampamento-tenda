@@ -1,3 +1,4 @@
+import { Tent } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { parishOptions } from "@/lib/data/parishes";
 import { stageOptions } from "@/lib/data/stages";
@@ -9,7 +10,7 @@ export default async function NewTentPage({ searchParams }: PageProps<"/tendas/n
 
   return (
     <>
-      <PageHeader title="Nova tenda" />
+      <PageHeader icon={Tent} title="Nova tenda" />
       <TentForm
         id={null}
         parishOptions={parishes}

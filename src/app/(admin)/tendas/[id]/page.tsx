@@ -1,8 +1,8 @@
+import { Tent } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/delete-button";
 import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -11,6 +11,8 @@ import { getTent } from "@/lib/data/tents";
 import { coupleName, formatDate, tentLabel, tentStatusLabels } from "@/lib/format/labels";
 import { deleteTent, removeTentStage } from "../actions";
 import { StageRecordForm } from "./stage-record-form";
+import { StatusBadge } from "@/components/status-badge";
+import { tentStatusTone } from "@/lib/format/status";
 
 export default async function TentPage({ params }: PageProps<"/tendas/[id]">) {
   const { id } = await params;
@@ -30,13 +32,14 @@ export default async function TentPage({ params }: PageProps<"/tendas/[id]">) {
   return (
     <>
       <PageHeader
+        icon={Tent}
         title={tentLabel(tent)}
         description={
           <>
             {tent.parish.name} · {tent.currentStage?.name ?? "Sem etapa"}{" "}
-            <Badge variant={tent.status === "active" ? "secondary" : "outline"} className="ml-1">
+            <StatusBadge tone={tentStatusTone[tent.status]} className="ml-1">
               {tentStatusLabels[tent.status]}
-            </Badge>
+            </StatusBadge>
           </>
         }
         actions={
@@ -87,9 +90,9 @@ export default async function TentPage({ params }: PageProps<"/tendas/[id]">) {
                         {family.label}
                       </Link>
                       {family.id === tent.guardianFamilyId && (
-                        <Badge variant="secondary" className="ml-2">
+                        <StatusBadge tone="brand" className="ml-2">
                           Guardiões
-                        </Badge>
+                        </StatusBadge>
                       )}
                     </TableCell>
                     <TableCell className="text-right tabular-nums">

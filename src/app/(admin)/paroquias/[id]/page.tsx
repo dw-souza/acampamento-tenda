@@ -1,3 +1,4 @@
+import { Church } from "lucide-react";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { getParish } from "@/lib/data/parishes";
@@ -10,7 +11,7 @@ export default async function EditParishPage({ params }: PageProps<"/paroquias/[
 
   return (
     <>
-      <PageHeader title={parish.name} />
+      <PageHeader icon={Church} title={parish.name} />
       <ParishForm
         id={parish.id}
         defaultValues={{

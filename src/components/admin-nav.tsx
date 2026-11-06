@@ -1,40 +1,31 @@
 import Image from "next/image";
 import Link from "next/link";
-import { type ReactNode } from "react";
-
-const links = [
-  { href: "/", label: "Início" },
-  { href: "/acampamentos", label: "Acampamentos" },
-  { href: "/familias", label: "Famílias" },
-  { href: "/tendas", label: "Tendas" },
-  { href: "/paroquias", label: "Paróquias" },
-  { href: "/equipes", label: "Equipes" },
-  { href: "/etapas", label: "Etapas" },
-];
+import { type ReactNode, Suspense } from "react";
+import { MobileNav, NavLinks } from "./nav-links";
 
 export function AdminNav({ userMenu }: { userMenu: ReactNode }) {
   return (
-    <header className="border-b bg-background print:hidden">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:gap-6">
-        <Link href="/" className="flex shrink-0 items-center gap-2 font-semibold">
-          {/* O logo é branco: precisa de fundo escuro. */}
-          <Image
-            src="/logo_tenda.webp"
-            alt=""
-            width={28}
-            height={28}
-            className="rounded-md bg-primary p-0.5"
-          />
-          <span className="sr-only sm:not-sr-only">Acampamento Tenda</span>
-        </Link>
-        <nav className="flex min-w-0 flex-1 items-center gap-4 overflow-x-auto text-sm whitespace-nowrap text-muted-foreground">
-          {links.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-foreground">
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-        {userMenu}
+    <header className="tenda-pattern sticky top-0 z-30 text-primary-foreground shadow-sm print:hidden">
+      <div className="mx-auto flex h-16 max-w-6xl items-stretch gap-4 px-4">
+        <div className="flex items-center gap-1">
+          <Suspense>
+            <MobileNav />
+          </Suspense>
+          <Link href="/" className="flex shrink-0 items-center gap-2.5">
+            {/* O logo é branco, feito para o fundo marrom. */}
+            <Image src="/logo_tenda.webp" alt="" width={40} height={40} priority />
+            <span className="font-heading text-lg leading-tight font-bold">
+              Comunidade
+              <br className="sm:hidden" /> Tenda
+            </span>
+          </Link>
+        </div>
+        <div className="flex flex-1 justify-center xl:ml-6">
+          <Suspense>
+            <NavLinks />
+          </Suspense>
+        </div>
+        <div className="flex items-center">{userMenu}</div>
       </div>
     </header>
   );
