@@ -1,165 +1,54 @@
-# Welcome to your Lovable project
+# Acampamento Tenda
 
-## Project info
+Sistema da Secretaria dos acampamentos da Comunidade Tenda: inscrições, tendas,
+equipes de trabalho, tesouraria e crachás.
 
-**URL**: https://lovable.dev/projects/047fe3b3-9d68-41f5-9ff0-084e7203e326
+## Stack
 
-## How can I edit this code?
+Next.js (App Router) · Drizzle ORM · Postgres (Neon em produção) · Better Auth · shadcn/ui · Vitest
 
-There are several ways of editing your application.
+## Rodando localmente
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/047fe3b3-9d68-41f5-9ff0-084e7203e326) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/047fe3b3-9d68-41f5-9ff0-084e7203e326) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
-
-# Tenda Família Digital
-
-Sistema de gerenciamento de acampamentos familiares com blog integrado.
-
-## 🖼️ Sistema de Imagens do Blog
-
-### Imagem de Destaque
-- **Upload**: Use o componente `ImageUpload` no formulário de blog
-- **Funcionalidades**: 
-  - Upload com drag & drop
-  - Preview da imagem
-  - Botão de remoção (X vermelho)
-  - Aspect ratio 16:9 (video)
-
-### Imagens no Conteúdo
-- **Upload**: Use o componente `ContentImageUpload` no editor de conteúdo
-- **Funcionalidades**:
-  - Upload múltiplas imagens
-  - Controle de tamanho personalizado
-  - HTML inline com estilos CSS
-  - Botão sempre disponível
-
-#### Opções de Tamanho:
-1. **Automático**: `max-width: 100%; height: auto;`
-2. **Pequeno**: `width: 300px; height: auto;`
-3. **Médio**: `width: 500px; height: auto;`
-4. **Grande**: `width: 800px; height: auto;`
-5. **Largura total**: `width: 100%; height: auto;`
-6. **Personalizado**: Define largura e altura específicas
-
-#### Exemplos de HTML gerado:
-```html
-<!-- Tamanho automático -->
-<img src="url-da-imagem" alt="Descrição" style="max-width: 100%; height: auto;" class="my-4 rounded-lg shadow mx-auto" />
-
-<!-- Tamanho médio -->
-<img src="url-da-imagem" alt="Descrição" style="width: 500px; height: auto;" class="my-4 rounded-lg shadow mx-auto" />
-
-<!-- Tamanho personalizado -->
-<img src="url-da-imagem" alt="Descrição" width="400px" height="300px" class="my-4 rounded-lg shadow mx-auto" />
-```
-
-### Como usar:
-1. **No editor de conteúdo**, clique no botão "Adicionar Imagem"
-2. **Configure as opções** clicando no ícone de engrenagem (⚙️)
-3. **Defina o texto alternativo** para acessibilidade
-4. **Escolha o tamanho** ou defina dimensões personalizadas
-5. **Faça upload** da imagem
-6. **O HTML será inserido** automaticamente no conteúdo
-
-### Suporte a Markdown e HTML:
-- ✅ Markdown padrão: `![alt](url)`
-- ✅ HTML inline: `<img src="url" alt="alt" style="..." />`
-- ✅ Controle total de tamanho e estilo
-- ✅ Preview em tempo real
-- ✅ Renderização correta na página pública
-
-## 🚀 Tecnologias
-
-- React + TypeScript
-- Vite
-- Tailwind CSS
-- Supabase (banco de dados + storage)
-- React Router
-- Lucide Icons
-
-## 📦 Instalação
+Requisitos: Node 24 e Docker.
 
 ```bash
 npm install
+cp .env.example .env.local        # preencha BETTER_AUTH_SECRET (openssl rand -base64 32)
+npm run db:up                     # Postgres local na porta 5433
+npm run db:migrate
+npm run db:seed                   # etapas e equipes
+npm run user:create -- "Seu Nome" voce@exemplo.com uma-senha
 npm run dev
 ```
 
-## 🗄️ Banco de Dados
+## Scripts
 
-Execute as migrações do Supabase:
+| Script | O que faz |
+|---|---|
+| `npm run dev` | Servidor de desenvolvimento |
+| `npm run typecheck` | Gera os tipos de rota e roda o `tsc` |
+| `npm test` | Testes de domínio (Vitest) |
+| `npm run db:generate` | Gera migration a partir de `src/db/schema` |
+| `npm run db:migrate` | Aplica migrations pendentes |
+| `npm run db:studio` | Drizzle Studio |
+| `npm run user:create` | Cria um usuário (não há cadastro público) |
 
-```bash
-supabase db reset
+## Organização
+
+```
+src/
+  app/(admin)/     telas autenticadas
+  app/login/       login
+  db/schema/       schema do banco (auth + domínio)
+  lib/dal.ts       requireUser(): checagem de sessão usada em toda leitura/escrita
+  lib/domain/      regras de negócio puras e testadas (valores, pajem…)
+  proxy.ts         redirecionamento otimista para /login
+scripts/           seed e criação de usuário
 ```
 
-## 📝 Blog
+## Modelo, em resumo
 
-O sistema inclui um blog completo com:
-- ✅ CRUD de posts
-- ✅ Upload de imagens
-- ✅ Controle de tamanho de imagens
-- ✅ Markdown + HTML inline
-- ✅ SEO otimizado
-- ✅ Tags e categorias
-- ✅ Preview em tempo real
+- **Família** é a unidade (casal + filhos, em `people`). Pertence a uma paróquia e, a partir do Kerigma, a uma tenda.
+- **Tenda** nasce com status `forming` junto do Kerigma (uma por paróquia) e vira `active` quando as inscrições fecham. Avança de etapa ao longo dos anos (`tent_stage_history`).
+- **Acampamento** pertence a uma etapa. Cada família tem uma única participação por acampamento (`camp_participants`: campista ou servo, equipe, pagamento), e `camp_attendees` registra quem da família vai de fato.
+- **Valor esperado** é calculado por pessoa presente; menores de 3 anos não pagam e contam para o pajem. Pagamento nunca bloqueia participação.
