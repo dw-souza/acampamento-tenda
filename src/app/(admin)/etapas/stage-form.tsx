@@ -19,7 +19,7 @@ export function StageForm({ id, defaultValues }: { id: string | null; defaultVal
   return (
     <form onSubmit={onSubmit} className="max-w-md">
       <FieldGroup>
-        <TextField control={control} name="name" label="Nome" />
+        <TextField uppercase control={control} name="name" label="Nome" />
         <TextField
           control={control}
           name="position"

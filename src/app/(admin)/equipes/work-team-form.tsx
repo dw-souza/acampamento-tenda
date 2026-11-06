@@ -21,7 +21,7 @@ export function WorkTeamForm({ id, defaultValues }: { id: string | null; default
   return (
     <form onSubmit={onSubmit} className="max-w-md">
       <FieldGroup>
-        <TextField control={control} name="name" label="Nome" />
+        <TextField uppercase control={control} name="name" label="Nome" />
         <SelectField
           control={control}
           name="kind"

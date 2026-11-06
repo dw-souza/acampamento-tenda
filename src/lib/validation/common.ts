@@ -8,6 +8,12 @@ export const optionalText = z
 
 export const requiredText = (message = "Obrigatório") => z.string().trim().min(1, message);
 
+// Nomes e endereços são gravados em maiúsculas (padrão da secretaria).
+export const optionalUpper = optionalText.transform((value) => value?.toUpperCase() ?? null);
+
+export const requiredUpper = (message = "Obrigatório") =>
+  requiredText(message).transform((value) => value.toUpperCase());
+
 /** Data opcional vinda de <input type="date">: "" vira null. */
 export const optionalDate = z
   .string()

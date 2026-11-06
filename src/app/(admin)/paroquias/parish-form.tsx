@@ -19,13 +19,13 @@ export function ParishForm({ id, defaultValues }: { id: string | null; defaultVa
   return (
     <form onSubmit={onSubmit} className="max-w-2xl">
       <FieldGroup>
-        <TextField control={control} name="name" label="Nome" />
+        <TextField uppercase control={control} name="name" label="Nome" />
         <div className="grid gap-4 sm:grid-cols-[1fr_6rem]">
-          <TextField control={control} name="city" label="Cidade" />
-          <TextField control={control} name="state" label="UF" maxLength={2} />
+          <TextField uppercase control={control} name="city" label="Cidade" />
+          <TextField uppercase control={control} name="state" label="UF" maxLength={2} />
         </div>
         <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
-          <TextField control={control} name="address" label="Endereço" />
+          <TextField uppercase control={control} name="address" label="Endereço" />
           <TextField control={control} name="zipCode" label="CEP" />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -33,7 +33,7 @@ export function ParishForm({ id, defaultValues }: { id: string | null; defaultVa
           <TextField control={control} name="email" label="E-mail" type="email" />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <TextField control={control} name="responsibleName" label="Responsável" />
+          <TextField uppercase control={control} name="responsibleName" label="Responsável" />
           <TextField control={control} name="responsiblePhone" label="Telefone do responsável" />
         </div>
         <CheckboxField control={control} name="active" label="Ativa" />

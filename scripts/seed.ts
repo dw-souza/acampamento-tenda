@@ -13,7 +13,7 @@ const stageSeed = [
   { name: "Caminho de Emaús", hasCamp: false },
   { name: "Koinonia", hasCamp: true },
   { name: "Consagração", hasCamp: false },
-].map((stage, i) => ({ ...stage, position: i + 1 }));
+].map((stage, i) => ({ ...stage, name: stage.name.toUpperCase(), position: i + 1 }));
 
 const teamSeed = [
   { name: "Cozinha", kind: "tent", color: "#EF4444", description: "Preparação das refeições" },
@@ -31,7 +31,10 @@ const teamSeed = [
 
 async function main() {
   await db.insert(stages).values(stageSeed).onConflictDoNothing();
-  await db.insert(workTeams).values([...teamSeed]).onConflictDoNothing();
+  await db
+    .insert(workTeams)
+    .values(teamSeed.map((team) => ({ ...team, name: team.name.toUpperCase() })))
+    .onConflictDoNothing();
   console.log(`Etapas: ${stageSeed.length}, equipes: ${teamSeed.length}`);
   process.exit(0);
 }

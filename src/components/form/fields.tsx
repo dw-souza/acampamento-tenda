@@ -31,8 +31,13 @@ export function TextField<T extends FieldValues, TOut>({
   label,
   description,
   className,
+  uppercase,
   ...inputProps
-}: BaseProps<T, TOut> & Omit<ComponentProps<typeof Input>, "name">) {
+}: BaseProps<T, TOut> &
+  Omit<ComponentProps<typeof Input>, "name"> & {
+    /** Mostra em maiúsculas enquanto digita (o schema grava em maiúsculas). */
+    uppercase?: boolean;
+  }) {
   return (
     <Controller
       control={control}
@@ -46,6 +51,7 @@ export function TextField<T extends FieldValues, TOut>({
             id={name}
             value={field.value ?? ""}
             aria-invalid={fieldState.invalid}
+            className={uppercase ? "uppercase" : undefined}
           />
           {description && <FieldDescription>{description}</FieldDescription>}
           {fieldState.error && <FieldError errors={[fieldState.error]} />}

@@ -1,15 +1,15 @@
 import { z } from "zod";
-import { optionalEmail, optionalText, requiredText } from "./common";
+import { optionalEmail, optionalText, optionalUpper, requiredUpper } from "./common";
 
 export const parishSchema = z.object({
-  name: requiredText("Informe o nome"),
-  city: requiredText("Informe a cidade"),
+  name: requiredUpper("Informe o nome"),
+  city: requiredUpper("Informe a cidade"),
   state: z.string().trim().length(2, "Use a sigla (ex.: SP)").toUpperCase(),
-  address: optionalText,
+  address: optionalUpper,
   zipCode: optionalText,
   phone: optionalText,
   email: optionalEmail,
-  responsibleName: optionalText,
+  responsibleName: optionalUpper,
   responsiblePhone: optionalText,
   active: z.boolean(),
 });

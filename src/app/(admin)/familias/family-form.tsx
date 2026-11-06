@@ -103,8 +103,8 @@ export function FamilyForm({
                 <X />
               </Button>
               <div className="grid gap-4 sm:grid-cols-[2fr_1fr_10rem]">
-                <TextField control={control} name={`children.${index}.fullName`} label="Nome completo" />
-                <TextField control={control} name={`children.${index}.badgeName`} label="Nome no crachá" />
+                <TextField uppercase control={control} name={`children.${index}.fullName`} label="Nome completo" />
+                <TextField uppercase control={control} name={`children.${index}.badgeName`} label="Nome no crachá" />
                 <TextField control={control} name={`children.${index}.birthDate`} label="Nascimento" type="date" />
                 <TextField
                   control={control}
@@ -129,12 +129,12 @@ export function FamilyForm({
         <FieldSet>
           <FieldLegend>Endereço</FieldLegend>
           <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
-            <TextField control={control} name="address" label="Endereço" />
-            <TextField control={control} name="neighborhood" label="Bairro" />
+            <TextField uppercase control={control} name="address" label="Endereço" />
+            <TextField uppercase control={control} name="neighborhood" label="Bairro" />
           </div>
           <div className="grid gap-4 sm:grid-cols-[2fr_6rem_10rem]">
-            <TextField control={control} name="city" label="Cidade" />
-            <TextField control={control} name="state" label="UF" maxLength={2} />
+            <TextField uppercase control={control} name="city" label="Cidade" />
+            <TextField uppercase control={control} name="state" label="UF" maxLength={2} />
             <TextField control={control} name="zipCode" label="CEP" />
           </div>
         </FieldSet>
@@ -167,8 +167,8 @@ function SpouseFields({
     <FieldSet>
       <FieldLegend>{title}</FieldLegend>
       <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
-        <TextField control={control} name={`${role}.fullName`} label="Nome completo" />
-        <TextField control={control} name={`${role}.badgeName`} label="Nome no crachá" />
+        <TextField uppercase control={control} name={`${role}.fullName`} label="Nome completo" />
+        <TextField uppercase control={control} name={`${role}.badgeName`} label="Nome no crachá" />
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
         <TextField control={control} name={`${role}.phone`} label="Telefone" type="tel" />
@@ -176,7 +176,7 @@ function SpouseFields({
         <TextField control={control} name={`${role}.birthDate`} label="Nascimento" type="date" />
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
-        <TextField control={control} name={`${role}.profession`} label="Profissão" />
+        <TextField uppercase control={control} name={`${role}.profession`} label="Profissão" />
         <TextField control={control} name={`${role}.dietaryRestrictions`} label="Restrição alimentar" />
         <SelectField control={control} name={`${role}.status`} label="Situação" options={statusOptions} />
       </div>

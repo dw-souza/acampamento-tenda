@@ -38,6 +38,7 @@ export function TentForm({
         <div className="grid gap-4 sm:grid-cols-[8rem_1fr]">
           <TextField control={control} name="number" label="Número" type="number" min={1} />
           <TextField
+            uppercase
             control={control}
             name="name"
             label="Nome"
@@ -64,7 +65,7 @@ export function TentForm({
         />
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField control={control} name="meetingSchedule" label="Dia e horário dos encontros" />
-          <TextField control={control} name="meetingLocation" label="Local dos encontros" />
+          <TextField uppercase control={control} name="meetingLocation" label="Local dos encontros" />
         </div>
         <TextField control={control} name="formedAt" label="Formada em" type="date" className="w-48" />
         <div className="flex gap-2">
