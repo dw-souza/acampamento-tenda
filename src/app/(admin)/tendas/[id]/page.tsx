@@ -13,14 +13,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { listStages } from "@/lib/data/stages";
 import { getTent } from "@/lib/data/tents";
 import { coupleName, formatDate, tentLabel, tentStatusLabels } from "@/lib/format/labels";
-import { deleteTent } from "../actions";
+import { deleteTent, removeTentStage } from "../actions";
+import { StageRecordForm } from "./stage-record-form";
 
 export default async function TentPage({ params }: PageProps<"/tendas/[id]">) {
   const { id } = await params;
-  const tent = await getTent(id);
+  const [tent, stages] = await Promise.all([getTent(id), listStages()]);
   if (!tent) notFound();
+  const recorded = new Set(tent.stageHistory.map((entry) => entry.stageId));
+  const milestoneOptions = stages
+    .filter((stage) => !stage.hasCamp && !recorded.has(stage.id))
+    .map((stage) => ({ value: stage.id, label: stage.name }));
 
   const families = tent.families
     .map((family) => ({ ...family, label: coupleName(family.people) }))
@@ -139,12 +145,26 @@ export default async function TentPage({ params }: PageProps<"/tendas/[id]">) {
               ) : (
                 <ol className="grid gap-2">
                   {history.map((entry) => (
-                    <li key={entry.id} className="flex justify-between gap-4">
+                    <li key={entry.id} className="flex items-center justify-between gap-4">
                       <span>{entry.stage.name}</span>
-                      <span className="text-muted-foreground tabular-nums">{formatDate(entry.date)}</span>
+                      <span className="flex items-center gap-1 text-muted-foreground tabular-nums">
+                        {formatDate(entry.date)}
+                        {!entry.campId && (
+                          <DeleteButton
+                            action={removeTentStage.bind(null, tent.id, entry.id)}
+                            title={`Remover ${entry.stage.name} do caminho?`}
+                            description="A etapa atual da tenda não muda; ajuste-a em Editar se precisar."
+                          />
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ol>
+              )}
+              {milestoneOptions.length > 0 && (
+                <div className="mt-4">
+                  <StageRecordForm tentId={tent.id} stageOptions={milestoneOptions} />
+                </div>
               )}
             </CardContent>
           </Card>

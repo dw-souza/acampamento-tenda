@@ -2,15 +2,15 @@
 
 import { Plus, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { type Control, useFieldArray, useWatch } from "react-hook-form";
 import { type Option, SelectField, TextareaField, TextField } from "@/components/form/fields";
 import { useActionForm } from "@/components/form/use-action-form";
 import { Button } from "@/components/ui/button";
 import { FieldGroup, FieldLegend, FieldSeparator, FieldSet } from "@/components/ui/field";
 import { personStatusLabels } from "@/lib/format/labels";
+import type { ActionResult } from "@/lib/action-result";
 import { type FamilyData, type FamilyInput, familySchema } from "@/lib/validation/family";
-import { saveFamily } from "./actions";
 
 type FamilyControl = Control<FamilyInput, unknown, FamilyData>;
 
@@ -31,32 +31,37 @@ export const emptyChild = {
 } satisfies FamilyInput["children"][number];
 
 export function FamilyForm({
-  id,
+  action,
   defaultValues,
   parishOptions,
   tentOptions,
+  cancelHref,
+  submitLabel = "Salvar",
 }: {
-  id: string | null;
+  action: (values: FamilyInput) => Promise<ActionResult>;
   defaultValues: FamilyInput;
   parishOptions: Option[];
-  tentOptions: (Option & { parishId: string })[];
+  /** Sem tendas: a tenda é definida pelo servidor (ex.: inscrição no Kerigma). */
+  tentOptions?: (Option & { parishId: string })[];
+  cancelHref: string;
+  submitLabel?: string;
 }) {
-  const { form, onSubmit, pending } = useActionForm({
-    schema: familySchema,
-    defaultValues,
-    action: (values) => saveFamily(id, values),
-  });
+  const { form, onSubmit, pending } = useActionForm({ schema: familySchema, defaultValues, action });
   const { control, getValues, setValue } = form;
   const children = useFieldArray({ control, name: "children" });
 
   const parishId = useWatch({ control, name: "parishId" });
-  const parishTents = tentOptions.filter((tent) => tent.parishId === parishId);
+  const parishTents = useMemo(
+    () => tentOptions?.filter((tent) => tent.parishId === parishId) ?? [],
+    [tentOptions, parishId],
+  );
 
   // Ao trocar de paróquia, a tenda escolhida deixa de valer.
   useEffect(() => {
+    if (!tentOptions) return;
     const tentId = getValues("tentId");
     if (tentId && !parishTents.some((tent) => tent.value === tentId)) setValue("tentId", "");
-  }, [parishId, parishTents, getValues, setValue]);
+  }, [tentOptions, parishTents, getValues, setValue]);
 
   return (
     <form onSubmit={onSubmit} className="max-w-3xl">
@@ -65,13 +70,15 @@ export function FamilyForm({
           <FieldLegend>Família</FieldLegend>
           <div className="grid gap-4 sm:grid-cols-2">
             <SelectField control={control} name="parishId" label="Paróquia" options={parishOptions} />
-            <SelectField
-              control={control}
-              name="tentId"
-              label="Tenda"
-              options={parishTents}
-              emptyLabel="Sem tenda"
-            />
+            {tentOptions && (
+              <SelectField
+                control={control}
+                name="tentId"
+                label="Tenda"
+                options={parishTents}
+                emptyLabel="Sem tenda"
+              />
+            )}
             <TextField control={control} name="weddingDate" label="Data de casamento" type="date" />
             <SelectField
               control={control}
@@ -143,9 +150,9 @@ export function FamilyForm({
 
         <div className="flex gap-2">
           <Button type="submit" disabled={pending}>
-            {pending ? "Salvando..." : "Salvar"}
+            {pending ? "Salvando..." : submitLabel}
           </Button>
-          <Button variant="outline" render={<Link href="/familias" />}>
+          <Button variant="outline" render={<Link href={cancelHref} />}>
             Cancelar
           </Button>
         </div>

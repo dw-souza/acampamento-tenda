@@ -13,7 +13,12 @@ export default async function EditStagePage({ params }: PageProps<"/etapas/[id]"
       <PageHeader title={stage.name} />
       <StageForm
         id={stage.id}
-        defaultValues={{ name: stage.name, position: stage.position, hasCamp: stage.hasCamp }}
+        defaultValues={{
+          name: stage.name,
+          position: stage.position,
+          hasCamp: stage.hasCamp,
+          formsTents: stage.formsTents,
+        }}
       />
     </>
   );

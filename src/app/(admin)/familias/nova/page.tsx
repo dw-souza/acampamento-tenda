@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/page-header";
 import { parishOptions } from "@/lib/data/parishes";
 import { tentOptions } from "@/lib/data/tents";
+import { saveFamily } from "../actions";
 import { FamilyForm } from "../family-form";
 import { newFamilyValues } from "../form-values";
 
@@ -12,7 +13,8 @@ export default async function NewFamilyPage({ searchParams }: PageProps<"/famili
     <>
       <PageHeader title="Nova família" />
       <FamilyForm
-        id={null}
+        action={saveFamily.bind(null, null)}
+        cancelHref="/familias"
         parishOptions={parishes}
         tentOptions={tents}
         defaultValues={newFamilyValues(

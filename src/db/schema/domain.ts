@@ -67,6 +67,9 @@ export const stages = pgTable("stages", {
   name: text().notNull().unique(),
   position: integer().notNull().unique(),
   hasCamp: boolean().notNull().default(false),
+  // Etapa em que as tendas nascem (Kerigma): o acampamento é por paróquia,
+  // com inscrição de famílias, e cada paróquia forma uma tenda nova.
+  formsTents: boolean().notNull().default(false),
   ...timestamps,
 });
 

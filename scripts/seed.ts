@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { stages, workTeams } from "@/db/schema";
 
 const stageSeed = [
-  { name: "Kerigma", hasCamp: true },
+  { name: "Kerigma", hasCamp: true, formsTents: true },
   { name: "Tabor", hasCamp: true },
   { name: "Ventania", hasCamp: false },
   { name: "Chai", hasCamp: false },

@@ -32,3 +32,11 @@ export const optionalEmail = z
   .trim()
   .refine((value) => value === "" || z.email().safeParse(value).success, "E-mail inválido")
   .transform((value) => value || null);
+
+export const requiredDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data");
+
+/** Inteiro opcional vindo de <input type="number">: "" vira null. */
+export const optionalInt = z
+  .union([z.string(), z.number()])
+  .transform((value) => (value === "" ? null : Number(value)))
+  .pipe(z.number().int("Use um número inteiro").min(0).nullable());

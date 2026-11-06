@@ -1,0 +1,1 @@
+ALTER TABLE "stages" ADD COLUMN "forms_tents" boolean DEFAULT false NOT NULL;

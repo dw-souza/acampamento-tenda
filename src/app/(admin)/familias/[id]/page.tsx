@@ -5,7 +5,7 @@ import { getFamily } from "@/lib/data/families";
 import { parishOptions } from "@/lib/data/parishes";
 import { tentOptions } from "@/lib/data/tents";
 import { coupleName, tentLabel } from "@/lib/format/labels";
-import { deleteFamily } from "../actions";
+import { deleteFamily, saveFamily } from "../actions";
 import { FamilyForm } from "../family-form";
 import { familyValues } from "../form-values";
 
@@ -29,7 +29,8 @@ export default async function FamilyPage({ params }: PageProps<"/familias/[id]">
         }
       />
       <FamilyForm
-        id={family.id}
+        action={saveFamily.bind(null, family.id)}
+        cancelHref="/familias"
         parishOptions={parishes}
         tentOptions={tents}
         defaultValues={familyValues(family)}

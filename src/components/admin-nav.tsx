@@ -4,6 +4,7 @@ import { type ReactNode } from "react";
 
 const links = [
   { href: "/", label: "Início" },
+  { href: "/acampamentos", label: "Acampamentos" },
   { href: "/familias", label: "Famílias" },
   { href: "/tendas", label: "Tendas" },
   { href: "/paroquias", label: "Paróquias" },

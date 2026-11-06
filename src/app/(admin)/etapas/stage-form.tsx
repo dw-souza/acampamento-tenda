@@ -29,6 +29,12 @@ export function StageForm({ id, defaultValues }: { id: string | null; defaultVal
           description="Posição da etapa no caminho (1 = primeira)."
         />
         <CheckboxField control={control} name="hasCamp" label="Esta etapa tem acampamento" />
+        <CheckboxField
+          control={control}
+          name="formsTents"
+          label="Nesta etapa nascem as tendas"
+          description="Acampamento por paróquia, com inscrição de famílias (ex.: Kerigma)."
+        />
         <div className="flex gap-2">
           <Button type="submit" disabled={pending}>
             {pending ? "Salvando..." : "Salvar"}
