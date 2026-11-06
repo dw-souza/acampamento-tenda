@@ -37,6 +37,7 @@ export function ActionButton({
       const result = await action();
       setOpen(false);
       if (result?.error) toast.error(result.error);
+      else if (result?.warning) toast.warning(result.warning);
       else if (successMessage) toast.success(successMessage);
     });
   }

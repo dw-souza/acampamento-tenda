@@ -4,14 +4,7 @@ import { SelectFilter } from "@/components/filters/select-filter";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { parishOptions } from "@/lib/data/parishes";
 import { listTents } from "@/lib/data/tents";
 import { tentLabel, tentStatusLabels } from "@/lib/format/labels";

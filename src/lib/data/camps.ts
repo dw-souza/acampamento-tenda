@@ -1,10 +1,11 @@
 import "server-only";
-import { and, asc, count, desc, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq, isNotNull, notExists } from "drizzle-orm";
 import { cache } from "react";
 import { db } from "@/db";
-import { campParticipants, camps, stages, tents } from "@/db/schema";
+import { campParticipants, camps, families, stages, tents } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
-import { type ParticipantForSummary, summarizeCamp } from "@/lib/domain/camp-summary";
+import type { ParticipantForSummary } from "@/lib/domain/camp-summary";
+import { coupleName, tentLabel } from "@/lib/format/labels";
 
 export async function listCamps() {
   await requireUser();
@@ -63,13 +64,11 @@ export function toSummaryInput(participant: CampParticipant): ParticipantForSumm
   return {
     status: participant.status,
     paidCents: participant.paidCents,
-    attendees: participant.attendees.map(({ person }) => ({ role: person.role, birthDate: person.birthDate })),
+    attendees: participant.attendees.map(({ person }) => ({
+      role: person.role,
+      birthDate: person.birthDate,
+    })),
   };
-}
-
-export async function getCampTotals(camp: Camp) {
-  const participants = await getCampParticipants(camp.id);
-  return summarizeCamp(participants.map(toSummaryInput), camp);
 }
 
 export async function campStageOptions() {
@@ -101,4 +100,28 @@ export async function tentsAvailableForCamp(camp: Camp) {
       ...tent,
       suggested: tent.currentStage?.position === camp.stage.position - 1,
     }));
+}
+
+/** Famílias de tendas ativas que ainda não têm função neste acampamento. */
+export async function familiesAvailableForCamp(campId: string) {
+  await requireUser();
+  const rows = await db.query.families.findMany({
+    where: and(
+      isNotNull(families.tentId),
+      notExists(
+        db
+          .select()
+          .from(campParticipants)
+          .where(and(eq(campParticipants.campId, campId), eq(campParticipants.familyId, families.id))),
+      ),
+    ),
+    with: { people: true, tent: true, parish: true },
+  });
+  return rows
+    .filter((family) => family.tent?.status === "active")
+    .map((family) => ({
+      value: family.id,
+      label: `${coupleName(family.people)} · ${tentLabel(family.tent!)} · ${family.parish.name}`,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 }

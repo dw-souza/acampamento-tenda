@@ -33,7 +33,9 @@ export async function saveTent(id: string | null, input: TentInput): Promise<Act
       tentId = created.id;
     }
   } catch (error) {
-    return { error: dbErrorMessage(error, { unique: "Já existe uma tenda com esse número nesta paróquia." }) };
+    return {
+      error: dbErrorMessage(error, { unique: "Já existe uma tenda com esse número nesta paróquia." }),
+    };
   }
   revalidatePath("/tendas");
   redirect(`/tendas/${tentId}`);
@@ -44,7 +46,11 @@ export async function deleteTent(id: string): Promise<ActionResult> {
   try {
     await db.delete(tents).where(eq(tents.id, id));
   } catch (error) {
-    return { error: dbErrorMessage(error, { inUse: "A tenda já participou de acampamentos. Marque-a como inativa." }) };
+    return {
+      error: dbErrorMessage(error, {
+        inUse: "A tenda já participou de acampamentos. Marque-a como inativa.",
+      }),
+    };
   }
   revalidatePath("/tendas");
   redirect("/tendas");

@@ -3,13 +3,7 @@
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { ActionResult } from "@/lib/action-result";
 import { participantStatusLabels } from "@/lib/validation/camp";
 import { setAttendance, setParticipantStatus } from "../../participant-actions";
@@ -57,7 +51,13 @@ export type MemberOption = {
   attending: boolean;
 };
 
-export function AttendanceChecks({ participantId, members }: { participantId: string; members: MemberOption[] }) {
+export function AttendanceChecks({
+  participantId,
+  members,
+}: {
+  participantId: string;
+  members: MemberOption[];
+}) {
   const { pending, run } = useAction();
   return (
     <div className="flex flex-wrap gap-x-4 gap-y-1">

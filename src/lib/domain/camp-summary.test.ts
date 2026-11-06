@@ -14,7 +14,11 @@ describe("summarizeCamp", () => {
         {
           status: "confirmed",
           paidCents: 10000,
-          attendees: [...couple, { role: "child", birthDate: "2015-01-01" }, { role: "child", birthDate: "2025-01-01" }],
+          attendees: [
+            ...couple,
+            { role: "child", birthDate: "2015-01-01" },
+            { role: "child", birthDate: "2025-01-01" },
+          ],
         },
         { status: "pending", paidCents: 0, attendees: [{ role: "wife", birthDate: null }] },
       ],

@@ -1,5 +1,13 @@
 import { z } from "zod";
-import { optionalDate, optionalEmail, optionalText, optionalUpper, optionalUuid, requiredUpper, uuid } from "./common";
+import {
+  optionalDate,
+  optionalEmail,
+  optionalText,
+  optionalUpper,
+  optionalUuid,
+  requiredUpper,
+  uuid,
+} from "./common";
 
 const personStatus = z.enum(["active", "deceased", "left"]);
 
@@ -30,7 +38,11 @@ export const familySchema = z.object({
   address: optionalUpper,
   neighborhood: optionalUpper,
   city: optionalUpper,
-  state: z.string().trim().toUpperCase().transform((value) => value || null),
+  state: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .transform((value) => value || null),
   zipCode: optionalText,
   weddingDate: optionalDate,
   mainContactRole: z.enum(["husband", "wife"]),

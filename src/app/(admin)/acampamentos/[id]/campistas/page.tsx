@@ -3,24 +3,15 @@ import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/delete-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { type CampParticipant, getCamp, getCampParticipants, toSummaryInput } from "@/lib/data/camps";
 import { countsTowardCamp, summarizeParticipant } from "@/lib/domain/camp-summary";
-import { ageOn, isToddler } from "@/lib/domain/pricing";
-import { coupleName, tentLabel } from "@/lib/format/labels";
+import { coupleName, plural, tentLabel } from "@/lib/format/labels";
 import { formatMoney } from "@/lib/format/money";
 import { participantStatusLabels } from "@/lib/validation/camp";
 import { removeParticipant } from "../../participant-actions";
-import { AttendanceChecks, type MemberOption, StatusSelect } from "./participant-controls";
-
-const roleOrder = { husband: 0, wife: 1, child: 2 } as const;
+import { memberOptions } from "../members";
+import { AttendanceChecks, StatusSelect } from "./participant-controls";
 
 export default async function CampersPage({ params }: PageProps<"/acampamentos/[id]/campistas">) {
   const { id } = await params;
@@ -47,8 +38,9 @@ export default async function CampersPage({ params }: PageProps<"/acampamentos/[
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">
-          {participants.length} famílias
-          {statusCounts.length > 0 && ` · ${statusCounts.map((entry) => `${entry.n} ${entry.label.toLowerCase()}`).join(" · ")}`}
+          {plural(participants.length, "família", "famílias")}
+          {statusCounts.length > 0 &&
+            ` · ${statusCounts.map((entry) => `${entry.n} ${entry.label.toLowerCase()}`).join(" · ")}`}
         </p>
         {canRegister && (
           <Button render={<Link href={`/acampamentos/${camp.id}/inscricao`} />}>Inscrever família</Button>
@@ -86,24 +78,18 @@ export default async function CampersPage({ params }: PageProps<"/acampamentos/[
                   .map((participant) => ({ participant, name: coupleName(participant.family.people) }))
                   .sort((a, b) => a.name.localeCompare(b.name))
                   .map(({ participant, name }) => {
-                    const attending = new Set(participant.attendees.map((a) => a.personId));
-                    const members: MemberOption[] = participant.family.people
-                      .filter((person) => person.status === "active" || attending.has(person.id))
-                      .sort((a, b) => roleOrder[a.role] - roleOrder[b.role] || (a.birthDate ?? "").localeCompare(b.birthDate ?? ""))
-                      .map((person) => ({
-                        id: person.id,
-                        label: person.badgeName ?? person.fullName.split(" ")[0],
-                        attending: attending.has(person.id),
-                        detail:
-                          person.role === "child" && person.birthDate
-                            ? `${ageOn(person.birthDate, camp.startDate)}a${isToddler(person, camp.startDate) ? " · pajem" : ""}`
-                            : undefined,
-                      }));
+                    const members = memberOptions(participant, camp.startDate);
                     const summary = summarizeParticipant(toSummaryInput(participant), camp);
                     return (
-                      <TableRow key={participant.id} className={countsTowardCamp(participant.status) ? undefined : "opacity-60"}>
+                      <TableRow
+                        key={participant.id}
+                        className={countsTowardCamp(participant.status) ? undefined : "opacity-60"}
+                      >
                         <TableCell className="align-top">
-                          <Link href={`/familias/${participant.familyId}`} className="font-medium hover:underline">
+                          <Link
+                            href={`/familias/${participant.familyId}`}
+                            className="font-medium hover:underline"
+                          >
                             {name}
                           </Link>
                         </TableCell>

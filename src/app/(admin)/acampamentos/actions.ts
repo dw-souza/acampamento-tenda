@@ -66,7 +66,10 @@ export async function deleteCamp(campId: string): Promise<ActionResult> {
         .from(campParishes)
         .where(eq(campParishes.campId, campId));
       await tx.delete(camps).where(eq(camps.id, campId));
-      await deleteEmptyFormingTents(tx, forming.flatMap((row) => (row.id ? [row.id] : [])));
+      await deleteEmptyFormingTents(
+        tx,
+        forming.flatMap((row) => (row.id ? [row.id] : [])),
+      );
     });
   } catch (error) {
     return { error: dbErrorMessage(error) };
@@ -151,14 +154,20 @@ export async function removeCampParish(campId: string, parishId: string): Promis
 export async function addCampTent(campId: string, tentId: string): Promise<ActionResult> {
   await requireUser();
   const camp = await loadCamp(campId);
-  if (!camp || camp.stage.formsTents) return { error: "Neste acampamento as famílias se inscrevem por paróquia." };
+  if (!camp || camp.stage.formsTents)
+    return { error: "Neste acampamento as famílias se inscrevem por paróquia." };
   if (camp.status === "finished") return { error: "O acampamento já foi realizado." };
 
   try {
     await db.transaction(async (tx) => {
       await tx.insert(campTents).values({ campId, tentId, role: "camper" });
       const members = await tx.select({ id: families.id }).from(families).where(eq(families.tentId, tentId));
-      await addFamiliesToCamp(tx, campId, members.map((family) => family.id), { role: "camper" });
+      await addFamiliesToCamp(
+        tx,
+        campId,
+        members.map((family) => family.id),
+        { role: "camper" },
+      );
     });
   } catch (error) {
     return { error: dbErrorMessage(error, { unique: "Esta tenda já está no acampamento." }) };
@@ -192,7 +201,10 @@ export async function removeCampTent(campId: string, tentId: string): Promise<Ac
 
 export async function openRegistrations(campId: string): Promise<ActionResult> {
   await requireUser();
-  await db.update(camps).set({ status: "open" }).where(and(eq(camps.id, campId), eq(camps.status, "draft")));
+  await db
+    .update(camps)
+    .set({ status: "open" })
+    .where(and(eq(camps.id, campId), eq(camps.status, "draft")));
   revalidateCamp(campId);
   return undefined;
 }

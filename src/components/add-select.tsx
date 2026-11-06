@@ -3,13 +3,7 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { ActionResult } from "@/lib/action-result";
 
 /** Select + botão "Adicionar" que chama uma Server Action com o valor escolhido. */
@@ -31,8 +25,9 @@ export function AddSelect({
     if (!value) return;
     startTransition(async () => {
       const result = await action(value);
-      if (result?.error) toast.error(result.error);
-      else setValue(null);
+      if (result?.error) return void toast.error(result.error);
+      if (result?.warning) toast.warning(result.warning);
+      setValue(null);
     });
   }
 

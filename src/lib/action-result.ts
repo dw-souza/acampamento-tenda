@@ -1,7 +1,9 @@
 import { DatabaseError } from "pg";
 import type { z } from "zod";
 
-export type ActionResult = { error: string } | undefined;
+/** error: nada foi feito. warning: foi feito, mas com ressalva para a secretaria. */
+export type ActionResult =
+  { error: string; warning?: undefined } | { warning: string; error?: undefined } | undefined;
 
 /** Converte erros conhecidos do Postgres em mensagens para a secretaria. */
 export function dbErrorMessage(error: unknown, messages: { unique?: string; inUse?: string } = {}) {

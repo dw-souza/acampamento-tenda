@@ -36,12 +36,7 @@ export function CampForm({
           <TextField control={control} name="endDate" label="Fim" type="date" />
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
-          <TextField
-            control={control}
-            name="adultPrice"
-            label="Valor por adulto (R$)"
-            inputMode="decimal"
-          />
+          <TextField control={control} name="adultPrice" label="Valor por adulto (R$)" inputMode="decimal" />
           <TextField
             control={control}
             name="childPrice"

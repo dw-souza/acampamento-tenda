@@ -8,7 +8,10 @@ export default async function NewStagePage() {
   return (
     <>
       <PageHeader title="Nova etapa" />
-      <StageForm id={null} defaultValues={{ name: "", position: nextPosition, hasCamp: false, formsTents: false }} />
+      <StageForm
+        id={null}
+        defaultValues={{ name: "", position: nextPosition, hasCamp: false, formsTents: false }}
+      />
     </>
   );
 }

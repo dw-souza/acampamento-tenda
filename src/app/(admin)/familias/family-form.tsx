@@ -110,9 +110,24 @@ export function FamilyForm({
                 <X />
               </Button>
               <div className="grid gap-4 sm:grid-cols-[2fr_1fr_10rem]">
-                <TextField uppercase control={control} name={`children.${index}.fullName`} label="Nome completo" />
-                <TextField uppercase control={control} name={`children.${index}.badgeName`} label="Nome no crachá" />
-                <TextField control={control} name={`children.${index}.birthDate`} label="Nascimento" type="date" />
+                <TextField
+                  uppercase
+                  control={control}
+                  name={`children.${index}.fullName`}
+                  label="Nome completo"
+                />
+                <TextField
+                  uppercase
+                  control={control}
+                  name={`children.${index}.badgeName`}
+                  label="Nome no crachá"
+                />
+                <TextField
+                  control={control}
+                  name={`children.${index}.birthDate`}
+                  label="Nascimento"
+                  type="date"
+                />
                 <TextField
                   control={control}
                   name={`children.${index}.dietaryRestrictions`}
@@ -127,7 +142,12 @@ export function FamilyForm({
               </div>
             </div>
           ))}
-          <Button type="button" variant="outline" className="w-fit" onClick={() => children.append(emptyChild)}>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-fit"
+            onClick={() => children.append(emptyChild)}
+          >
             <Plus /> Adicionar filho
           </Button>
         </FieldSet>

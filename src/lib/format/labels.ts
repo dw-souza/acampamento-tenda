@@ -29,3 +29,16 @@ export function formatDate(iso: string | null) {
   const [y, m, d] = iso.split("-");
   return `${d}/${m}/${y}`;
 }
+
+/** "1 família", "3 famílias". */
+export function plural(n: number, singular: string, pluralForm: string) {
+  return `${n} ${n === 1 ? singular : pluralForm}`;
+}
+
+export function peopleSummary(totals: { families: number; adults: number; children: number }) {
+  return [
+    plural(totals.families, "família", "famílias"),
+    plural(totals.adults, "adulto", "adultos"),
+    plural(totals.children, "filho", "filhos"),
+  ].join(" · ");
+}

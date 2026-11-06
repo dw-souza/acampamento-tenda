@@ -2,14 +2,7 @@ import Link from "next/link";
 import { DeleteButton } from "@/components/delete-button";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listWorkTeams } from "@/lib/data/work-teams";
 import { teamKinds } from "@/lib/validation/work-team";
 import { deleteWorkTeam } from "./actions";
@@ -36,7 +29,10 @@ export default async function WorkTeamsPage() {
           {teams.map((team) => (
             <TableRow key={team.id}>
               <TableCell>
-                <Link href={`/equipes/${team.id}`} className="flex items-center gap-2 font-medium hover:underline">
+                <Link
+                  href={`/equipes/${team.id}`}
+                  className="flex items-center gap-2 font-medium hover:underline"
+                >
                   <span
                     className="size-3 rounded-full border"
                     style={{ backgroundColor: team.color ?? undefined }}

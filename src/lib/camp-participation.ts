@@ -37,7 +37,15 @@ export async function addFamiliesToCamp(
   const members = await tx
     .select({ id: people.id, familyId: people.familyId })
     .from(people)
-    .where(and(inArray(people.familyId, created.map((row) => row.familyId)), eq(people.status, "active")));
+    .where(
+      and(
+        inArray(
+          people.familyId,
+          created.map((row) => row.familyId),
+        ),
+        eq(people.status, "active"),
+      ),
+    );
 
   const participantByFamily = new Map(created.map((row) => [row.familyId, row.id]));
   if (members.length > 0) {

@@ -17,7 +17,12 @@ const stageSeed = [
 
 const teamSeed = [
   { name: "Cozinha", kind: "tent", color: "#EF4444", description: "Preparação das refeições" },
-  { name: "Secretaria", kind: "tent", color: "#3B82F6", description: "Organização, inscrições, tesouraria e crachás" },
+  {
+    name: "Secretaria",
+    kind: "tent",
+    color: "#3B82F6",
+    description: "Organização, inscrições, tesouraria e crachás",
+  },
   { name: "Capela", kind: "tent", color: "#8B5CF6", description: "Liturgia e momentos espirituais" },
   { name: "Filhos", kind: "tent", color: "#10B981", description: "Cuidado e atividades das crianças" },
   { name: "Limpeza", kind: "tent", color: "#F59E0B", description: "Limpeza e organização dos espaços" },

@@ -23,15 +23,15 @@ npm run dev
 
 ## Scripts
 
-| Script | O que faz |
-|---|---|
-| `npm run dev` | Servidor de desenvolvimento |
-| `npm run typecheck` | Gera os tipos de rota e roda o `tsc` |
-| `npm test` | Testes de domínio (Vitest) |
+| Script                | O que faz                                  |
+| --------------------- | ------------------------------------------ |
+| `npm run dev`         | Servidor de desenvolvimento                |
+| `npm run typecheck`   | Gera os tipos de rota e roda o `tsc`       |
+| `npm test`            | Testes de domínio (Vitest)                 |
 | `npm run db:generate` | Gera migration a partir de `src/db/schema` |
-| `npm run db:migrate` | Aplica migrations pendentes |
-| `npm run db:studio` | Drizzle Studio |
-| `npm run user:create` | Cria um usuário (não há cadastro público) |
+| `npm run db:migrate`  | Aplica migrations pendentes                |
+| `npm run db:studio`   | Drizzle Studio                             |
+| `npm run user:create` | Cria um usuário (não há cadastro público)  |
 
 ## Organização
 

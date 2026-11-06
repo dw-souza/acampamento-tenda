@@ -4,23 +4,16 @@ import { ActionButton } from "@/components/action-button";
 import { AddSelect } from "@/components/add-select";
 import { DeleteButton } from "@/components/delete-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { parishOptions } from "@/lib/data/parishes";
 import {
   type Camp,
   getCamp,
   getCampParticipants,
-  getCampTotals,
   tentsAvailableForCamp,
+  toSummaryInput,
 } from "@/lib/data/camps";
-import { countsTowardCamp } from "@/lib/domain/camp-summary";
+import { countsTowardCamp, summarizeCamp } from "@/lib/domain/camp-summary";
 import { tentLabel } from "@/lib/format/labels";
 import { formatMoney } from "@/lib/format/money";
 import {
@@ -38,13 +31,16 @@ export default async function CampOverviewPage({ params }: PageProps<"/acampamen
   const { id } = await params;
   const camp = await getCamp(id);
   if (!camp) notFound();
-  const totals = await getCampTotals(camp);
+  const participants = await getCampParticipants(camp.id);
+  const totals = summarizeCamp(participants.map(toSummaryInput), camp);
+  const campers = summarizeCamp(participants.filter((p) => p.role === "camper").map(toSummaryInput), camp);
 
   const stats = [
     {
-      label: "Famílias",
-      value: camp.expectedFamilies ? `${totals.families} / ${camp.expectedFamilies}` : totals.families,
+      label: "Famílias campistas",
+      value: camp.expectedFamilies ? `${campers.families} / ${camp.expectedFamilies}` : campers.families,
     },
+    { label: "Famílias servindo", value: totals.families - campers.families },
     { label: "Adultos", value: totals.adults },
     { label: "Filhos", value: totals.children },
     { label: "Pajem (menores de 3)", value: totals.toddlers },
@@ -54,7 +50,7 @@ export default async function CampOverviewPage({ params }: PageProps<"/acampamen
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
         {stats.map((stat) => (
           <Card key={stat.label} size="sm">
             <CardHeader>
@@ -82,7 +78,8 @@ function StatusCard({ camp }: { camp: Camp }) {
             (camp.stage.formsTents
               ? "Ao encerrar as inscrições, cada tenda em formação passa a ativa com as famílias confirmadas."
               : "Ao encerrar, a lista de campistas fica fechada.")}
-          {camp.status === "closed" && "Depois do acampamento, marque como realizado para registrar a etapa nas tendas."}
+          {camp.status === "closed" &&
+            "Depois do acampamento, marque como realizado para registrar a etapa nas tendas."}
           {camp.status === "finished" && "Acampamento realizado."}
         </CardDescription>
       </CardHeader>
@@ -139,7 +136,9 @@ async function ParishesCard({ camp }: { camp: Camp }) {
     <Card>
       <CardHeader>
         <CardTitle>Paróquias</CardTitle>
-        <CardDescription>Cada paróquia forma uma tenda nova com as famílias inscritas por ela.</CardDescription>
+        <CardDescription>
+          Cada paróquia forma uma tenda nova com as famílias inscritas por ela.
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <Table>
@@ -212,7 +211,9 @@ async function TentsCard({ camp }: { camp: Camp }) {
     <Card>
       <CardHeader>
         <CardTitle>Tendas campistas</CardTitle>
-        <CardDescription>Todas as famílias da tenda entram como campistas; ajuste quem vai na aba Campistas.</CardDescription>
+        <CardDescription>
+          Todas as famílias da tenda entram como campistas; ajuste quem vai na aba Campistas.
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <Table>
@@ -243,7 +244,8 @@ async function TentsCard({ camp }: { camp: Camp }) {
                 <TableCell className="text-right tabular-nums">
                   {
                     participants.filter(
-                      (p) => p.role === "camper" && p.family.tentId === link.tentId && countsTowardCamp(p.status),
+                      (p) =>
+                        p.role === "camper" && p.family.tentId === link.tentId && countsTowardCamp(p.status),
                     ).length
                   }
                 </TableCell>
