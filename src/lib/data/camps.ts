@@ -2,11 +2,38 @@ import "server-only";
 import { and, asc, count, desc, eq, isNotNull, notExists, sql } from "drizzle-orm";
 import { cache } from "react";
 import { db } from "@/db";
-import { campParishes, campParticipants, camps, families, parishes, stages, tents } from "@/db/schema";
+import {
+  campParishes,
+  campParticipants,
+  camps,
+  campTents,
+  families,
+  parishes,
+  stages,
+  tents,
+} from "@/db/schema";
 import { requireUser } from "@/lib/dal";
 import type { ParticipantForSummary } from "@/lib/domain/camp-summary";
 import { canServe } from "@/lib/domain/eligibility";
 import { coupleName, tentLabel } from "@/lib/format/labels";
+
+/**
+ * Tendas campistas do acampamento, "TENDA 3 – SANTA GIANNA, ...": no acampamento aberto são os
+ * tendas em formação de cada paróquia; nos demais, os tendas vinculados como campistas.
+ */
+export function camperTentsLabel() {
+  return sql<string | null>`(
+    select string_agg('TENDA ' || ${tents.number} || ' – ' || ${parishes.name}, ', '
+      order by ${parishes.name}, ${tents.number})
+    from ${tents} join ${parishes} on ${parishes.id} = ${tents.parishId}
+    where ${tents.id} in (
+      select ${campParishes.formingTentId} from ${campParishes} where ${campParishes.campId} = ${camps.id}
+      union
+      select ${campTents.tentId} from ${campTents}
+      where ${campTents.campId} = ${camps.id} and ${campTents.role} = 'camper'
+    )
+  )`;
+}
 
 /** stageId opcional filtra por etapa. */
 export async function listCamps(filters: { stageId?: string } = {}) {
@@ -26,12 +53,7 @@ export async function listCamps(filters: { stageId?: string } = {}) {
       stageName: stages.name,
       stageFormsTents: stages.formsTents,
       families: families.n,
-      // Paróquias do acampamento aberto, para distinguir Kerigmas da mesma temporada.
-      parishNames: sql<string | null>`(
-        select string_agg(${parishes.name}, ', ' order by ${parishes.name})
-        from ${campParishes} join ${parishes} on ${parishes.id} = ${campParishes.parishId}
-        where ${campParishes.campId} = ${camps.id}
-      )`,
+      camperTents: camperTentsLabel(),
     })
     .from(camps)
     .innerJoin(stages, eq(stages.id, camps.stageId))

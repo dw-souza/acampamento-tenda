@@ -56,7 +56,7 @@ export default async function CampsPage({ searchParams }: PageProps<"/acampament
                     stage: { name: camp.stageName, formsTents: camp.stageFormsTents },
                   })}
                 </Link>
-                {camp.parishNames && <div className="text-xs text-muted-foreground">{camp.parishNames}</div>}
+                {camp.camperTents && <div className="text-xs text-muted-foreground">{camp.camperTents}</div>}
               </TableCell>
               <TableCell className="tabular-nums">
                 {formatDate(camp.startDate)} a {formatDate(camp.endDate)}

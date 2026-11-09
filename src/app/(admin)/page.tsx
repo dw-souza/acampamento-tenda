@@ -187,8 +187,8 @@ function CampItem({ camp, children }: { camp: CampSummary; children?: ReactNode 
             stage: { name: camp.stageName, formsTents: camp.stageFormsTents },
           })}
         </Link>
+        {camp.camperTents && <p className="text-xs text-muted-foreground">{camp.camperTents}</p>}
         <p className="text-xs text-muted-foreground tabular-nums">
-          {formatDate(camp.startDate)} a {formatDate(camp.endDate)} ·{" "}
           {plural(camp.campers ?? 0, "família campista", "famílias campistas")} ·{" "}
           {plural(camp.servers ?? 0, "servindo", "servindo")}
         </p>

@@ -13,6 +13,7 @@ import {
   tentStageHistory,
 } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
+import { camperTentsLabel } from "./camps";
 
 export async function communityTotals() {
   await requireUser();
@@ -100,6 +101,7 @@ const campColumns = (counts: ReturnType<typeof participantCounts>) => ({
   stageName: stages.name,
   stageFormsTents: stages.formsTents,
   stagePosition: stages.position,
+  camperTents: camperTentsLabel(),
   campers: counts.campers,
   servers: counts.servers,
 });
