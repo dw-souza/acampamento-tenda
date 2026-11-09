@@ -1,5 +1,5 @@
 import type { CampParticipant } from "@/lib/data/camps";
-import { ageOn, isToddler } from "@/lib/domain/pricing";
+import { ageOn } from "@/lib/domain/pricing";
 import type { MemberOption } from "./campistas/participant-controls";
 
 const roleOrder = { husband: 0, wife: 1, child: 2 } as const;
@@ -18,7 +18,7 @@ export function memberOptions(participant: CampParticipant, campStartDate: strin
       attending: attending.has(person.id),
       detail:
         person.role === "child" && person.birthDate
-          ? `${ageOn(person.birthDate, campStartDate)}a${isToddler(person, campStartDate) ? " · pajem" : ""}`
+          ? `${ageOn(person.birthDate, campStartDate)}a`
           : undefined,
     }));
 }

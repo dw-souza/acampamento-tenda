@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { type CampParticipant, getCamp, getCampParticipants, toSummaryInput } from "@/lib/data/camps";
-import { countsTowardCamp, summarizeParticipant } from "@/lib/domain/camp-summary";
+import { countsTowardCamp, summarizeCamp, summarizeParticipant } from "@/lib/domain/camp-summary";
 import { coupleName, plural, tentLabel } from "@/lib/format/labels";
 import { formatMoney } from "@/lib/format/money";
 import { participantStatusLabels } from "@/lib/validation/camp";
@@ -13,7 +13,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { participantStatusTone } from "@/lib/format/status";
 import { removeParticipant } from "../../participant-actions";
 import { memberOptions } from "../members";
-import { AttendanceChecks, StatusSelect } from "./participant-controls";
+import { AttendanceChecks, NannyControl, StatusSelect } from "./participant-controls";
 
 export default async function CampersPage({ params }: PageProps<"/acampamentos/[id]/campistas">) {
   const { id } = await params;
@@ -45,11 +45,20 @@ export default async function CampersPage({ params }: PageProps<"/acampamentos/[
         .join(" · ")
     : plural(participants.length, "família", "famílias");
   const canRegister = isOpenCamp && scheduled;
+  const nannyPending = summarizeCamp(participants.map(toSummaryInput), camp).nannyPending;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className="text-sm text-muted-foreground">{statusSummary}</p>
+        <p className="text-sm text-muted-foreground">
+          {statusSummary}
+          {nannyPending > 0 && (
+            <span className="text-amber-700">
+              {" "}
+              · {plural(nannyPending, "família precisa informar a babá", "famílias precisam informar a babá")}
+            </span>
+          )}
+        </p>
         {canRegister && (
           <Button render={<Link href={`/acampamentos/${camp.id}/inscricao`} />}>Inscrever família</Button>
         )}
@@ -103,6 +112,13 @@ export default async function CampersPage({ params }: PageProps<"/acampamentos/[
                         </TableCell>
                         <TableCell className="align-top whitespace-normal">
                           <AttendanceChecks participantId={participant.id} members={members} />
+                          {summary.nanny !== "not_needed" && countsTowardCamp(participant.status) && (
+                            <NannyControl
+                              participantId={participant.id}
+                              status={summary.nanny}
+                              name={participant.nannyName}
+                            />
+                          )}
                         </TableCell>
                         {isOpenCamp && (
                           <TableCell className="align-top">

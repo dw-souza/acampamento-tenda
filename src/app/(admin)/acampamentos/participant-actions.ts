@@ -120,3 +120,21 @@ export async function removeParticipant(participantId: string): Promise<ActionRe
   revalidateCamp(participant.campId);
   return undefined;
 }
+
+/**
+ * Babá (pajem) de quem leva criança com menos de 3 anos: se vai e quem é. Como "quem vai",
+ * pode ser ajustada mesmo depois de concluído.
+ */
+export async function setNanny(participantId: string, going: boolean, name: string): Promise<ActionResult> {
+  await requireUser();
+  const nannyName = name.trim().toUpperCase();
+  if (going && !nannyName) return { error: "Informe o nome da babá." };
+
+  const [row] = await db
+    .update(campParticipants)
+    .set({ nannyGoing: going, nannyName: going ? nannyName : null })
+    .where(eq(campParticipants.id, participantId))
+    .returning({ campId: campParticipants.campId });
+  if (row) revalidateCamp(row.campId);
+  return undefined;
+}

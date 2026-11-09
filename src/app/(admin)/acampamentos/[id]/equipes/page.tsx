@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
+  type CampParticipant,
   familiesEligibleToServe,
   getCamp,
   getCampParticipants,
@@ -14,12 +15,12 @@ import {
   toSummaryInput,
 } from "@/lib/data/camps";
 import { listWorkTeams } from "@/lib/data/work-teams";
-import { summarizeCamp } from "@/lib/domain/camp-summary";
-import { coupleName, peopleSummary, tentLabel } from "@/lib/format/labels";
+import { nannyStatus, summarizeCamp } from "@/lib/domain/camp-summary";
+import { coupleName, peopleSummary, plural, tentLabel } from "@/lib/format/labels";
 import { teamKinds } from "@/lib/validation/work-team";
 import { removeParticipant } from "../../participant-actions";
 import { addTeamFamily, addTeamTent, removeTeamTent } from "../../team-actions";
-import { AttendanceChecks } from "../campistas/participant-controls";
+import { AttendanceChecks, NannyControl } from "../campistas/participant-controls";
 import { memberOptions } from "../members";
 import { CoordinatorCheck } from "./coordinator-check";
 
@@ -47,7 +48,18 @@ export default async function CampTeamsPage({ params }: PageProps<"/acampamentos
     <div className="flex flex-col gap-6">
       <p className="text-sm text-muted-foreground">
         Servindo: {peopleSummary(total)}
-        {total.toddlers > 0 && ` (${total.toddlers} com pajem)`}
+        {total.nannies > 0 && ` · ${plural(total.nannies, "babá", "babás")}`}
+        {total.nannyPending > 0 && (
+          <span className="text-amber-700">
+            {" "}
+            ·{" "}
+            {plural(
+              total.nannyPending,
+              "família precisa informar a babá",
+              "famílias precisam informar a babá",
+            )}
+          </span>
+        )}
         <br />
         Para servir, o tenda precisa já ter passado pelo {camp.stage.name}. Tendas sem etapa registrada não
         aparecem.
@@ -139,6 +151,7 @@ export default async function CampTeamsPage({ params }: PageProps<"/acampamentos
                               participantId={participant.id}
                               members={memberOptions(participant, camp.startDate)}
                             />
+                            <NannyFor participant={participant} startDate={camp.startDate} />
                           </TableCell>
                           <TableCell className="text-center align-top">
                             <CoordinatorCheck
@@ -185,4 +198,10 @@ export default async function CampTeamsPage({ params }: PageProps<"/acampamentos
         })}
     </div>
   );
+}
+
+function NannyFor({ participant, startDate }: { participant: CampParticipant; startDate: string }) {
+  const status = nannyStatus(toSummaryInput(participant), startDate);
+  if (status === "not_needed") return null;
+  return <NannyControl participantId={participant.id} status={status} name={participant.nannyName} />;
 }

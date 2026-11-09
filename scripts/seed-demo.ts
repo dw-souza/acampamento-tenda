@@ -5,7 +5,7 @@ import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { canServe } from "@/lib/domain/eligibility";
-import { type AttendeeForPricing, expectedAmountCents } from "@/lib/domain/pricing";
+import { type AttendeeForPricing, expectedAmountCents, isToddler } from "@/lib/domain/pricing";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Stage = typeof schema.stages.$inferSelect;
@@ -524,8 +524,26 @@ async function addParticipants(
               ? Math.round(expected / 2 / 100) * 100
               : 0;
 
+    // Babá: quem leva criança com menos de 3 anos informa se vai e quem é. Nos acampamentos
+    // já realizados está sempre informado; nos próximos, parte ainda está pendente.
+    const needsNanny = attending.some(
+      (person) =>
+        person.role === "child" &&
+        isToddler({ role: "child", birthDate: person.birthDate ?? null }, camp.startDate),
+    );
+    const nannyGoing = !needsNanny
+      ? null
+      : camp.payments === "finished"
+        ? chance(0.7)
+        : chance(0.3)
+          ? null
+          : chance(0.65);
+    const nannyName = nannyGoing ? `${pick(WOMEN)} ${pick(SURNAMES)}` : null;
+
     participants.push({
       id: participantId,
+      nannyGoing,
+      nannyName,
       campId: camp.id,
       familyId: family.id,
       role,

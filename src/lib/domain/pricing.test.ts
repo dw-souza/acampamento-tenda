@@ -42,7 +42,7 @@ describe("expectedAmountCents", () => {
   });
 });
 
-describe("pajem", () => {
+describe("menores de 3 anos", () => {
   it("conta só crianças menores de 3 anos", () => {
     const kids = [
       { role: "child" as const, birthDate: "2024-05-01" },

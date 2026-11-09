@@ -96,6 +96,7 @@ export function toSummaryInput(participant: CampParticipant): ParticipantForSumm
     role: participant.role,
     status: participant.status,
     paidCents: participant.paidCents,
+    nannyGoing: participant.nannyGoing,
     attendees: participant.attendees.map(({ person }) => ({
       role: person.role,
       birthDate: person.birthDate,

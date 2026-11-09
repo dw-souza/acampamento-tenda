@@ -222,6 +222,10 @@ export const campParticipants = pgTable(
     status: participantStatus().notNull().default("confirmed"),
     paymentMethod: paymentMethod(),
     paidCents: integer().notNull().default(0),
+    // Babá (pajem): obrigatória para quem leva criança com menos de 3 anos. null = ainda não
+    // informado; false = não vai; true = vai, com o nome em nannyName. Não paga.
+    nannyGoing: boolean(),
+    nannyName: text(),
     notes: text(),
     ...timestamps,
   },

@@ -7,9 +7,11 @@ export function Badge({ person, campName }: { person: CampPerson; campName: stri
   // Campistas na cor da marca; servos na cor da equipe.
   const color = person.groupColor ?? "var(--tenda-brown)";
   const subtitle =
-    person.role === "child"
-      ? person.parentsNames && `Filho(a) de ${person.parentsNames}`
-      : person.spouseName && `e ${person.spouseName}`;
+    person.role === "nanny"
+      ? person.parentsNames && `Babá de ${person.parentsNames}`
+      : person.role === "child"
+        ? person.parentsNames && `Filho(a) de ${person.parentsNames}`
+        : person.spouseName && `e ${person.spouseName}`;
 
   return (
     <div className="flex h-[6.5cm] w-[9cm] break-inside-avoid flex-col overflow-hidden border border-dashed border-neutral-400 bg-white text-neutral-950 [print-color-adjust:exact]">
@@ -30,7 +32,6 @@ export function Badge({ person, campName }: { person: CampPerson; campName: stri
         </span>
         <span className="flex shrink-0 gap-1.5">
           {person.role === "child" && person.age !== null && <span>{plural(person.age, "ano", "anos")}</span>}
-          {person.toddler && <span className="rounded bg-neutral-900 px-1 text-white">Pajem</span>}
           {person.isCoordinator && (
             <span className="rounded bg-neutral-900 px-1 text-white">Coordenador</span>
           )}

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { type ReactNode, Suspense } from "react";
 import { SelectFilter } from "@/components/filters/select-filter";
+import { StatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -20,6 +21,7 @@ import { PrintButton } from "../crachas/print-button";
 const sections = [
   { value: "grupos", label: "Pessoas por grupo" },
   { value: "criancas", label: "Crianças" },
+  { value: "babas", label: "Babás" },
   { value: "restricoes", label: "Restrições alimentares" },
   { value: "necessidades", label: "Necessidades especiais" },
 ];
@@ -49,6 +51,7 @@ export default async function CampListsPage({
 
       {show("grupos") && <GroupsSection people={people} />}
       {show("criancas") && <ChildrenSection people={people} />}
+      {show("babas") && <NanniesSection people={people} />}
       {show("restricoes") && (
         <PeopleNotes
           title="Restrições alimentares"
@@ -89,17 +92,17 @@ function Section({
 }
 
 function GroupsSection({ people }: { people: CampPerson[] }) {
-  const groups = new Map<string, { camper: boolean; adults: number; children: number; toddlers: number }>();
+  const groups = new Map<string, { camper: boolean; adults: number; children: number; nannies: number }>();
   for (const person of people) {
     const group = groups.get(person.group) ?? {
       camper: person.participantRole === "camper",
       adults: 0,
       children: 0,
-      toddlers: 0,
+      nannies: 0,
     };
     if (person.role === "child") group.children += 1;
+    else if (person.role === "nanny") group.nannies += 1;
     else group.adults += 1;
-    if (person.toddler) group.toddlers += 1;
     groups.set(person.group, group);
   }
   const rows = [...groups.entries()];
@@ -107,9 +110,9 @@ function GroupsSection({ people }: { people: CampPerson[] }) {
     (sum, [, group]) => ({
       adults: sum.adults + group.adults,
       children: sum.children + group.children,
-      toddlers: sum.toddlers + group.toddlers,
+      nannies: sum.nannies + group.nannies,
     }),
-    { adults: 0, children: 0, toddlers: 0 },
+    { adults: 0, children: 0, nannies: 0 },
   );
 
   return (
@@ -123,7 +126,7 @@ function GroupsSection({ people }: { people: CampPerson[] }) {
             <TableHead>Grupo</TableHead>
             <TableHead className="text-right">Adultos</TableHead>
             <TableHead className="text-right">Filhos</TableHead>
-            <TableHead className="text-right">Pajem</TableHead>
+            <TableHead className="text-right">Babás</TableHead>
             <TableHead className="text-right">Total</TableHead>
           </TableRow>
         </TableHeader>
@@ -140,9 +143,9 @@ function GroupsSection({ people }: { people: CampPerson[] }) {
               </TableCell>
               <TableCell className="text-right tabular-nums">{group.adults}</TableCell>
               <TableCell className="text-right tabular-nums">{group.children}</TableCell>
-              <TableCell className="text-right tabular-nums">{group.toddlers}</TableCell>
+              <TableCell className="text-right tabular-nums">{group.nannies}</TableCell>
               <TableCell className="text-right font-medium tabular-nums">
-                {group.adults + group.children}
+                {group.adults + group.children + group.nannies}
               </TableCell>
             </TableRow>
           ))}
@@ -152,8 +155,10 @@ function GroupsSection({ people }: { people: CampPerson[] }) {
             <TableCell>Total</TableCell>
             <TableCell className="text-right tabular-nums">{total.adults}</TableCell>
             <TableCell className="text-right tabular-nums">{total.children}</TableCell>
-            <TableCell className="text-right tabular-nums">{total.toddlers}</TableCell>
-            <TableCell className="text-right tabular-nums">{total.adults + total.children}</TableCell>
+            <TableCell className="text-right tabular-nums">{total.nannies}</TableCell>
+            <TableCell className="text-right tabular-nums">
+              {total.adults + total.children + total.nannies}
+            </TableCell>
           </TableRow>
         </TableFooter>
       </Table>
@@ -178,25 +183,81 @@ function ChildrenSection({ people }: { people: CampPerson[] }) {
               <TableHead className="text-right">Idade</TableHead>
               <TableHead>Pais</TableHead>
               <TableHead>Grupo dos pais</TableHead>
+              <TableHead>Babá</TableHead>
               <TableHead>Observações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {children.map((child) => (
               <TableRow key={child.id}>
-                <TableCell className="font-medium">
-                  {child.fullName}
-                  {child.toddler && (
-                    <Badge variant="secondary" className="ml-2">
-                      Pajem
-                    </Badge>
-                  )}
-                </TableCell>
+                <TableCell className="font-medium">{child.fullName}</TableCell>
                 <TableCell className="text-right tabular-nums">{child.age ?? "—"}</TableCell>
                 <TableCell>{child.parentsNames}</TableCell>
                 <TableCell>{child.group}</TableCell>
+                <TableCell>{child.toddler ? <NannyLabel person={child} /> : null}</TableCell>
                 <TableCell className="whitespace-normal">
                   {[child.dietaryRestrictions, child.specialNeeds].filter(Boolean).join(" · ")}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </Section>
+  );
+}
+
+function NannyLabel({ person }: { person: CampPerson }) {
+  if (person.nanny === "going") return <>{person.nannyName}</>;
+  if (person.nanny === "not_going") return <span className="text-muted-foreground">Sem babá</span>;
+  return <StatusBadge tone="warning">Informar babá</StatusBadge>;
+}
+
+/** Uma linha por família que leva criança com menos de 3 anos. */
+function NanniesSection({ people }: { people: CampPerson[] }) {
+  const byFamily = new Map<string, { family: CampPerson; toddlers: CampPerson[] }>();
+  for (const person of people) {
+    if (!person.toddler) continue;
+    const entry = byFamily.get(person.familyId) ?? { family: person, toddlers: [] };
+    entry.toddlers.push(person);
+    byFamily.set(person.familyId, entry);
+  }
+  const rows = [...byFamily.values()].sort(
+    (a, b) =>
+      Number(a.family.nanny !== "pending") - Number(b.family.nanny !== "pending") ||
+      a.family.familyName.localeCompare(b.family.familyName),
+  );
+  const going = rows.filter((row) => row.family.nanny === "going").length;
+
+  return (
+    <Section
+      title={`Babás (${going})`}
+      description="Famílias que levam criança com menos de 3 anos. A babá não paga e tem crachá."
+    >
+      {rows.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Nenhuma criança com menos de 3 anos.</p>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Família</TableHead>
+              <TableHead>Grupo</TableHead>
+              <TableHead>Crianças</TableHead>
+              <TableHead>Babá</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map(({ family, toddlers }) => (
+              <TableRow key={family.familyId}>
+                <TableCell className="font-medium">{family.familyName}</TableCell>
+                <TableCell>{family.group}</TableCell>
+                <TableCell className="whitespace-normal">
+                  {toddlers
+                    .map((child) => `${child.displayName} (${plural(child.age ?? 0, "ano", "anos")})`)
+                    .join(", ")}
+                </TableCell>
+                <TableCell>
+                  <NannyLabel person={family} />
                 </TableCell>
               </TableRow>
             ))}

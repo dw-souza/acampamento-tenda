@@ -52,8 +52,8 @@ export default async function CampOverviewPage({ params }: PageProps<"/acampamen
     {
       icon: UsersRound,
       label: "Pessoas",
-      value: totals.adults + totals.children,
-      detail: `${plural(totals.adults, "adulto", "adultos")} · ${plural(totals.children, "filho", "filhos")} · ${totals.toddlers} no pajem`,
+      value: totals.adults + totals.children + totals.nannies,
+      detail: `${plural(totals.adults, "adulto", "adultos")} · ${plural(totals.children, "filho", "filhos")} · ${plural(totals.nannies, "babá", "babás")}`,
     },
     {
       icon: Wallet,
@@ -77,6 +77,13 @@ export default async function CampOverviewPage({ params }: PageProps<"/acampamen
         ))}
       </div>
 
+      {totals.nannyPending > 0 && (
+        <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-amber-600/20">
+          {plural(totals.nannyPending, "família leva", "famílias levam")} criança com menos de 3 anos e ainda
+          não {totals.nannyPending === 1 ? "informou" : "informaram"} a babá. Veja nas abas Campistas e
+          Equipes.
+        </p>
+      )}
       <StatusCard camp={camp} />
       {camp.stage.formsTents ? <ParishesCard camp={camp} /> : <TentsCard camp={camp} />}
     </div>

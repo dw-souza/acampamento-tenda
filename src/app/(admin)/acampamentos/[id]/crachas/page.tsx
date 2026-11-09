@@ -12,6 +12,7 @@ const kindFilter = [
   { value: "servos", label: "Servos" },
   { value: "criancas", label: "Só crianças" },
   { value: "adultos", label: "Só adultos" },
+  { value: "babas", label: "Só babás" },
 ];
 
 export default async function BadgesPage({ params, searchParams }: PageProps<"/acampamentos/[id]/crachas">) {
@@ -30,7 +31,8 @@ export default async function BadgesPage({ params, searchParams }: PageProps<"/a
       if (tipo === "campistas") return person.participantRole === "camper";
       if (tipo === "servos") return person.participantRole === "server";
       if (tipo === "criancas") return person.role === "child";
-      if (tipo === "adultos") return person.role !== "child";
+      if (tipo === "adultos") return person.role === "husband" || person.role === "wife";
+      if (tipo === "babas") return person.role === "nanny";
       return true;
     })
     .filter((person) => (typeof grupo === "string" ? person.group === grupo : true));
