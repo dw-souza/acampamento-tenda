@@ -2,8 +2,8 @@
 
 export const tentStatusLabels = {
   forming: "Em formação",
-  active: "Ativa",
-  inactive: "Inativa",
+  active: "Ativo",
+  inactive: "Inativo",
 } as const;
 
 export const personStatusLabels = {
@@ -12,8 +12,9 @@ export const personStatusLabels = {
   left: "Saiu",
 } as const;
 
-export function tentLabel(tent: { number: number; name: string | null }) {
-  return tent.name ? `Tenda ${tent.number} – ${tent.name}` : `Tenda ${tent.number}`;
+/** Os tendas não têm nome: são conhecidos pelo número (e pela paróquia). */
+export function tentLabel(tent: { number: number }) {
+  return `TENDA ${tent.number}`;
 }
 
 type Person = { role: "husband" | "wife" | "child"; fullName: string };
@@ -22,6 +23,14 @@ export function coupleName(people: Person[]) {
   const husband = people.find((person) => person.role === "husband");
   const wife = people.find((person) => person.role === "wife");
   return [husband?.fullName, wife?.fullName].filter(Boolean).join(" e ") || "Família sem nome";
+}
+
+/**
+ * Acampamentos são por temporada (vários Kerigmas entre fevereiro e abril, por exemplo):
+ * o nome é a etapa e a data de início. A etapa em que nascem os tendas é o acampamento aberto.
+ */
+export function campLabel(camp: { startDate: string; stage: { name: string; formsTents: boolean } }) {
+  return `${camp.stage.name}${camp.stage.formsTents ? " (ABERTO)" : ""} – ${formatDate(camp.startDate)}`;
 }
 
 export function formatDate(iso: string | null) {

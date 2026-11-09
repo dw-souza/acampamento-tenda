@@ -14,7 +14,6 @@ export default async function EditCampPage({ params }: PageProps<"/acampamentos/
       stageOptions={stages}
       defaultValues={{
         stageId: camp.stageId,
-        name: camp.name,
         startDate: camp.startDate,
         endDate: camp.endDate,
         adultPrice: centsToInput(camp.adultPriceCents),

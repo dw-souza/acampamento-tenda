@@ -10,7 +10,7 @@ export default async function NewTentPage({ searchParams }: PageProps<"/tendas/n
 
   return (
     <>
-      <PageHeader icon={Tent} title="Nova tenda" />
+      <PageHeader icon={Tent} title="Novo tenda" />
       <TentForm
         id={null}
         parishOptions={parishes}
@@ -19,7 +19,6 @@ export default async function NewTentPage({ searchParams }: PageProps<"/tendas/n
         defaultValues={{
           parishId: typeof paroquia === "string" ? paroquia : "",
           number: "",
-          name: "",
           status: "active",
           currentStageId: "",
           guardianFamilyId: "",

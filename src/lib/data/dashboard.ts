@@ -49,7 +49,7 @@ export async function communityTotals() {
   };
 }
 
-/** Etapas em ordem com as tendas ativas que estão em cada uma. */
+/** Etapas em ordem com os tendas ativos que estão em cada uma. */
 export async function tentsByStage() {
   await requireUser();
   const [stageRows, tentRows] = await Promise.all([
@@ -93,12 +93,12 @@ function participantCounts() {
 
 const campColumns = (counts: ReturnType<typeof participantCounts>) => ({
   id: camps.id,
-  name: camps.name,
   startDate: camps.startDate,
   endDate: camps.endDate,
   status: camps.status,
   stageId: camps.stageId,
   stageName: stages.name,
+  stageFormsTents: stages.formsTents,
   stagePosition: stages.position,
   campers: counts.campers,
   servers: counts.servers,
@@ -138,7 +138,7 @@ export async function recentCampsByStage(limit = 3) {
   return [...byStage.values()];
 }
 
-/** Tenda parada: sem avançar de etapa há mais que isso (e ainda antes da última etapa). */
+/** Tenda parado: sem avançar de etapa há mais que isso (e ainda antes da última etapa). */
 export const STALLED_YEARS = 2;
 
 /** Situações que pedem ação da secretaria. */
@@ -151,7 +151,7 @@ export async function attentionPoints() {
     .innerJoin(campParishes, eq(campParishes.campId, campParticipants.campId))
     .where(eq(campParticipants.familyId, families.id));
 
-  // Último avanço da tenda: a etapa mais recente registrada ou a data de formação.
+  // Último avanço do tenda: a etapa mais recente registrada ou a data de formação.
   const progress = db
     .select({ tentId: tentStageHistory.tentId, last: max(tentStageHistory.date).as("last") })
     .from(tentStageHistory)
@@ -178,7 +178,6 @@ export async function attentionPoints() {
       .select({
         id: tents.id,
         number: tents.number,
-        name: tents.name,
         parishName: parishes.name,
         stageName: stages.name,
         since: lastProgress.as("since"),

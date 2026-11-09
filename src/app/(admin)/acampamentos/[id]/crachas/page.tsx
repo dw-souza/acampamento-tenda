@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { SelectFilter } from "@/components/filters/select-filter";
 import { getCamp, getCampParticipants } from "@/lib/data/camps";
-import { plural } from "@/lib/format/labels";
+import { campLabel, plural } from "@/lib/format/labels";
 import { campPeople, sortByGroup } from "../people";
 import { Badge } from "./badge";
 import { PrintButton } from "./print-button";
@@ -52,7 +52,7 @@ export default async function BadgesPage({ params, searchParams }: PageProps<"/a
       ) : (
         <div className="grid w-fit grid-cols-1 md:grid-cols-2 print:grid-cols-2">
           {people.map((person) => (
-            <Badge key={person.id} person={person} campName={camp.name} />
+            <Badge key={person.id} person={person} campName={campLabel(camp)} />
           ))}
         </div>
       )}

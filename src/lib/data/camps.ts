@@ -1,14 +1,15 @@
 import "server-only";
-import { and, asc, count, desc, eq, isNotNull, notExists } from "drizzle-orm";
+import { and, asc, count, desc, eq, isNotNull, notExists, sql } from "drizzle-orm";
 import { cache } from "react";
 import { db } from "@/db";
-import { campParticipants, camps, families, stages, tents } from "@/db/schema";
+import { campParishes, campParticipants, camps, families, parishes, stages, tents } from "@/db/schema";
 import { requireUser } from "@/lib/dal";
 import type { ParticipantForSummary } from "@/lib/domain/camp-summary";
 import { canServe } from "@/lib/domain/eligibility";
 import { coupleName, tentLabel } from "@/lib/format/labels";
 
-export async function listCamps() {
+/** stageId opcional filtra por etapa. */
+export async function listCamps(filters: { stageId?: string } = {}) {
   await requireUser();
   const families = db
     .select({ campId: campParticipants.campId, n: count().as("n") })
@@ -19,16 +20,23 @@ export async function listCamps() {
   return db
     .select({
       id: camps.id,
-      name: camps.name,
       startDate: camps.startDate,
       endDate: camps.endDate,
       status: camps.status,
       stageName: stages.name,
+      stageFormsTents: stages.formsTents,
       families: families.n,
+      // Paróquias do acampamento aberto, para distinguir Kerigmas da mesma temporada.
+      parishNames: sql<string | null>`(
+        select string_agg(${parishes.name}, ', ' order by ${parishes.name})
+        from ${campParishes} join ${parishes} on ${parishes.id} = ${campParishes.parishId}
+        where ${campParishes.campId} = ${camps.id}
+      )`,
     })
     .from(camps)
     .innerJoin(stages, eq(stages.id, camps.stageId))
     .leftJoin(families, eq(families.campId, camps.id))
+    .where(filters.stageId ? eq(camps.stageId, filters.stageId) : undefined)
     .orderBy(desc(camps.startDate));
 }
 
@@ -82,7 +90,7 @@ export async function campStageOptions() {
   return rows.map((stage) => ({ value: stage.id, label: stage.name }));
 }
 
-/** Tendas ativas ainda não vinculadas, com as da etapa do acampamento primeiro. */
+/** Tendas ativos ainda não vinculados, com os da etapa do acampamento primeiro. */
 export async function tentsAvailableForCamp(camp: Camp) {
   await requireUser();
   const linked = new Set(camp.tents.map((link) => link.tentId));
@@ -104,13 +112,13 @@ export async function tentsAvailableForCamp(camp: Camp) {
     }));
 }
 
-/** Tendas que podem servir: ativas, ainda sem vínculo e que já passaram pela etapa do acampamento. */
+/** Tendas que podem servir: ativos, ainda sem vínculo e que já passaram pela etapa do acampamento. */
 export async function tentsEligibleToServe(camp: Camp) {
   const tents = await tentsAvailableForCamp(camp);
   return tents.filter((tent) => canServe(tent.currentStage?.position, camp.stage.position));
 }
 
-/** Famílias que podem servir: tenda ativa que já passou pela etapa e ainda sem função no acampamento. */
+/** Famílias que podem servir: tenda ativo que já passou pela etapa e ainda sem função no acampamento. */
 export async function familiesEligibleToServe(camp: Camp) {
   const campId = camp.id;
   await requireUser();

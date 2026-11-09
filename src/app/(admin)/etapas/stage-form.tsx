@@ -32,7 +32,7 @@ export function StageForm({ id, defaultValues }: { id: string | null; defaultVal
         <CheckboxField
           control={control}
           name="formsTents"
-          label="Nesta etapa nascem as tendas"
+          label="Nesta etapa nascem os tendas"
           description="Acampamento por paróquia, com inscrição de famílias (ex.: Kerigma)."
         />
         <div className="flex gap-2">

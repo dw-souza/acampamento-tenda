@@ -29,7 +29,7 @@ export default async function TentsPage({ searchParams }: PageProps<"/tendas">) 
         title="Tendas"
         actions={
           <Button render={<Link href={parishId ? `/tendas/nova?paroquia=${parishId}` : "/tendas/nova"} />}>
-            Nova tenda
+            Novo tenda
           </Button>
         }
       />
@@ -56,7 +56,7 @@ export default async function TentsPage({ searchParams }: PageProps<"/tendas">) 
           {tents.length === 0 && (
             <TableRow>
               <TableCell colSpan={4} className="text-muted-foreground">
-                Nenhuma tenda encontrada.
+                Nenhum tenda encontrado.
               </TableCell>
             </TableRow>
           )}

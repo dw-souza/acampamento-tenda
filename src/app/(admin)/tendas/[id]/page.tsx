@@ -79,7 +79,7 @@ export default async function TentPage({ params }: PageProps<"/tendas/[id]">) {
                 {families.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={2} className="text-muted-foreground">
-                      Nenhuma família nesta tenda.
+                      Nenhuma família neste tenda.
                     </TableCell>
                   </TableRow>
                 )}
@@ -125,7 +125,7 @@ export default async function TentPage({ params }: PageProps<"/tendas/[id]">) {
                   <dd>{tent.meetingLocation ?? "—"}</dd>
                 </div>
                 <div>
-                  <dt className="text-muted-foreground">Formada em</dt>
+                  <dt className="text-muted-foreground">Formado em</dt>
                   <dd>{formatDate(tent.formedAt) || "—"}</dd>
                 </div>
               </dl>
@@ -149,7 +149,7 @@ export default async function TentPage({ params }: PageProps<"/tendas/[id]">) {
                           <DeleteButton
                             action={removeTentStage.bind(null, tent.id, entry.id)}
                             title={`Remover ${entry.stage.name} do caminho?`}
-                            description="A etapa atual da tenda não muda; ajuste-a em Editar se precisar."
+                            description="A etapa atual do tenda não muda; ajuste-a em Editar se precisar."
                           />
                         )}
                       </span>

@@ -49,7 +49,7 @@ export default async function CampTeamsPage({ params }: PageProps<"/acampamentos
         Servindo: {peopleSummary(total)}
         {total.toddlers > 0 && ` (${total.toddlers} com pajem)`}
         <br />
-        Para servir, a tenda precisa já ter passado pelo {camp.stage.name}. Tendas sem etapa registrada não
+        Para servir, o tenda precisa já ter passado pelo {camp.stage.name}. Tendas sem etapa registrada não
         aparecem.
       </p>
 
@@ -100,7 +100,7 @@ export default async function CampTeamsPage({ params }: PageProps<"/acampamentos
                           <DeleteButton
                             action={removeTeamTent.bind(null, camp.id, link.tentId)}
                             title={`Tirar ${tentLabel(link.tent)} da ${team.name}?`}
-                            description="As famílias desta tenda deixam de servir nesta equipe."
+                            description="As famílias deste tenda deixam de servir nesta equipe."
                           />
                         )}
                       </span>
@@ -165,7 +165,7 @@ export default async function CampTeamsPage({ params }: PageProps<"/acampamentos
                   <div className="flex flex-wrap gap-2">
                     {team.kind === "tent" && (
                       <AddSelect
-                        placeholder="Tenda inteira..."
+                        placeholder="Tenda inteiro..."
                         label="Adicionar tenda"
                         options={tentOptions}
                         action={addTeamTent.bind(null, camp.id, team.id)}

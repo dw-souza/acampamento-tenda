@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getFamily, getFamilyHistory } from "@/lib/data/families";
 import { parishOptions } from "@/lib/data/parishes";
 import { tentOptions } from "@/lib/data/tents";
-import { coupleName, formatDate, plural, tentLabel } from "@/lib/format/labels";
+import { campLabel, coupleName, formatDate, plural, tentLabel } from "@/lib/format/labels";
 import { participantStatusLabels } from "@/lib/validation/camp";
 import { deleteFamily, saveFamily } from "../actions";
 import { FamilyForm } from "../family-form";
@@ -36,7 +36,7 @@ export default async function FamilyPage({ params }: PageProps<"/familias/[id]">
           <DeleteButton
             action={deleteFamily.bind(null, family.id)}
             title={`Remover ${name}?`}
-            description="Remove a família, os filhos e as participações em acampamentos. Para quem deixou a tenda, prefira marcar a situação como “Saiu”."
+            description="Remove a família, os filhos e as participações em acampamentos. Para quem deixou o tenda, prefira marcar a situação como “Saiu”."
           />
         }
       />
@@ -60,7 +60,7 @@ export default async function FamilyPage({ params }: PageProps<"/familias/[id]">
                 {history.map((entry) => (
                   <li key={entry.id}>
                     <Link href={`/acampamentos/${entry.campId}`} className="font-medium hover:underline">
-                      {entry.camp.name}
+                      {campLabel(entry.camp)}
                     </Link>
                     <p className="text-xs text-muted-foreground">
                       {entry.role === "camper" ? "Campista" : (entry.team?.name ?? "Servo")}

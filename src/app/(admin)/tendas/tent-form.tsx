@@ -34,16 +34,9 @@ export function TentForm({
   return (
     <form onSubmit={onSubmit} className="max-w-2xl">
       <FieldGroup>
-        <SelectField control={control} name="parishId" label="Paróquia" options={parishOptions} />
-        <div className="grid gap-4 sm:grid-cols-[8rem_1fr]">
+        <div className="grid gap-4 sm:grid-cols-[1fr_8rem]">
+          <SelectField control={control} name="parishId" label="Paróquia" options={parishOptions} />
           <TextField control={control} name="number" label="Número" type="number" min={1} />
-          <TextField
-            uppercase
-            control={control}
-            name="name"
-            label="Nome"
-            description="Opcional. Revelado no fim do Kerigma."
-          />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <SelectField control={control} name="status" label="Situação" options={statusOptions} />
@@ -61,13 +54,13 @@ export function TentForm({
           label="Guardiões"
           options={guardianOptions}
           emptyLabel="Não definidos"
-          description={id ? undefined : "Defina depois de cadastrar as famílias da tenda."}
+          description={id ? undefined : "Defina depois de cadastrar as famílias do tenda."}
         />
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField control={control} name="meetingSchedule" label="Dia e horário dos encontros" />
           <TextField uppercase control={control} name="meetingLocation" label="Local dos encontros" />
         </div>
-        <TextField control={control} name="formedAt" label="Formada em" type="date" className="w-48" />
+        <TextField control={control} name="formedAt" label="Formado em" type="date" className="w-48" />
         <div className="flex gap-2">
           <Button type="submit" disabled={pending}>
             {pending ? "Salvando..." : "Salvar"}

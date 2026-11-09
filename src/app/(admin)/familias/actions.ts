@@ -19,7 +19,7 @@ export async function saveFamily(id: string | null, input: FamilyInput): Promise
   if (family.tentId) {
     const tent = await db.query.tents.findFirst({ where: eq(tents.id, family.tentId) });
     if (tent?.parishId !== family.parishId) {
-      return { error: "A tenda escolhida não pertence a esta paróquia." };
+      return { error: "O tenda escolhido não pertence a esta paróquia." };
     }
   }
 

@@ -101,10 +101,10 @@ async function deleteEmptyFormingTents(tx: Tx, tentIds: string[]) {
 }
 
 // ---------------------------------------------------------------------------
-// Paróquias (etapa em que nascem as tendas)
+// Paróquias (etapa em que nascem os tendas)
 // ---------------------------------------------------------------------------
 
-/** Vincula a paróquia e cria a tenda que ela vai formar, com o próximo número. */
+/** Vincula a paróquia e cria o tenda que ela vai formar, com o próximo número. */
 export async function addCampParish(campId: string, parishId: string): Promise<ActionResult> {
   await requireUser();
   const camp = await loadCamp(campId);
@@ -176,12 +176,12 @@ export async function addCampTent(campId: string, tentId: string): Promise<Actio
       );
     });
   } catch (error) {
-    return { error: dbErrorMessage(error, { unique: "Esta tenda já está no acampamento." }) };
+    return { error: dbErrorMessage(error, { unique: "Este tenda já está no acampamento." }) };
   }
   revalidateCamp(campId);
 }
 
-/** Desvincula a tenda e as participações de campista das suas famílias. */
+/** Desvincula o tenda e as participações de campista das suas famílias. */
 export async function removeCampTent(campId: string, tentId: string): Promise<ActionResult> {
   await requireUser();
   await db.transaction(async (tx) => {
@@ -216,8 +216,8 @@ export async function openRegistrations(campId: string): Promise<ActionResult> {
 }
 
 /**
- * Encerra as inscrições. Na etapa em que nascem as tendas, cada tenda em formação
- * vira ativa com as famílias confirmadas; quem cancelou ou ficou na espera sai da tenda.
+ * Encerra as inscrições. Na etapa em que nascem os tendas, cada tenda em formação
+ * vira ativo com as famílias confirmadas; quem cancelou ou ficou na espera sai do tenda.
  */
 export async function closeRegistrations(campId: string): Promise<ActionResult> {
   await requireUser();
@@ -260,7 +260,7 @@ export async function closeRegistrations(campId: string): Promise<ActionResult> 
   revalidatePath("/tendas");
 }
 
-/** Marca como realizado e registra a etapa no caminho das tendas campistas. */
+/** Marca como realizado e registra a etapa no caminho dos tendas campistas. */
 export async function finishCamp(campId: string): Promise<ActionResult> {
   await requireUser();
   const camp = await db.query.camps.findFirst({ where: eq(camps.id, campId), with: { tents: true } });

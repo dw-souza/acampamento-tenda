@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getCamp, getCampParticipants } from "@/lib/data/camps";
-import { plural } from "@/lib/format/labels";
+import { campLabel, plural } from "@/lib/format/labels";
 import { type CampPerson, campPeople, sortByGroup } from "../people";
 import { PrintButton } from "../crachas/print-button";
 
@@ -45,7 +45,7 @@ export default async function CampListsPage({
           <PrintButton />
         </div>
       </div>
-      <h2 className="hidden text-lg font-semibold print:block">{camp.name}</h2>
+      <h2 className="hidden text-lg font-semibold print:block">{campLabel(camp)}</h2>
 
       {show("grupos") && <GroupsSection people={people} />}
       {show("criancas") && <ChildrenSection people={people} />}

@@ -27,11 +27,14 @@ export function CampForm({
   return (
     <form onSubmit={onSubmit} className="max-w-2xl">
       <FieldGroup>
-        <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
-          <SelectField control={control} name="stageId" label="Etapa" options={stageOptions} />
-          <TextField uppercase control={control} name="name" label="Nome" placeholder="KERIGMA 2026" />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <SelectField
+            control={control}
+            name="stageId"
+            label="Etapa"
+            options={stageOptions}
+            description="O nome do acampamento é a etapa e a data de início."
+          />
           <TextField control={control} name="startDate" label="Início" type="date" />
           <TextField control={control} name="endDate" label="Fim" type="date" />
         </div>

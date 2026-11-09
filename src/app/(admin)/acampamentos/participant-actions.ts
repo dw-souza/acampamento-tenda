@@ -16,7 +16,7 @@ function revalidateCamp(campId: string) {
   revalidatePath(`/acampamentos/${campId}`, "layout");
 }
 
-/** Inscrição no acampamento em que nascem as tendas: cria a família já na tenda em formação. */
+/** Inscrição no acampamento em que nascem os tendas: cria a família já no tenda em formação. */
 export async function registerFamily(campId: string, input: FamilyInput): Promise<ActionResult> {
   await requireUser();
   const camp = await db.query.camps.findFirst({
@@ -86,8 +86,8 @@ export async function setAttendance(
 }
 
 /**
- * Remove a família do acampamento. Se ela estava numa tenda em formação deste
- * acampamento, sai da tenda também (o cadastro da família continua).
+ * Remove a família do acampamento. Se ela estava num tenda em formação deste
+ * acampamento, sai do tenda também (o cadastro da família continua).
  */
 export async function removeParticipant(participantId: string): Promise<ActionResult> {
   await requireUser();

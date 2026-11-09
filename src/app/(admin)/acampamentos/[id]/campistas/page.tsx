@@ -51,7 +51,7 @@ export default async function CampersPage({ params }: PageProps<"/acampamentos/[
         <p className="text-sm text-muted-foreground">
           {camp.stage.formsTents
             ? "Nenhuma família inscrita ainda."
-            : "Adicione as tendas campistas na visão geral."}
+            : "Adicione os tendas campistas na visão geral."}
         </p>
       )}
 
@@ -108,7 +108,7 @@ export default async function CampersPage({ params }: PageProps<"/acampamentos/[
                             title={`Tirar ${name} do acampamento?`}
                             description={
                               camp.stage.formsTents
-                                ? "A inscrição é removida e a família sai da tenda em formação. O cadastro continua."
+                                ? "A inscrição é removida e a família sai do tenda em formação. O cadastro continua."
                                 : "A família deixa de participar deste acampamento. O cadastro continua."
                             }
                           />

@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { getCamp } from "@/lib/data/camps";
-import { formatDate } from "@/lib/format/labels";
+import { campLabel, formatDate } from "@/lib/format/labels";
 import { campStatusLabels } from "@/lib/validation/camp";
 import { CampTabs } from "./camp-tabs";
 import { StatusBadge } from "@/components/status-badge";
@@ -21,7 +21,7 @@ export default async function CampLayout({ children, params }: LayoutProps<"/aca
       <div className="print:hidden">
         <PageHeader
           icon={CalendarDays}
-          title={camp.name}
+          title={campLabel(camp)}
           description={
             <>
               {camp.stage.name} · {formatDate(camp.startDate)} a {formatDate(camp.endDate)}{" "}

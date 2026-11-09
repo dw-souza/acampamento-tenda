@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { parseMoney } from "@/lib/format/money";
-import { optionalInt, optionalText, requiredDate, requiredUpper, uuid } from "./common";
+import { optionalInt, optionalText, requiredDate, uuid } from "./common";
 
 const money = z.string().transform((value, ctx) => {
   const cents = parseMoney(value);
@@ -21,7 +21,6 @@ export const campStatusLabels = {
 export const campSchema = z
   .object({
     stageId: uuid,
-    name: requiredUpper("Informe o nome"),
     startDate: requiredDate,
     endDate: requiredDate,
     adultPrice: money,

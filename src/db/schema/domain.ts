@@ -61,14 +61,14 @@ export const parishes = pgTable("parishes", {
 });
 
 // Etapas do caminho, em ordem. hasCamp marca as que têm acampamento;
-// as demais são só marcos na história da tenda.
+// as demais são só marcos na história do tenda.
 export const stages = pgTable("stages", {
   id: uuid().primaryKey().defaultRandom(),
   name: text().notNull().unique(),
   position: integer().notNull().unique(),
   hasCamp: boolean().notNull().default(false),
-  // Etapa em que as tendas nascem (Kerigma): o acampamento é por paróquia,
-  // com inscrição de famílias, e cada paróquia forma uma tenda nova.
+  // Etapa em que os tendas nascem (Kerigma): o acampamento é por paróquia,
+  // com inscrição de famílias, e cada paróquia forma um tenda novo.
   formsTents: boolean().notNull().default(false),
   ...timestamps,
 });
@@ -81,7 +81,6 @@ export const tents = pgTable(
       .notNull()
       .references(() => parishes.id),
     number: integer().notNull(),
-    name: text(),
     status: tentStatus().notNull().default("forming"),
     currentStageId: uuid().references(() => stages.id),
     guardianFamilyId: uuid().references((): AnyPgColumn => families.id, {
@@ -96,7 +95,7 @@ export const tents = pgTable(
 );
 
 // A família é o casal (e filhos). Entra no Kerigma sempre como casal completo;
-// depois pode se dissolver sem deixar a tenda, por isso os membros ficam em people.
+// depois pode se dissolver sem deixar o tenda, por isso os membros ficam em people.
 export const families = pgTable(
   "families",
   {
@@ -144,7 +143,7 @@ export const people = pgTable(
 export const workTeams = pgTable("work_teams", {
   id: uuid().primaryKey().defaultRandom(),
   name: text().notNull().unique(),
-  // tent: uma tenda inteira serve (ex.: cozinha). special: casais avulsos (ex.: música).
+  // tent: um tenda inteiro serve (ex.: cozinha). special: casais avulsos (ex.: música).
   kind: teamKind().notNull(),
   color: text(),
   description: text(),
@@ -160,7 +159,7 @@ export const camps = pgTable("camps", {
   stageId: uuid()
     .notNull()
     .references(() => stages.id),
-  name: text().notNull(),
+  // Sem nome: o rótulo é a etapa + data de início (campLabel).
   startDate: date().notNull(),
   endDate: date().notNull(),
   // Valores em centavos, por pessoa. Crianças menores de 3 anos não pagam.
@@ -176,7 +175,7 @@ export const camps = pgTable("camps", {
   ...timestamps,
 });
 
-// Paróquias de um acampamento aberto (Kerigma). Cada uma forma a sua tenda.
+// Paróquias de um acampamento aberto (Kerigma). Cada uma forma a seu tenda.
 export const campParishes = pgTable(
   "camp_parishes",
   {
@@ -192,7 +191,7 @@ export const campParishes = pgTable(
 );
 
 // Tendas inteiras num acampamento: como campistas ou servindo numa equipe de tenda.
-// Ao vincular, cada família da tenda vira um camp_participant.
+// Ao vincular, cada família do tenda vira um camp_participant.
 export const campTents = pgTable(
   "camp_tents",
   {
@@ -245,7 +244,7 @@ export const campAttendees = pgTable(
   (t) => [primaryKey({ columns: [t.participantId, t.personId] })],
 );
 
-// Quando a tenda passou por cada etapa.
+// Quando o tenda passou por cada etapa.
 export const tentStageHistory = pgTable(
   "tent_stage_history",
   {

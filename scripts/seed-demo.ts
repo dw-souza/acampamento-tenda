@@ -60,10 +60,42 @@ function randomDate(from: string, to: string) {
   return new Date(start + rand() * Math.max(0, end - start)).toISOString().slice(0, 10);
 }
 
-// Meses depois do Kerigma (julho do ano de formação) em que cada etapa acontece, pela posição.
-const STAGE_OFFSETS = [0, 8, 13, 19, 26, 32, 38, 52, 59];
-const stageOffset = (index: number) => STAGE_OFFSETS[index] ?? 59 + (index - 8) * 6;
-const kerigmaDate = (year: number) => `${year}-07-10`;
+// Agenda por posição da etapa: anos depois da formação e meses em que acontece. Acampamentos são
+// por temporada (ex.: vários Kerigmas de fevereiro a abril, vários Tabor de maio a julho); as
+// etapas sem acampamento são marcos num mês. Meses de Ventania em diante são só para demonstração.
+const SCHEDULE: { years: number; months: [number, number] }[] = [
+  { years: 0, months: [2, 4] }, // Kerigma
+  { years: 1, months: [5, 7] }, // Tabor
+  { years: 1, months: [9, 9] }, // Ventania
+  { years: 2, months: [3, 3] }, // Chai
+  { years: 2, months: [8, 10] }, // Anawin
+  { years: 3, months: [3, 3] }, // Kenosis
+  { years: 3, months: [9, 9] }, // Caminho de Emaús
+  { years: 4, months: [10, 11] }, // Koinonia
+  { years: 5, months: [6, 6] }, // Consagração
+];
+const schedule = (index: number) =>
+  SCHEDULE[index] ?? { years: 5 + (index - 8), months: [6, 6] as [number, number] };
+
+/** Sábados de uma temporada (meses inclusivos). */
+function saturdays(year: number, [from, to]: [number, number]) {
+  const days: string[] = [];
+  const date = new Date(Date.UTC(year, from - 1, 1, 12));
+  while (date.getUTCMonth() + 1 <= to && date.getUTCFullYear() === year) {
+    if (date.getUTCDay() === 6) days.push(date.toISOString().slice(0, 10));
+    date.setUTCDate(date.getUTCDate() + 1);
+  }
+  return days;
+}
+
+/** Espalha `count` acampamentos pelos sábados da temporada, sem repetir data. */
+function spreadDates(year: number, months: [number, number], count: number) {
+  const days = saturdays(year, months);
+  return Array.from(
+    { length: count },
+    (_, i) => days[Math.min(days.length - 1, Math.floor(((i + 0.5) * days.length) / count))],
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Nomes e dados pessoais
@@ -275,23 +307,6 @@ const CHILD_NEEDS = [
   "Alergia a picada de inseto",
   "Epilepsia controlada, medicação às 20h",
 ];
-const TENT_NAMES = [
-  "SHALOM",
-  "EMANUEL",
-  "BETÂNIA",
-  "NAZARÉ",
-  "CANÁ",
-  "BETEL",
-  "HEBROM",
-  "EFRATA",
-  "SIÃO",
-  "MAANAIM",
-  "GETSÊMANI",
-  "TABOR",
-  "JERICÓ",
-  "SILOÉ",
-  "BELÉM",
-];
 
 const phone = () => `(16) 9${int(8000, 9999)}-${int(1000, 9999)}`;
 const emailOf = (first: string, last: string) =>
@@ -305,7 +320,7 @@ const emailOf = (first: string, last: string) =>
 // Estrutura da comunidade
 // ---------------------------------------------------------------------------
 
-// Anos de formação das tendas (relativos ao ano atual).
+// Anos de formação dos tendas (relativos ao ano atual).
 const PARISHES = [
   {
     name: "SANTA GIANNA BERETTA MOLLA",
@@ -340,7 +355,7 @@ type TentPlan = {
   number: number;
   year: number;
   status: "active" | "inactive";
-  /** Etapas (índice) e datas em que a tenda passou, até hoje. */
+  /** Etapas (índice) e datas em que o tenda passou, até hoje. */
   history: { stageIndex: number; date: string }[];
   /** Próxima etapa prevista (pode ser no futuro). */
   next: { stageIndex: number; date: string } | null;
@@ -414,7 +429,7 @@ function planFamily(
     });
   }
 
-  // Raros: viuvez e separação (a família continua na tenda).
+  // Raros: viuvez e separação (a família continua no tenda).
   if (oldTent && chance(0.02)) people[0].status = "deceased";
   else if (oldTent && chance(0.015)) people[0].status = "left";
 
@@ -575,7 +590,7 @@ async function staffCamp(
       },
     );
   }
-  // Equipes especiais: casais avulsos das tendas que podem servir e ainda não estão no acampamento.
+  // Equipes especiais: casais avulsos dos tendas que podem servir e ainda não estão no acampamento.
   const loose = shuffle(pool.slice(tentTeams.length).flatMap((tent) => tent.familyIds));
   for (const team of teams.special) {
     const chosen = loose.splice(0, int(2, 3)).map((id) => families.get(id)!);
@@ -596,9 +611,9 @@ async function main() {
   const allTeams: Team[] = await db.query.workTeams.findMany();
   const kerigma = stages.find((stage) => stage.formsTents);
   if (stages.length === 0 || !kerigma) {
-    throw new Error("Cadastre as etapas antes (npm run db:seed) e marque a etapa em que nascem as tendas.");
+    throw new Error("Cadastre as etapas antes (npm run db:seed) e marque a etapa em que nascem os tendas.");
   }
-  if (stages.indexOf(kerigma) !== 0) throw new Error("A etapa em que nascem as tendas deve ser a primeira.");
+  if (stages.indexOf(kerigma) !== 0) throw new Error("A etapa em que nascem os tendas deve ser a primeira.");
   const existing = await db.select().from(schema.parishes).limit(1);
   if (existing.length > 0) {
     throw new Error(
@@ -633,41 +648,82 @@ async function main() {
     totals.parishes = parishRows.length;
     const parishByName = new Map(parishRows.map((row) => [row.name, row.id]));
 
-    // 2. Tendas e famílias, com o caminho calculado a partir do ano de formação.
+    // 2. Tendas e famílias. O caminho de cada tenda sai da agenda por temporada.
     const tents: TentPlan[] = [];
     const families = new Map<string, FamilyPlan>();
-    const namePool = shuffle([...TENT_NAMES]);
+    const kerigmaSeasonEnd = (year: number) => `${year}-${String(schedule(0).months[1]).padStart(2, "0")}-30`;
     for (const parish of PARISHES) {
       const parishId = parishByName.get(parish.name)!;
       const years = parish.years
         .map((offset) => thisYear + offset)
-        .filter((year) => kerigmaDate(year) <= today);
+        .filter((year) => kerigmaSeasonEnd(year) < today);
       for (const [index, year] of years.sort((a, b) => a - b).entries()) {
-        const formation = kerigmaDate(year);
-        const all = stages.map((_, stageIndex) => ({
-          stageIndex,
-          date: stageIndex === 0 ? formation : addMonths(formation, stageOffset(stageIndex)),
-        }));
-        let history = all.filter((entry) => entry.date <= today);
-        let status: TentPlan["status"] = "active";
-        // Casos especiais para os pontos de atenção.
-        if (parish.name === "SANTA GIANNA BERETTA MOLLA" && index === 2) history = history.slice(0, 4); // parada
-        if (parish.name === "SÃO JOSÉ" && index === 0) {
-          history = history.slice(0, 6);
-          status = "inactive";
-        }
-        const next = status === "active" ? (all.find((entry) => entry.date > today) ?? null) : null;
         tents.push({
           id: crypto.randomUUID(),
           parishId,
           parishName: parish.name,
           number: index + 1,
           year,
-          status,
-          history,
-          next: history.length === all.filter((e) => e.date <= today).length ? next : null,
+          status: "active",
+          history: [],
+          next: null,
           familyIds: [],
         });
+      }
+    }
+
+    // Datas: para cada etapa e ano, os tendas se agrupam em acampamentos em sábados diferentes.
+    // Kerigma: no máximo duas paróquias, um tenda novo por paróquia. Demais: até três tendas.
+    type Group = { stageIndex: number; date: string; tents: TentPlan[] };
+    const groups: Group[] = [];
+    const dateOf = new Map<string, string>(); // `${tentId}:${stageIndex}` -> data
+    stages.forEach((stage, stageIndex) => {
+      const { years, months } = schedule(stageIndex);
+      const byYear = new Map<number, TentPlan[]>();
+      for (const tent of tents)
+        byYear.set(tent.year + years, [...(byYear.get(tent.year + years) ?? []), tent]);
+      for (const [year, yearTents] of byYear) {
+        if (!stage.hasCamp) {
+          // Marco: cada tenda registra num dia do mês.
+          for (const tent of yearTents)
+            dateOf.set(
+              `${tent.id}:${stageIndex}`,
+              `${year}-${String(months[0]).padStart(2, "0")}-${String(int(1, 28)).padStart(2, "0")}`,
+            );
+          continue;
+        }
+        const chunks: TentPlan[][] = [];
+        for (const tent of shuffle(yearTents)) {
+          const chunk = chunks.find((c) =>
+            stageIndex === 0 ? c.length < 2 && !c.some((t) => t.parishId === tent.parishId) : c.length < 3,
+          );
+          if (chunk) chunk.push(tent);
+          else chunks.push([tent]);
+        }
+        spreadDates(year, months, chunks.length).forEach((date, i) => {
+          groups.push({ stageIndex, date, tents: chunks[i] });
+          for (const tent of chunks[i]) dateOf.set(`${tent.id}:${stageIndex}`, date);
+        });
+      }
+    });
+
+    for (const tent of tents) {
+      const all = stages.map((_, stageIndex) => ({
+        stageIndex,
+        date: dateOf.get(`${tent.id}:${stageIndex}`)!,
+      }));
+      tent.history = all.filter((entry) => entry.date <= today);
+      tent.next = all.find((entry) => entry.date > today) ?? null;
+      // Casos especiais para os pontos de atenção.
+      const index = tents.filter((t) => t.parishId === tent.parishId).indexOf(tent);
+      if (tent.parishName === "SANTA GIANNA BERETTA MOLLA" && index === 2) {
+        tent.history = tent.history.slice(0, 4); // parado
+        tent.next = null;
+      }
+      if (tent.parishName === "SÃO JOSÉ" && index === 0) {
+        tent.history = tent.history.slice(0, 6);
+        tent.status = "inactive";
+        tent.next = null;
       }
     }
 
@@ -688,12 +744,11 @@ async function main() {
         id: tent.id,
         parishId: tent.parishId,
         number: tent.number,
-        name: chance(0.75) ? (namePool.pop() ?? null) : null,
         status: tent.status,
         currentStageId: stages[tent.history.at(-1)!.stageIndex].id,
         meetingSchedule: `${pick(["SEGUNDAS", "TERÇAS", "QUARTAS", "QUINTAS", "SEXTAS"])}, 20H`,
         meetingLocation: `CASA DE UMA DAS FAMÍLIAS (RODÍZIO)`,
-        formedAt: addDays(kerigmaDate(tent.year), 2),
+        formedAt: addDays(tent.history[0].date, 2),
       })),
     );
     await tx.insert(schema.families).values(familyPlans.map(familyRow));
@@ -709,14 +764,11 @@ async function main() {
     totals.families = familyPlans.length;
     totals.people = familyPlans.reduce((sum, plan) => sum + plan.people.length, 0);
 
-    // 3. Acampamentos realizados: um por etapa com acampamento e data; Kerigma por pares de paróquias.
-    const historyRows: (typeof schema.tentStageHistory.$inferInsert)[] = [];
+    // 3. Acampamentos: realizados (até hoje) e próximos (próximos 13 meses).
     const campOf = new Map<string, string>(); // `${tentId}:${stageIndex}` -> campId
-
     const priceFor = (date: string) => (Number(date.slice(0, 4)) <= thisYear - 4 ? 11000 : 12500);
     async function createCamp(
       stageIndex: number,
-      name: string,
       startDate: string,
       status: (typeof schema.campStatus.enumValues)[number],
       payments: CampCtx["payments"],
@@ -727,7 +779,6 @@ async function main() {
         .insert(schema.camps)
         .values({
           stageId: stages[stageIndex].id,
-          name,
           startDate,
           endDate: addDays(startDate, 2),
           adultPriceCents: adult,
@@ -751,115 +802,60 @@ async function main() {
         taken: new Set(),
       };
     }
-
     const familiesOf = (tent: TentPlan) => tent.familyIds.map((id) => families.get(id)!);
 
-    // Kerigmas: no máximo uma tenda por paróquia e duas paróquias por acampamento.
-    const byYear = new Map<number, TentPlan[]>();
-    for (const tent of tents) byYear.set(tent.year, [...(byYear.get(tent.year) ?? []), tent]);
-    for (const [year, yearTents] of [...byYear.entries()].sort((a, b) => a[0] - b[0])) {
-      const groups: TentPlan[][] = [];
-      for (const tent of yearTents) {
-        const group = groups.find((g) => g.length < 2 && !g.some((t) => t.parishId === tent.parishId));
-        if (group) group.push(tent);
-        else groups.push([tent]);
-      }
-      for (const [i, group] of groups.entries()) {
-        const camp = await createCamp(
-          0,
-          `${kerigma.name} ${year}${groups.length > 1 ? ` – ${["I", "II", "III", "IV"][i]}` : ""}`,
-          kerigmaDate(year),
-          "finished",
-          "finished",
-          16 * group.length,
-        );
-        for (const tent of group) {
+    const horizon = addMonths(today, 13);
+    const openUntil = addDays(today, 75);
+    let openedOne = false;
+    for (const group of groups.sort((a, b) => a.date.localeCompare(b.date))) {
+      const past = group.date <= today;
+      // Só entram os tendas que de fato chegam a essa etapa (parados e inativos ficam fora).
+      const campers = group.tents.filter((tent) =>
+        past
+          ? tent.history.some((entry) => entry.stageIndex === group.stageIndex)
+          : tent.next?.stageIndex === group.stageIndex,
+      );
+      if (campers.length === 0 || (!past && group.date > horizon)) continue;
+
+      const open = !past && (group.date <= openUntil || !openedOne);
+      if (open) openedOne = true;
+      const camp = await createCamp(
+        group.stageIndex,
+        group.date,
+        past ? "finished" : open ? "open" : "draft",
+        past ? "finished" : open ? "open" : "none",
+        group.stageIndex === 0 ? 16 * campers.length : null,
+      );
+      for (const tent of campers) {
+        if (group.stageIndex === 0) {
           await tx
             .insert(schema.campParishes)
             .values({ campId: camp.id, parishId: tent.parishId, formingTentId: tent.id });
-          await addParticipants(tx, camp, familiesOf(tent), "camper");
-          campOf.set(`${tent.id}:0`, camp.id);
-        }
-        await staffCamp(tx, camp, tents, new Set(group.map((t) => t.id)), families, teams);
-      }
-    }
-
-    // Demais etapas com acampamento: agrupa as tendas pela data da etapa.
-    const campStages = stages
-      .map((stage, index) => ({ stage, index }))
-      .filter((s) => s.stage.hasCamp && s.index > 0);
-    for (const { stage, index } of campStages) {
-      const byDate = new Map<string, TentPlan[]>();
-      for (const tent of tents) {
-        const entry = tent.history.find((h) => h.stageIndex === index);
-        if (entry) byDate.set(entry.date, [...(byDate.get(entry.date) ?? []), tent]);
-      }
-      for (const [date, campers] of [...byDate.entries()].sort()) {
-        const camp = await createCamp(
-          index,
-          `${stage.name} ${date.slice(0, 4)}`,
-          date,
-          "finished",
-          "finished",
-        );
-        for (const tent of campers) {
+        } else {
           await tx.insert(schema.campTents).values({ campId: camp.id, tentId: tent.id, role: "camper" });
-          await addParticipants(tx, camp, familiesOf(tent), "camper");
-          campOf.set(`${tent.id}:${index}`, camp.id);
         }
-        await staffCamp(tx, camp, tents, new Set(campers.map((t) => t.id)), families, teams);
+        await addParticipants(tx, camp, familiesOf(tent), "camper");
+        if (past) campOf.set(`${tent.id}:${group.stageIndex}`, camp.id);
       }
+      if (past || open) await staffCamp(tx, camp, tents, new Set(campers.map((t) => t.id)), families, teams);
     }
 
-    for (const tent of tents) {
-      for (const entry of tent.history) {
-        historyRows.push({
+    await tx.insert(schema.tentStageHistory).values(
+      tents.flatMap((tent) =>
+        tent.history.map((entry) => ({
           tentId: tent.id,
           stageId: stages[entry.stageIndex].id,
           campId: campOf.get(`${tent.id}:${entry.stageIndex}`) ?? null,
           date: entry.date,
-        });
-      }
-    }
-    await tx.insert(schema.tentStageHistory).values(historyRows);
-
-    // 4. Próximos acampamentos das tendas (próximos 13 meses).
-    const horizon = addMonths(today, 13);
-    const upcoming = new Map<string, TentPlan[]>();
-    for (const tent of tents) {
-      if (!tent.next || !stages[tent.next.stageIndex].hasCamp || tent.next.date > horizon) continue;
-      const key = `${tent.next.stageIndex}|${tent.next.date}`;
-      upcoming.set(key, [...(upcoming.get(key) ?? []), tent]);
-    }
-    const sortedUpcoming = [...upcoming.entries()].sort((a, b) =>
-      a[0].split("|")[1].localeCompare(b[0].split("|")[1]),
+        })),
+      ),
     );
-    for (const [i, [key, campers]] of sortedUpcoming.entries()) {
-      const [stageIndex, date] = [Number(key.split("|")[0]), key.split("|")[1]];
-      const open = i === 0;
-      const camp = await createCamp(
-        stageIndex,
-        `${stages[stageIndex].name} ${date.slice(0, 4)}`,
-        date,
-        open ? "open" : "draft",
-        open ? "open" : "none",
-      );
-      for (const tent of campers) {
-        await tx.insert(schema.campTents).values({ campId: camp.id, tentId: tent.id, role: "camper" });
-        await addParticipants(tx, camp, familiesOf(tent), "camper");
-      }
-      if (open) await staffCamp(tx, camp, tents, new Set(campers.map((t) => t.id)), families, teams);
-    }
 
-    // 5. Próximo Kerigma com inscrições abertas: duas paróquias formando tendas novas.
-    const nextKerigmaYear = kerigmaDate(thisYear) > today ? thisYear : thisYear + 1;
-    const kerigmaCamp = await createCamp(
-      0,
-      `${kerigma.name} ${nextKerigmaYear}`,
-      kerigmaDate(nextKerigmaYear),
-      "open",
-      "open",
-      32,
+    // 4. Próxima temporada de Kerigma: um com inscrições abertas (duas paróquias formando tendas
+    //    novos) e outro ainda em preparação, para mostrar vários Kerigmas na mesma temporada.
+    const kerigmaYear = kerigmaSeasonEnd(thisYear) >= today ? thisYear : thisYear + 1;
+    const [openDate, laterDate] = spreadDates(kerigmaYear, schedule(0).months, 2).map((d) =>
+      d > today ? d : addDays(today, 14),
     );
     const statuses = [
       "confirmed",
@@ -872,30 +868,47 @@ async function main() {
       "waitlist",
       "cancelled",
     ] as const;
-    for (const [parishName, count] of [
-      ["NOSSA SENHORA DA CONCEIÇÃO", 14],
-      ["SÃO SEBASTIÃO", 12],
-    ] as const) {
-      const parishId = parishByName.get(parishName)!;
-      const number = tents.filter((tent) => tent.parishId === parishId).length + 1;
-      const [forming] = await tx
-        .insert(schema.tents)
-        .values({ parishId, number, status: "forming", currentStageId: kerigma.id })
-        .returning({ id: schema.tents.id });
-      await tx
-        .insert(schema.campParishes)
-        .values({ campId: kerigmaCamp.id, parishId, formingTentId: forming.id });
-      const registered = Array.from({ length: count }, () =>
-        planFamily(parishId, forming.id, nextKerigmaYear, false),
-      );
-      await tx.insert(schema.families).values(registered.map(familyRow));
-      await tx.insert(schema.people).values(registered.flatMap((plan) => plan.people));
-      totals.families += registered.length;
-      totals.people += registered.reduce((sum, plan) => sum + plan.people.length, 0);
-      totals.tents += 1;
-      await addParticipants(tx, kerigmaCamp, registered, "camper", { status: () => pick(statuses) });
+    const nextKerigmas = [
+      {
+        date: openDate,
+        status: "open" as const,
+        parishes: [
+          ["NOSSA SENHORA DA CONCEIÇÃO", 14],
+          ["SÃO SEBASTIÃO", 12],
+        ] as const,
+      },
+      {
+        date: laterDate,
+        status: "draft" as const,
+        parishes: [
+          ["SANTA GIANNA BERETTA MOLLA", 0],
+          ["SÃO JOSÉ", 0],
+        ] as const,
+      },
+    ];
+    for (const next of nextKerigmas) {
+      const camp = await createCamp(0, next.date, next.status, next.status === "open" ? "open" : "none", 32);
+      for (const [parishName, count] of next.parishes) {
+        const parishId = parishByName.get(parishName)!;
+        const number = tents.filter((tent) => tent.parishId === parishId).length + 1;
+        const [forming] = await tx
+          .insert(schema.tents)
+          .values({ parishId, number, status: "forming", currentStageId: kerigma.id })
+          .returning({ id: schema.tents.id });
+        await tx.insert(schema.campParishes).values({ campId: camp.id, parishId, formingTentId: forming.id });
+        totals.tents += 1;
+        if (count === 0) continue;
+        const registered = Array.from({ length: count }, () =>
+          planFamily(parishId, forming.id, kerigmaYear, false),
+        );
+        await tx.insert(schema.families).values(registered.map(familyRow));
+        await tx.insert(schema.people).values(registered.flatMap((plan) => plan.people));
+        totals.families += registered.length;
+        totals.people += registered.reduce((sum, plan) => sum + plan.people.length, 0);
+        await addParticipants(tx, camp, registered, "camper", { status: () => pick(statuses) });
+      }
+      if (next.status === "open") await staffCamp(tx, camp, tents, new Set(), families, teams);
     }
-    await staffCamp(tx, kerigmaCamp, tents, new Set(), families, teams);
   });
 
   console.log(
@@ -907,5 +920,7 @@ async function main() {
 
 main().catch((error) => {
   console.error(error instanceof Error ? error.message : error);
+  if (error instanceof Error && error.cause)
+    console.error("Causa:", (error.cause as Error).message ?? error.cause);
   process.exit(1);
 });

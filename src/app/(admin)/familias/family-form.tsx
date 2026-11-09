@@ -41,7 +41,7 @@ export function FamilyForm({
   action: (values: FamilyInput) => Promise<ActionResult>;
   defaultValues: FamilyInput;
   parishOptions: Option[];
-  /** Sem tendas: a tenda é definida pelo servidor (ex.: inscrição no Kerigma). */
+  /** Sem tendas: o tenda é definida pelo servidor (ex.: inscrição no Kerigma). */
   tentOptions?: (Option & { parishId: string })[];
   cancelHref: string;
   submitLabel?: string;
@@ -56,7 +56,7 @@ export function FamilyForm({
     [tentOptions, parishId],
   );
 
-  // Ao trocar de paróquia, a tenda escolhida deixa de valer.
+  // Ao trocar de paróquia, o tenda escolhido deixa de valer.
   useEffect(() => {
     if (!tentOptions) return;
     const tentId = getValues("tentId");

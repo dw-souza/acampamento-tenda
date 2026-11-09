@@ -20,5 +20,7 @@ async function main() {
 
 main().catch((error) => {
   console.error(error instanceof Error ? error.message : error);
+  if (error instanceof Error && error.cause)
+    console.error("Causa:", (error.cause as Error).message ?? error.cause);
   process.exit(1);
 });

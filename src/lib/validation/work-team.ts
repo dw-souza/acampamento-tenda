@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { optionalText, requiredUpper } from "./common";
 
-export const teamKinds = { tent: "Tenda inteira", special: "Casais avulsos" } as const;
+export const teamKinds = { tent: "Tenda inteiro", special: "Casais avulsos" } as const;
 
 export const workTeamSchema = z.object({
   name: requiredUpper("Informe o nome"),

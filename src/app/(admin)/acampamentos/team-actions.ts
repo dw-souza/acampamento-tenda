@@ -13,7 +13,7 @@ function revalidateCamp(campId: string) {
   revalidatePath(`/acampamentos/${campId}`, "layout");
 }
 
-/** Confere se a equipe pode receber servos e se a tenda já passou pela etapa do acampamento. */
+/** Confere se a equipe pode receber servos e se o tenda já passou pela etapa do acampamento. */
 async function assertCanServe(campId: string, teamId: string, tentId: string | null) {
   const [camp, team, tent] = await Promise.all([
     db.query.camps.findFirst({ where: eq(camps.id, campId), with: { stage: true } }),
@@ -22,14 +22,14 @@ async function assertCanServe(campId: string, teamId: string, tentId: string | n
   ]);
   if (!camp || !team) return "Acampamento ou equipe não encontrados.";
   if (camp.status === "finished") return "O acampamento já foi realizado.";
-  if (!tent || tent.status !== "active") return "Só famílias de tendas ativas podem servir.";
+  if (!tent || tent.status !== "active") return "Só famílias de tendas ativos podem servir.";
   if (!canServe(tent.currentStage?.position, camp.stage.position)) {
-    return `A tenda ainda não passou pelo ${camp.stage.name}; só serve quem já passou por esta etapa.`;
+    return `O tenda ainda não passou pelo ${camp.stage.name}; só serve quem já passou por esta etapa.`;
   }
   return null;
 }
 
-/** A tenda inteira serve na equipe: cada família entra como servo, com todos os membros. */
+/** O tenda inteiro serve na equipe: cada família entra como servo, com todos os membros. */
 export async function addTeamTent(campId: string, teamId: string, tentId: string): Promise<ActionResult> {
   await requireUser();
   const problem = await assertCanServe(campId, teamId, tentId);
@@ -52,12 +52,12 @@ export async function addTeamTent(campId: string, teamId: string, tentId: string
       skipped = members.length - added;
     });
   } catch (error) {
-    return { error: dbErrorMessage(error, { unique: "Esta tenda já participa deste acampamento." }) };
+    return { error: dbErrorMessage(error, { unique: "Este tenda já participa deste acampamento." }) };
   }
   revalidateCamp(campId);
   if (skipped > 0) {
     return {
-      warning: `${skipped} família(s) da tenda já tinham outra função neste acampamento e ficaram onde estavam.`,
+      warning: `${skipped} família(s) do tenda já tinham outra função neste acampamento e ficaram onde estavam.`,
     };
   }
   return undefined;

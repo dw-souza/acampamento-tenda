@@ -6,16 +6,16 @@ type Row = {
   id: string | null;
   name: string;
   hasCamp: boolean;
-  tents: { id: string; number: number; name: string | null; parish: { name: string } }[];
+  tents: { id: string; number: number; parish: { name: string } }[];
 };
 
 // Uma série só (tendas por etapa): uma cor (o marrom da marca), sem legenda; o título diz o que é.
 const BAR_COLOR = "var(--primary)";
 
 /**
- * Barras horizontais: quantas tendas ativas estão em cada etapa do caminho.
+ * Barras horizontais: quantas tendas ativos estão em cada etapa do caminho.
  * Cada linha leva à lista de tendas filtrada (a versão em tabela do gráfico);
- * passar o mouse ou focar mostra quais são as tendas.
+ * passar o mouse ou focar mostra quais são os tendas.
  */
 export function StageBars({ rows }: { rows: Row[] }) {
   const max = Math.max(1, ...rows.map((row) => row.tents.length));

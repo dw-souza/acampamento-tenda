@@ -21,7 +21,7 @@ export async function saveTent(id: string | null, input: TentInput): Promise<Act
           where: and(eq(families.id, data.guardianFamilyId), eq(families.tentId, id)),
         })
       : undefined;
-    if (!guardian) return { error: "Os guardiões precisam ser uma família desta tenda." };
+    if (!guardian) return { error: "Os guardiões precisam ser uma família deste tenda." };
   }
 
   let tentId = id;
@@ -34,7 +34,7 @@ export async function saveTent(id: string | null, input: TentInput): Promise<Act
     }
   } catch (error) {
     return {
-      error: dbErrorMessage(error, { unique: "Já existe uma tenda com esse número nesta paróquia." }),
+      error: dbErrorMessage(error, { unique: "Já existe um tenda com esse número nesta paróquia." }),
     };
   }
   revalidatePath("/tendas");
@@ -48,7 +48,7 @@ export async function deleteTent(id: string): Promise<ActionResult> {
   } catch (error) {
     return {
       error: dbErrorMessage(error, {
-        inUse: "A tenda já participou de acampamentos. Marque-a como inativa.",
+        inUse: "O tenda já participou de acampamentos. Marque-o como inativo.",
       }),
     };
   }
@@ -56,7 +56,7 @@ export async function deleteTent(id: string): Promise<ActionResult> {
   redirect("/tendas");
 }
 
-/** Registra uma etapa no caminho da tenda (marcos sem acampamento, como Ventania e Chai). */
+/** Registra uma etapa no caminho do tenda (marcos sem acampamento, como Ventania e Chai). */
 export async function recordTentStage(tentId: string, stageId: string, date: string): Promise<ActionResult> {
   await requireUser();
   if (!stageId) return { error: "Escolha a etapa." };
@@ -73,7 +73,7 @@ export async function recordTentStage(tentId: string, stageId: string, date: str
       .insert(tentStageHistory)
       .values({ tentId, stageId, date })
       .onConflictDoUpdate({ target: [tentStageHistory.tentId, tentStageHistory.stageId], set: { date } });
-    // A etapa atual só avança; registrar uma etapa antiga não faz a tenda voltar.
+    // A etapa atual só avança; registrar uma etapa antiga não faz o tenda voltar.
     if (!tent.currentStage || stage.position >= tent.currentStage.position) {
       await tx.update(tents).set({ currentStageId: stageId }).where(eq(tents.id, tentId));
     }

@@ -1,0 +1,1 @@
+ALTER TABLE "camps" DROP COLUMN "name";

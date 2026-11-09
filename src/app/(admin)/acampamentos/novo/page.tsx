@@ -13,7 +13,6 @@ export default async function NewCampPage() {
         stageOptions={stages}
         defaultValues={{
           stageId: "",
-          name: "",
           startDate: "",
           endDate: "",
           adultPrice: "125,00",

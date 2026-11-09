@@ -4,7 +4,6 @@ import { optionalDate, optionalText, optionalUpper, optionalUuid, uuid } from ".
 export const tentSchema = z.object({
   parishId: uuid,
   number: z.coerce.number<string | number>().int().min(1, "Número deve ser 1 ou maior"),
-  name: optionalUpper,
   status: z.enum(["forming", "active", "inactive"]),
   currentStageId: optionalUuid,
   guardianFamilyId: optionalUuid,

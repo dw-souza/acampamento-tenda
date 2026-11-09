@@ -18,7 +18,6 @@ export async function listTents(filters: { parishId?: string; stageId?: string }
     .select({
       id: tents.id,
       number: tents.number,
-      name: tents.name,
       status: tents.status,
       parishName: parishes.name,
       stageName: stages.name,
@@ -54,7 +53,7 @@ export async function getTent(id: string) {
   });
 }
 
-/** Todas as tendas com a paróquia, para selects filtrados por paróquia no cliente. */
+/** Todos os tendas com a paróquia, para selects filtrados por paróquia no cliente. */
 export async function tentOptions() {
   await requireUser();
   const rows = await db.query.tents.findMany({ orderBy: asc(tents.number) });

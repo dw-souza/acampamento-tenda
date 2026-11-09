@@ -45,7 +45,7 @@ export default async function StagesPage() {
                 <DeleteButton
                   action={deleteStage.bind(null, stage.id)}
                   title={`Remover ${stage.name}?`}
-                  description="Só é possível remover etapas que nenhuma tenda ou acampamento usa."
+                  description="Só é possível remover etapas que nenhum tenda ou acampamento usa."
                 />
               </TableCell>
             </TableRow>

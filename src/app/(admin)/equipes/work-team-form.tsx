@@ -27,7 +27,7 @@ export function WorkTeamForm({ id, defaultValues }: { id: string | null; default
           name="kind"
           label="Quem serve"
           options={kindOptions}
-          description="Tenda inteira (ex.: cozinha) ou casais de várias tendas (ex.: música)."
+          description="Tenda inteiro (ex.: cozinha) ou casais de várias tendas (ex.: música)."
         />
         <TextField control={control} name="color" label="Cor" type="color" className="w-24" />
         <TextareaField control={control} name="description" label="Descrição" />

@@ -12,7 +12,7 @@ import {
   tentsByStage,
   upcomingCamps,
 } from "@/lib/data/dashboard";
-import { formatDate, plural, tentLabel } from "@/lib/format/labels";
+import { campLabel, formatDate, plural, tentLabel } from "@/lib/format/labels";
 import { campStatusLabels } from "@/lib/validation/camp";
 import { StageBars } from "./_dashboard/stage-bars";
 import { StatusBadge } from "@/components/status-badge";
@@ -32,12 +32,12 @@ export default async function HomePage() {
   const tiles = [
     {
       icon: Tent,
-      label: "Tendas ativas",
+      label: "Tendas ativos",
       value: totals.activeTents,
       detail:
         totals.formingTents > 0 ? `+ ${plural(totals.formingTents, "em formação", "em formação")}` : null,
     },
-    { icon: Users, label: "Famílias", value: totals.families, detail: "nas tendas ativas" },
+    { icon: Users, label: "Famílias", value: totals.families, detail: "nos tendas ativos" },
     {
       icon: UsersRound,
       label: "Pessoas",
@@ -91,7 +91,7 @@ export default async function HomePage() {
           <CardHeader>
             <CardTitle>Tendas por etapa</CardTitle>
             <CardDescription>
-              Etapa atual de cada tenda ativa. Passe o mouse para ver quais são.
+              Etapa atual de cada tenda ativo. Passe o mouse para ver quais são.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -182,7 +182,10 @@ function CampItem({ camp, children }: { camp: CampSummary; children?: ReactNode 
     <li className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <Link href={`/acampamentos/${camp.id}`} className="font-medium hover:underline">
-          {camp.name}
+          {campLabel({
+            startDate: camp.startDate,
+            stage: { name: camp.stageName, formsTents: camp.stageFormsTents },
+          })}
         </Link>
         <p className="text-xs text-muted-foreground tabular-nums">
           {formatDate(camp.startDate)} a {formatDate(camp.endDate)} ·{" "}
@@ -205,7 +208,7 @@ function AttentionCard({ attention }: { attention: Awaited<ReturnType<typeof att
           <Link href="/tendas?etapa=nenhuma" className="font-medium hover:underline">
             {plural(attention.noStage.length, "tenda sem etapa", "tendas sem etapa")}
           </Link>{" "}
-          registrada: não podem servir nem ser sugeridas para acampamentos.
+          registrada: não podem servir nem ser sugeridos para acampamentos.
         </>
       ),
     });

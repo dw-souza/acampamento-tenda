@@ -28,7 +28,6 @@ export default async function EditTentPage({ params }: PageProps<"/tendas/[id]/e
         defaultValues={{
           parishId: tent.parishId,
           number: tent.number,
-          name: tent.name ?? "",
           status: tent.status,
           currentStageId: tent.currentStageId ?? "",
           guardianFamilyId: tent.guardianFamilyId ?? "",

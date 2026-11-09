@@ -44,7 +44,7 @@ export function campPeople(camp: Camp, participants: CampParticipant[]): CampPer
         .map(displayName)
         .join(" e ");
 
-      // No Kerigma o número da tenda só é revelado no fim: o crachá mostra a paróquia.
+      // No Kerigma o número do tenda só é revelado no fim: o crachá mostra a paróquia.
       const camperGroup =
         camp.stage.formsTents || !family.tent ? family.parish.name : tentLabel(family.tent).toUpperCase();
       const group = participant.role === "camper" ? camperGroup : (participant.team?.name ?? "EQUIPE");

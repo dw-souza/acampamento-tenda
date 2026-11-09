@@ -74,7 +74,7 @@ scripts/           seed e criação de usuário
 
 ## Modelo, em resumo
 
-- **Família** é a unidade (casal + filhos, em `people`). Pertence a uma paróquia e, a partir do Kerigma, a uma tenda.
+- **Família** é a unidade (casal + filhos, em `people`). Pertence a uma paróquia e, a partir do Kerigma, a um tenda.
 - **Tenda** nasce com status `forming` junto do Kerigma (uma por paróquia) e vira `active` quando as inscrições fecham. Avança de etapa ao longo dos anos (`tent_stage_history`).
 - **Acampamento** pertence a uma etapa. Cada família tem uma única participação por acampamento (`camp_participants`: campista ou servo, equipe, pagamento), e `camp_attendees` registra quem da família vai de fato.
 - **Valor esperado** é calculado por pessoa presente; menores de 3 anos não pagam e contam para o pajem. Pagamento nunca bloqueia participação.

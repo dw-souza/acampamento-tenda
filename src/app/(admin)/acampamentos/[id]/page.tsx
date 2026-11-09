@@ -14,7 +14,7 @@ import {
   toSummaryInput,
 } from "@/lib/data/camps";
 import { countsTowardCamp, summarizeCamp } from "@/lib/domain/camp-summary";
-import { tentLabel } from "@/lib/format/labels";
+import { campLabel, tentLabel } from "@/lib/format/labels";
 import { formatMoney } from "@/lib/format/money";
 import {
   addCampParish,
@@ -93,10 +93,10 @@ function StatusCard({ camp }: { camp: Camp }) {
           {camp.status === "draft" && "Em preparação. Abra as inscrições quando estiver pronto."}
           {camp.status === "open" &&
             (camp.stage.formsTents
-              ? "Ao encerrar as inscrições, cada tenda em formação passa a ativa com as famílias confirmadas."
+              ? "Ao encerrar as inscrições, cada tenda em formação passa a ativo com as famílias confirmadas."
               : "Ao encerrar, a lista de campistas fica fechada.")}
           {camp.status === "closed" &&
-            "Depois do acampamento, marque como realizado para registrar a etapa nas tendas."}
+            "Depois do acampamento, marque como realizado para registrar a etapa nos tendas."}
           {camp.status === "finished" && "Acampamento realizado."}
         </CardDescription>
       </CardHeader>
@@ -111,7 +111,7 @@ function StatusCard({ camp }: { camp: Camp }) {
             confirm={{
               title: "Encerrar inscrições?",
               description: camp.stage.formsTents
-                ? "As tendas em formação passam a ativas. Famílias canceladas ou na lista de espera saem da tenda. Inscrições pendentes impedem o encerramento."
+                ? "Os tendas em formação passam a ativos. Famílias canceladas ou na lista de espera saem do tenda. Inscrições pendentes impedem o encerramento."
                 : "Inscrições pendentes impedem o encerramento.",
               confirmLabel: "Encerrar",
             }}
@@ -125,7 +125,7 @@ function StatusCard({ camp }: { camp: Camp }) {
             successMessage="Acampamento realizado."
             confirm={{
               title: "Marcar como realizado?",
-              description: `As tendas campistas passam para a etapa ${camp.stage.name} no caminho.`,
+              description: `Os tendas campistas passam para a etapa ${camp.stage.name} no caminho.`,
               confirmLabel: "Marcar como realizado",
             }}
           >
@@ -135,7 +135,7 @@ function StatusCard({ camp }: { camp: Camp }) {
         <div className="ml-auto">
           <DeleteButton
             action={deleteCamp.bind(null, camp.id)}
-            title={`Remover ${camp.name}?`}
+            title={`Remover ${campLabel(camp)}?`}
             description="Remove o acampamento e todas as inscrições. Os cadastros das famílias continuam."
           />
         </div>
@@ -154,7 +154,7 @@ async function ParishesCard({ camp }: { camp: Camp }) {
       <CardHeader>
         <CardTitle>Paróquias</CardTitle>
         <CardDescription>
-          Cada paróquia forma uma tenda nova com as famílias inscritas por ela.
+          Cada paróquia forma um tenda novo com as famílias inscritas por ela.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -195,7 +195,7 @@ async function ParishesCard({ camp }: { camp: Camp }) {
                       <DeleteButton
                         action={removeCampParish.bind(null, camp.id, link.parishId)}
                         title={`Tirar ${link.parish.name} do acampamento?`}
-                        description="Só é possível sem famílias inscritas por esta paróquia. A tenda em formação é removida."
+                        description="Só é possível sem famílias inscritas por esta paróquia. O tenda em formação é removido."
                       />
                     )}
                   </TableCell>
@@ -229,7 +229,7 @@ async function TentsCard({ camp }: { camp: Camp }) {
       <CardHeader>
         <CardTitle>Tendas campistas</CardTitle>
         <CardDescription>
-          Todas as famílias da tenda entram como campistas; ajuste quem vai na aba Campistas.
+          Todas as famílias do tenda entram como campistas; ajuste quem vai na aba Campistas.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -246,7 +246,7 @@ async function TentsCard({ camp }: { camp: Camp }) {
             {camperTents.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} className="text-muted-foreground">
-                  Adicione as tendas que vão acampar.
+                  Adicione os tendas que vão acampar.
                 </TableCell>
               </TableRow>
             )}
@@ -271,7 +271,7 @@ async function TentsCard({ camp }: { camp: Camp }) {
                     <DeleteButton
                       action={removeCampTent.bind(null, camp.id, link.tentId)}
                       title={`Tirar ${tentLabel(link.tent)} do acampamento?`}
-                      description="As famílias desta tenda deixam de ser campistas neste acampamento."
+                      description="As famílias deste tenda deixam de ser campistas neste acampamento."
                     />
                   )}
                 </TableCell>
@@ -284,7 +284,7 @@ async function TentsCard({ camp }: { camp: Camp }) {
             placeholder="Adicionar tenda..."
             options={available.map((tent) => ({
               value: tent.id,
-              label: `${tentLabel(tent)} · ${tent.parish.name}${tent.suggested ? " (sugerida)" : ""}`,
+              label: `${tentLabel(tent)} · ${tent.parish.name}${tent.suggested ? " (sugerido)" : ""}`,
             }))}
             action={addCampTent.bind(null, camp.id)}
           />
