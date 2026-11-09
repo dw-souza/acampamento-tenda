@@ -812,12 +812,13 @@ async function main() {
       );
       if (campers.length === 0 || (!past && group.date > horizon)) continue;
 
+      // Próximos: o mais perto (ou até 75 dias) já tem equipes e pagamentos em andamento.
       const open = !past && (group.date <= openUntil || !openedOne);
       if (open) openedOne = true;
       const camp = await createCamp(
         group.stageIndex,
         group.date,
-        past ? "finished" : open ? "open" : "draft",
+        past ? "finished" : "scheduled",
         past ? "finished" : open ? "open" : "none",
         group.stageIndex === 0 ? 16 * campers.length : null,
       );
@@ -858,14 +859,13 @@ async function main() {
       "confirmed",
       "confirmed",
       "confirmed",
-      "pending",
       "waitlist",
       "cancelled",
     ] as const;
     const nextKerigmas = [
       {
         date: openDate,
-        status: "open" as const,
+        inProgress: true,
         parishes: [
           ["NOSSA SENHORA DA CONCEIÇÃO", 14],
           ["SÃO SEBASTIÃO", 12],
@@ -873,7 +873,7 @@ async function main() {
       },
       {
         date: laterDate,
-        status: "draft" as const,
+        inProgress: false,
         parishes: [
           ["SANTA GIANNA BERETTA MOLLA", 0],
           ["SÃO JOSÉ", 0],
@@ -881,7 +881,7 @@ async function main() {
       },
     ];
     for (const next of nextKerigmas) {
-      const camp = await createCamp(0, next.date, next.status, next.status === "open" ? "open" : "none", 32);
+      const camp = await createCamp(0, next.date, "scheduled", next.inProgress ? "open" : "none", 32);
       for (const [parishName, count] of next.parishes) {
         const parishId = parishByName.get(parishName)!;
         const number = tents.filter((tent) => tent.parishId === parishId).length + 1;
@@ -901,7 +901,7 @@ async function main() {
         totals.people += registered.reduce((sum, plan) => sum + plan.people.length, 0);
         await addParticipants(tx, camp, registered, "camper", { status: () => pick(statuses) });
       }
-      if (next.status === "open") await staffCamp(tx, camp, tents, new Set(), families, teams);
+      if (next.inProgress) await staffCamp(tx, camp, tents, new Set(), families, teams);
     }
   });
 

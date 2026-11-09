@@ -24,9 +24,7 @@ export async function registerFamily(campId: string, input: FamilyInput): Promis
     with: { stage: true, parishes: true },
   });
   if (!camp?.stage.formsTents) return { error: "Este acampamento não recebe inscrições de famílias." };
-  if (camp.status === "closed" || camp.status === "finished") {
-    return { error: "As inscrições deste acampamento já foram encerradas." };
-  }
+  if (camp.status !== "scheduled") return { error: "O acampamento já foi concluído." };
 
   const parsed = parseOrError(familySchema, input);
   if (!parsed.ok) return { error: parsed.error };
@@ -51,12 +49,20 @@ export async function setParticipantStatus(participantId: string, status: string
   const parsed = parseOrError(participantStatusSchema, status);
   if (!parsed.ok) return { error: parsed.error };
 
-  const [row] = await db
+  // Lista de espera e desistência só existem no acampamento aberto, e só antes de concluir.
+  const participant = await db.query.campParticipants.findFirst({
+    where: eq(campParticipants.id, participantId),
+    with: { camp: { with: { stage: true } } },
+  });
+  if (!participant) return undefined;
+  if (!participant.camp.stage.formsTents) return { error: "Só o acampamento aberto tem lista de espera." };
+  if (participant.camp.status !== "scheduled") return { error: "O acampamento já foi concluído." };
+
+  await db
     .update(campParticipants)
     .set({ status: parsed.data })
-    .where(eq(campParticipants.id, participantId))
-    .returning({ campId: campParticipants.campId });
-  if (row) revalidateCamp(row.campId);
+    .where(eq(campParticipants.id, participantId));
+  revalidateCamp(participant.campId);
   return undefined;
 }
 
@@ -96,6 +102,9 @@ export async function removeParticipant(participantId: string): Promise<ActionRe
     with: { family: true, camp: { with: { parishes: true } } },
   });
   if (!participant) return undefined;
+  if (participant.camp.status !== "scheduled") {
+    return { error: "O acampamento já foi concluído. Desfaça a conclusão para alterar." };
+  }
 
   const formingTentIds = participant.camp.parishes.map((link) => link.formingTentId);
   try {

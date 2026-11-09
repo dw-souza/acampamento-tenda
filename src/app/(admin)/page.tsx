@@ -254,6 +254,30 @@ function AttentionCard({ attention }: { attention: Awaited<ReturnType<typeof att
       ),
     });
   }
+  if (attention.overdue.length > 0) {
+    items.push({
+      key: "overdue",
+      text: (
+        <>
+          <span className="font-medium">
+            {plural(attention.overdue.length, "acampamento já passou", "acampamentos já passaram")} e não{" "}
+            {attention.overdue.length === 1 ? "foi concluído" : "foram concluídos"}:
+          </span>{" "}
+          {attention.overdue.map((camp, i) => (
+            <span key={camp.id}>
+              {i > 0 && ", "}
+              <Link href={`/acampamentos/${camp.id}`} className="hover:underline">
+                {campLabel({
+                  startDate: camp.startDate,
+                  stage: { name: camp.stageName, formsTents: camp.stageFormsTents },
+                })}
+              </Link>
+            </span>
+          ))}
+        </>
+      ),
+    });
+  }
   if (attention.familiesWithoutTent > 0) {
     items.push({
       key: "family",

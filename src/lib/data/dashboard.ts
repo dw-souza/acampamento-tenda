@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, count, desc, eq, gte, isNull, lt, max, ne, notExists, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, isNull, lt, max, ne, notExists, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   campParishes,
@@ -78,11 +78,11 @@ function participantCounts() {
     .select({
       campId: campParticipants.campId,
       campers:
-        sql<number>`count(*) filter (where ${campParticipants.role} = 'camper' and ${campParticipants.status} in ('pending', 'confirmed'))`
+        sql<number>`count(*) filter (where ${campParticipants.role} = 'camper' and ${campParticipants.status} = 'confirmed')`
           .mapWith(Number)
           .as("campers"),
       servers:
-        sql<number>`count(*) filter (where ${campParticipants.role} = 'server' and ${campParticipants.status} in ('pending', 'confirmed'))`
+        sql<number>`count(*) filter (where ${campParticipants.role} = 'server' and ${campParticipants.status} = 'confirmed')`
           .mapWith(Number)
           .as("servers"),
     })
@@ -126,7 +126,7 @@ export async function recentCampsByStage(limit = 3) {
     .from(camps)
     .innerJoin(stages, eq(stages.id, camps.stageId))
     .leftJoin(counts, eq(counts.campId, camps.id))
-    .where(or(eq(camps.status, "finished"), lt(camps.endDate, sql`current_date`)))
+    .where(eq(camps.status, "finished"))
     .orderBy(asc(stages.position), desc(camps.startDate));
 
   const byStage = new Map<string, { stageName: string; camps: typeof rows }>();
@@ -144,12 +144,13 @@ export const STALLED_YEARS = 2;
 /** Situações que pedem ação da secretaria. */
 export async function attentionPoints() {
   await requireUser();
-  // Famílias sem tenda que não estão inscritas num acampamento que forma tendas.
+  // Famílias sem tenda que não estão inscritas num Kerigma ainda agendado.
   const inFormingCamp = db
     .select()
     .from(campParticipants)
     .innerJoin(campParishes, eq(campParishes.campId, campParticipants.campId))
-    .where(eq(campParticipants.familyId, families.id));
+    .innerJoin(camps, eq(camps.id, campParticipants.campId))
+    .where(and(eq(campParticipants.familyId, families.id), eq(camps.status, "scheduled")));
 
   // Último avanço do tenda: a etapa mais recente registrada ou a data de formação.
   const progress = db
@@ -159,7 +160,7 @@ export async function attentionPoints() {
     .as("progress");
   const lastProgress = sql<string>`greatest(${progress.last}, ${tents.formedAt})`;
 
-  const [noGuardian, noStage, noTent, stalled] = await Promise.all([
+  const [noGuardian, noStage, noTent, stalled, overdue] = await Promise.all([
     db.query.tents.findMany({
       where: and(eq(tents.status, "active"), isNull(tents.guardianFamilyId)),
       with: { parish: true },
@@ -194,8 +195,20 @@ export async function attentionPoints() {
         ),
       )
       .orderBy(asc(lastProgress)),
+    // Acampamentos que já terminaram mas não foram concluídos: o caminho dos tendas fica atrasado.
+    db
+      .select({
+        id: camps.id,
+        startDate: camps.startDate,
+        stageName: stages.name,
+        stageFormsTents: stages.formsTents,
+      })
+      .from(camps)
+      .innerJoin(stages, eq(stages.id, camps.stageId))
+      .where(and(eq(camps.status, "scheduled"), lt(camps.endDate, sql`current_date`)))
+      .orderBy(asc(camps.startDate)),
   ]);
-  return { noGuardian, noStage, familiesWithoutTent: noTent[0].n, stalled };
+  return { noGuardian, noStage, familiesWithoutTent: noTent[0].n, stalled, overdue };
 }
 
 export async function parishSummary() {

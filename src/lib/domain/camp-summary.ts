@@ -1,7 +1,7 @@
 // Totais de um acampamento a partir das participações e de quem vai.
 import { type AttendeeForPricing, type CampPrices, expectedAmountCents, isToddler } from "./pricing";
 
-export type ParticipantStatus = "pending" | "confirmed" | "waitlist" | "cancelled";
+export type ParticipantStatus = "confirmed" | "waitlist" | "cancelled";
 export type ParticipantRole = "camper" | "server";
 
 /** Campistas e servos podem ter valores diferentes no mesmo acampamento. */
@@ -44,9 +44,9 @@ export type Totals = {
   paidCents: number;
 };
 
-/** Lista de espera e cancelados não contam para vagas, pessoas nem valores. */
+/** Lista de espera e desistentes não contam para vagas, pessoas nem valores. */
 export function countsTowardCamp(status: ParticipantStatus) {
-  return status === "pending" || status === "confirmed";
+  return status === "confirmed";
 }
 
 export function summarizeParticipant(participant: ParticipantForSummary, camp: CampPricing) {

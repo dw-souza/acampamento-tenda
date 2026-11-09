@@ -19,12 +19,11 @@ import { formatMoney } from "@/lib/format/money";
 import {
   addCampParish,
   addCampTent,
-  closeRegistrations,
+  concludeCamp,
   deleteCamp,
-  finishCamp,
-  openRegistrations,
   removeCampParish,
   removeCampTent,
+  reopenCamp,
 } from "../actions";
 import { StatTile } from "@/components/stat-tile";
 import { HeartHandshake, Tent, UsersRound, Wallet } from "lucide-react";
@@ -85,60 +84,66 @@ export default async function CampOverviewPage({ params }: PageProps<"/acampamen
 }
 
 function StatusCard({ camp }: { camp: Camp }) {
+  const today = new Date().toISOString().slice(0, 10);
+  const scheduled = camp.status === "scheduled";
+  const overdue = scheduled && camp.endDate < today;
   return (
     <Card>
       <CardHeader>
         <CardTitle>Situação</CardTitle>
         <CardDescription>
-          {camp.status === "draft" && "Em preparação. Abra as inscrições quando estiver pronto."}
-          {camp.status === "open" &&
-            (camp.stage.formsTents
-              ? "Ao encerrar as inscrições, cada tenda em formação passa a ativo com as famílias confirmadas."
-              : "Ao encerrar, a lista de campistas fica fechada.")}
-          {camp.status === "closed" &&
-            "Depois do acampamento, marque como realizado para registrar a etapa nos tendas."}
-          {camp.status === "finished" && "Acampamento realizado."}
+          {scheduled
+            ? camp.stage.formsTents
+              ? "Agendado. Ao concluir, cada tenda em formação passa a ativo com as famílias inscritas; quem está na lista de espera ou desistiu sai do tenda."
+              : `Agendado. Ao concluir, os tendas campistas passam para a etapa ${camp.stage.name} no caminho.`
+            : "Realizado. Tendas, equipes e inscrições ficam travados; quem vai e pagamentos continuam editáveis."}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-wrap items-center gap-2">
-        {camp.status === "draft" && (
-          <ActionButton action={openRegistrations.bind(null, camp.id)}>Abrir inscrições</ActionButton>
+        {overdue && (
+          <p className="w-full text-sm text-amber-700">
+            Este acampamento já passou: conclua para registrar a etapa nos tendas.
+          </p>
         )}
-        {camp.status === "open" && (
+        {scheduled ? (
           <ActionButton
-            action={closeRegistrations.bind(null, camp.id)}
-            successMessage="Inscrições encerradas."
+            action={concludeCamp.bind(null, camp.id)}
+            successMessage="Acampamento concluído."
             confirm={{
-              title: "Encerrar inscrições?",
+              title: "Concluir acampamento?",
               description: camp.stage.formsTents
-                ? "Os tendas em formação passam a ativos. Famílias canceladas ou na lista de espera saem do tenda. Inscrições pendentes impedem o encerramento."
-                : "Inscrições pendentes impedem o encerramento.",
-              confirmLabel: "Encerrar",
+                ? "Os tendas em formação passam a ativos com as famílias inscritas. Famílias na lista de espera ou que desistiram saem do tenda."
+                : `Os tendas campistas passam para a etapa ${camp.stage.name} no caminho.`,
+              confirmLabel: "Concluir",
             }}
           >
-            Encerrar inscrições
+            Concluir acampamento
           </ActionButton>
-        )}
-        {camp.status === "closed" && (
+        ) : (
           <ActionButton
-            action={finishCamp.bind(null, camp.id)}
-            successMessage="Acampamento realizado."
+            variant="outline"
+            action={reopenCamp.bind(null, camp.id)}
+            successMessage="Conclusão desfeita."
             confirm={{
-              title: "Marcar como realizado?",
-              description: `Os tendas campistas passam para a etapa ${camp.stage.name} no caminho.`,
-              confirmLabel: "Marcar como realizado",
+              title: "Desfazer a conclusão?",
+              description: camp.stage.formsTents
+                ? "Os tendas voltam a ficar em formação e as famílias da lista de espera ou que desistiram voltam a eles. Só é possível se nenhum tenda avançou depois deste acampamento."
+                : "A etapa sai do caminho dos tendas campistas. Só é possível se nenhum deles avançou depois deste acampamento.",
+              confirmLabel: "Desfazer",
             }}
           >
-            Marcar como realizado
+            Desfazer conclusão
           </ActionButton>
         )}
-        <div className="ml-auto">
-          <DeleteButton
-            action={deleteCamp.bind(null, camp.id)}
-            title={`Remover ${campLabel(camp)}?`}
-            description="Remove o acampamento e todas as inscrições. Os cadastros das famílias continuam."
-          />
-        </div>
+        {scheduled && (
+          <div className="ml-auto">
+            <DeleteButton
+              action={deleteCamp.bind(null, camp.id)}
+              title={`Remover ${campLabel(camp)}?`}
+              description="Remove o acampamento e todas as inscrições. Os cadastros das famílias continuam."
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -147,7 +152,7 @@ function StatusCard({ camp }: { camp: Camp }) {
 async function ParishesCard({ camp }: { camp: Camp }) {
   const [participants, parishes] = await Promise.all([getCampParticipants(camp.id), parishOptions()]);
   const linked = new Set(camp.parishes.map((link) => link.parishId));
-  const editable = camp.status === "draft" || camp.status === "open";
+  const editable = camp.status === "scheduled";
 
   return (
     <Card>
@@ -222,7 +227,7 @@ async function TentsCard({ camp }: { camp: Camp }) {
     tentsAvailableForCamp(camp),
   ]);
   const camperTents = camp.tents.filter((link) => link.role === "camper");
-  const editable = camp.status !== "finished";
+  const editable = camp.status === "scheduled";
 
   return (
     <Card>

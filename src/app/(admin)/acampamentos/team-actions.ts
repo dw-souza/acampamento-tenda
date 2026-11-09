@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { campParticipants, camps, campTents, families, tents, workTeams } from "@/db/schema";
 import { type ActionResult, dbErrorMessage } from "@/lib/action-result";
 import { addFamiliesToCamp } from "@/lib/camp-participation";
+import { scheduledCamp } from "@/lib/camp-guards";
 import { requireUser } from "@/lib/dal";
 import { canServe } from "@/lib/domain/eligibility";
 
@@ -21,7 +22,7 @@ async function assertCanServe(campId: string, teamId: string, tentId: string | n
     tentId ? db.query.tents.findFirst({ where: eq(tents.id, tentId), with: { currentStage: true } }) : null,
   ]);
   if (!camp || !team) return "Acampamento ou equipe não encontrados.";
-  if (camp.status === "finished") return "O acampamento já foi realizado.";
+  if (camp.status !== "scheduled") return "O acampamento já foi concluído. Desfaça a conclusão para alterar.";
   if (!tent || tent.status !== "active") return "Só famílias de tendas ativos podem servir.";
   if (!canServe(tent.currentStage?.position, camp.stage.position)) {
     return `O tenda ainda não passou pelo ${camp.stage.name}; só serve quem já passou por esta etapa.`;
@@ -65,6 +66,8 @@ export async function addTeamTent(campId: string, teamId: string, tentId: string
 
 export async function removeTeamTent(campId: string, tentId: string): Promise<ActionResult> {
   await requireUser();
+  const guard = await scheduledCamp(campId);
+  if (!guard.ok) return { error: guard.error };
   await db.transaction(async (tx) => {
     const [link] = await tx
       .delete(campTents)

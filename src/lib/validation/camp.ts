@@ -12,9 +12,7 @@ const money = z.string().transform((value, ctx) => {
 });
 
 export const campStatusLabels = {
-  draft: "Em preparação",
-  open: "Inscrições abertas",
-  closed: "Inscrições encerradas",
+  scheduled: "Agendado",
   finished: "Realizado",
 } as const;
 
@@ -37,11 +35,12 @@ export const campSchema = z
 
 export type CampInput = z.input<typeof campSchema>;
 
+// Só no Kerigma (acampamento aberto): até minutos antes de começar alguém pode desistir
+// e uma família da lista de espera ser convidada.
 export const participantStatusLabels = {
-  pending: "Pendente",
-  confirmed: "Confirmada",
+  confirmed: "Inscrita",
   waitlist: "Lista de espera",
-  cancelled: "Cancelada",
+  cancelled: "Desistiu",
 } as const;
 
-export const participantStatusSchema = z.enum(["pending", "confirmed", "waitlist", "cancelled"]);
+export const participantStatusSchema = z.enum(["confirmed", "waitlist", "cancelled"]);

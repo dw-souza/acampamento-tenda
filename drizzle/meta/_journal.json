@@ -43,6 +43,13 @@
       "when": 1794228134360,
       "tag": "0005_drop_camp_name",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794231342057,
+      "tag": "0006_simplify_statuses",
+      "breakpoints": true
     }
   ]
 }

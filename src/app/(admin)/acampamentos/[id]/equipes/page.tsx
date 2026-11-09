@@ -35,7 +35,7 @@ export default async function CampTeamsPage({ params }: PageProps<"/acampamentos
     familiesEligibleToServe(camp),
   ]);
   const servers = participants.filter((participant) => participant.role === "server");
-  const editable = camp.status !== "finished";
+  const editable = camp.status === "scheduled";
   const tentOptions = tents.map((tent) => ({
     value: tent.id,
     label: `${tentLabel(tent)} · ${tent.parish.name}`,

@@ -27,7 +27,7 @@ describe("summarizeCamp", () => {
             { role: "child", birthDate: "2025-01-01" },
           ],
         },
-        { role: "camper", status: "pending", paidCents: 0, attendees: [{ role: "wife", birthDate: null }] },
+        { role: "camper", status: "confirmed", paidCents: 0, attendees: [{ role: "wife", birthDate: null }] },
       ],
       camp,
     );

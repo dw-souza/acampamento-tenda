@@ -31,14 +31,12 @@ export const tentStatus = pgEnum("tent_status", ["forming", "active", "inactive"
 export const personRole = pgEnum("person_role", ["husband", "wife", "child"]);
 export const personStatus = pgEnum("person_status", ["active", "deceased", "left"]);
 export const teamKind = pgEnum("team_kind", ["tent", "special"]);
-export const campStatus = pgEnum("camp_status", ["draft", "open", "closed", "finished"]);
+// scheduled: tudo editável. finished: concluído (caminho dos tendas registrado e, no Kerigma,
+// tendas formados); só "quem vai" e pagamentos continuam editáveis.
+export const campStatus = pgEnum("camp_status", ["scheduled", "finished"]);
 export const participantRole = pgEnum("participant_role", ["camper", "server"]);
-export const participantStatus = pgEnum("participant_status", [
-  "pending",
-  "confirmed",
-  "waitlist",
-  "cancelled",
-]);
+// Só faz diferença no Kerigma: inscrita, lista de espera ou desistiu (cancelled).
+export const participantStatus = pgEnum("participant_status", ["confirmed", "waitlist", "cancelled"]);
 export const paymentMethod = pgEnum("payment_method", ["pix", "cash"]);
 
 // ---------------------------------------------------------------------------
@@ -170,7 +168,7 @@ export const camps = pgTable("camps", {
   serverChildPriceCents: integer().notNull().default(0),
   // Só referência (ex.: 16 famílias por paróquia); nunca bloqueia inscrição.
   expectedFamilies: integer(),
-  status: campStatus().notNull().default("draft"),
+  status: campStatus().notNull().default("scheduled"),
   notes: text(),
   ...timestamps,
 });

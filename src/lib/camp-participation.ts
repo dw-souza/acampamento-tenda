@@ -14,7 +14,7 @@ export async function addFamiliesToCamp(
   tx: Tx,
   campId: string,
   familyIds: string[],
-  participation: { role: "camper" | "server"; teamId?: string | null; status?: "pending" | "confirmed" },
+  participation: { role: "camper" | "server"; teamId?: string | null },
 ) {
   if (familyIds.length === 0) return 0;
 
@@ -26,7 +26,6 @@ export async function addFamiliesToCamp(
         familyId,
         role: participation.role,
         teamId: participation.teamId ?? null,
-        status: participation.status ?? "confirmed",
       })),
     )
     .onConflictDoNothing({ target: [campParticipants.campId, campParticipants.familyId] })

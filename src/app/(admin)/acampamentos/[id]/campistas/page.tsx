@@ -9,6 +9,8 @@ import { countsTowardCamp, summarizeParticipant } from "@/lib/domain/camp-summar
 import { coupleName, plural, tentLabel } from "@/lib/format/labels";
 import { formatMoney } from "@/lib/format/money";
 import { participantStatusLabels } from "@/lib/validation/camp";
+import { StatusBadge } from "@/components/status-badge";
+import { participantStatusTone } from "@/lib/format/status";
 import { removeParticipant } from "../../participant-actions";
 import { memberOptions } from "../members";
 import { AttendanceChecks, StatusSelect } from "./participant-controls";
@@ -29,19 +31,25 @@ export default async function CampersPage({ params }: PageProps<"/acampamentos/[
   }
   const sortedGroups = [...groups.values()].sort((a, b) => a.title.localeCompare(b.title));
 
-  const statusCounts = Object.entries(participantStatusLabels)
-    .map(([status, label]) => ({ label, n: participants.filter((p) => p.status === status).length }))
-    .filter((entry) => entry.n > 0);
-  const canRegister = camp.stage.formsTents && (camp.status === "draft" || camp.status === "open");
+  // Inscrição, lista de espera e desistência só existem no acampamento aberto.
+  const isOpenCamp = camp.stage.formsTents;
+  const scheduled = camp.status === "scheduled";
+  const count = (status: string) => participants.filter((p) => p.status === status).length;
+  const statusSummary = isOpenCamp
+    ? [
+        plural(count("confirmed"), "inscrita", "inscritas"),
+        count("waitlist") > 0 && `${count("waitlist")} na lista de espera`,
+        count("cancelled") > 0 && plural(count("cancelled"), "desistiu", "desistiram"),
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : plural(participants.length, "família", "famílias");
+  const canRegister = isOpenCamp && scheduled;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className="text-sm text-muted-foreground">
-          {plural(participants.length, "família", "famílias")}
-          {statusCounts.length > 0 &&
-            ` · ${statusCounts.map((entry) => `${entry.n} ${entry.label.toLowerCase()}`).join(" · ")}`}
-        </p>
+        <p className="text-sm text-muted-foreground">{statusSummary}</p>
         {canRegister && (
           <Button render={<Link href={`/acampamentos/${camp.id}/inscricao`} />}>Inscrever família</Button>
         )}
@@ -68,7 +76,7 @@ export default async function CampersPage({ params }: PageProps<"/acampamentos/[
                 <TableRow>
                   <TableHead>Família</TableHead>
                   <TableHead>Quem vai</TableHead>
-                  <TableHead>Inscrição</TableHead>
+                  {isOpenCamp && <TableHead>Inscrição</TableHead>}
                   <TableHead className="text-right">Valor</TableHead>
                   <TableHead />
                 </TableRow>
@@ -96,22 +104,32 @@ export default async function CampersPage({ params }: PageProps<"/acampamentos/[
                         <TableCell className="align-top whitespace-normal">
                           <AttendanceChecks participantId={participant.id} members={members} />
                         </TableCell>
-                        <TableCell className="align-top">
-                          <StatusSelect participantId={participant.id} status={participant.status} />
-                        </TableCell>
+                        {isOpenCamp && (
+                          <TableCell className="align-top">
+                            {scheduled ? (
+                              <StatusSelect participantId={participant.id} status={participant.status} />
+                            ) : (
+                              <StatusBadge tone={participantStatusTone[participant.status]}>
+                                {participantStatusLabels[participant.status]}
+                              </StatusBadge>
+                            )}
+                          </TableCell>
+                        )}
                         <TableCell className="text-right align-top tabular-nums">
                           {formatMoney(summary.expectedCents)}
                         </TableCell>
                         <TableCell className="text-right align-top">
-                          <DeleteButton
-                            action={removeParticipant.bind(null, participant.id)}
-                            title={`Tirar ${name} do acampamento?`}
-                            description={
-                              camp.stage.formsTents
-                                ? "A inscrição é removida e a família sai do tenda em formação. O cadastro continua."
-                                : "A família deixa de participar deste acampamento. O cadastro continua."
-                            }
-                          />
+                          {scheduled && (
+                            <DeleteButton
+                              action={removeParticipant.bind(null, participant.id)}
+                              title={`Tirar ${name} do acampamento?`}
+                              description={
+                                camp.stage.formsTents
+                                  ? "A inscrição é removida e a família sai do tenda em formação. O cadastro continua."
+                                  : "A família deixa de participar deste acampamento. O cadastro continua."
+                              }
+                            />
+                          )}
                         </TableCell>
                       </TableRow>
                     );
