@@ -60,42 +60,30 @@ function randomDate(from: string, to: string) {
   return new Date(start + rand() * Math.max(0, end - start)).toISOString().slice(0, 10);
 }
 
-// Agenda por posição da etapa: anos depois da formação e meses em que acontece. Acampamentos são
-// por temporada (ex.: vários Kerigmas de fevereiro a abril, vários Tabor de maio a julho); as
-// etapas sem acampamento são marcos num mês. Meses de Ventania em diante são só para demonstração.
-const SCHEDULE: { years: number; months: [number, number] }[] = [
-  { years: 0, months: [2, 4] }, // Kerigma
-  { years: 1, months: [5, 7] }, // Tabor
-  { years: 1, months: [9, 9] }, // Ventania
-  { years: 2, months: [3, 3] }, // Chai
-  { years: 2, months: [8, 10] }, // Anawin
-  { years: 3, months: [3, 3] }, // Kenosis
-  { years: 3, months: [9, 9] }, // Caminho de Emaús
-  { years: 4, months: [10, 11] }, // Koinonia
-  { years: 5, months: [6, 6] }, // Consagração
+// Meses (mín., máx.) entre uma etapa e a anterior, pela posição. Não há temporada fixa: há
+// vários acampamentos de cada etapa por ano, e cada grupo de tendas acampa num sábado qualquer.
+const GAPS: [number, number][] = [
+  [0, 0], // Kerigma (formação)
+  [6, 9], // Tabor
+  [3, 5], // Ventania
+  [4, 6], // Chai
+  [5, 7], // Anawin
+  [4, 6], // Kenosis
+  [4, 6], // Caminho de Emaús
+  [8, 12], // Koinonia
+  [6, 8], // Consagração
 ];
-const schedule = (index: number) =>
-  SCHEDULE[index] ?? { years: 5 + (index - 8), months: [6, 6] as [number, number] };
+const gapAfter = (index: number) => GAPS[index] ?? [6, 8];
 
-/** Sábados de uma temporada (meses inclusivos). */
-function saturdays(year: number, [from, to]: [number, number]) {
-  const days: string[] = [];
-  const date = new Date(Date.UTC(year, from - 1, 1, 12));
-  while (date.getUTCMonth() + 1 <= to && date.getUTCFullYear() === year) {
-    if (date.getUTCDay() === 6) days.push(date.toISOString().slice(0, 10));
-    date.setUTCDate(date.getUTCDate() + 1);
-  }
-  return days;
+function nextSaturday(isoDate: string) {
+  let date = isoDate;
+  while (new Date(`${date}T12:00:00Z`).getUTCDay() !== 6) date = addDays(date, 1);
+  return date;
 }
 
-/** Espalha `count` acampamentos pelos sábados da temporada, sem repetir data. */
-function spreadDates(year: number, months: [number, number], count: number) {
-  const days = saturdays(year, months);
-  return Array.from(
-    { length: count },
-    (_, i) => days[Math.min(days.length - 1, Math.floor(((i + 0.5) * days.length) / count))],
-  );
-}
+// Tendas cuja data prevista para a etapa cai em até 60 dias acampam juntos.
+const GROUP_WINDOW_DAYS = 60;
+const daysBetween = (a: string, b: string) => (Date.parse(b) - Date.parse(a)) / 86_400_000;
 
 // ---------------------------------------------------------------------------
 // Nomes e dados pessoais
@@ -648,18 +636,20 @@ async function main() {
     totals.parishes = parishRows.length;
     const parishByName = new Map(parishRows.map((row) => [row.name, row.id]));
 
-    // 2. Tendas e famílias. O caminho de cada tenda sai da agenda por temporada.
+    // 2. Tendas e famílias. Cada tenda nasce num Kerigma do seu ano e segue o caminho com
+    //    intervalos variáveis entre as etapas.
     const tents: TentPlan[] = [];
     const families = new Map<string, FamilyPlan>();
-    const kerigmaSeasonEnd = (year: number) => `${year}-${String(schedule(0).months[1]).padStart(2, "0")}-30`;
+    const formationTarget = new Map<string, string>();
     for (const parish of PARISHES) {
       const parishId = parishByName.get(parish.name)!;
-      const years = parish.years
-        .map((offset) => thisYear + offset)
-        .filter((year) => kerigmaSeasonEnd(year) < today);
+      const years = parish.years.map((offset) => thisYear + offset);
       for (const [index, year] of years.sort((a, b) => a - b).entries()) {
+        const latest = year === thisYear ? addDays(today, -45) : `${year}-11-30`;
+        const id = crypto.randomUUID();
+        formationTarget.set(id, randomDate(`${year}-01-15`, latest));
         tents.push({
-          id: crypto.randomUUID(),
+          id,
           parishId,
           parishName: parish.name,
           number: index + 1,
@@ -672,39 +662,44 @@ async function main() {
       }
     }
 
-    // Datas: para cada etapa e ano, os tendas se agrupam em acampamentos em sábados diferentes.
+    // Datas, etapa por etapa: a data prevista é a etapa anterior + um intervalo; tendas com
+    // previsões próximas viram um acampamento no sábado seguinte à última previsão do grupo.
     // Kerigma: no máximo duas paróquias, um tenda novo por paróquia. Demais: até três tendas.
     type Group = { stageIndex: number; date: string; tents: TentPlan[] };
     const groups: Group[] = [];
     const dateOf = new Map<string, string>(); // `${tentId}:${stageIndex}` -> data
     stages.forEach((stage, stageIndex) => {
-      const { years, months } = schedule(stageIndex);
-      const byYear = new Map<number, TentPlan[]>();
-      for (const tent of tents)
-        byYear.set(tent.year + years, [...(byYear.get(tent.year + years) ?? []), tent]);
-      for (const [year, yearTents] of byYear) {
-        if (!stage.hasCamp) {
-          // Marco: cada tenda registra num dia do mês.
-          for (const tent of yearTents)
-            dateOf.set(
-              `${tent.id}:${stageIndex}`,
-              `${year}-${String(months[0]).padStart(2, "0")}-${String(int(1, 28)).padStart(2, "0")}`,
-            );
-          continue;
-        }
-        const chunks: TentPlan[][] = [];
-        for (const tent of shuffle(yearTents)) {
-          const chunk = chunks.find((c) =>
-            stageIndex === 0 ? c.length < 2 && !c.some((t) => t.parishId === tent.parishId) : c.length < 3,
-          );
-          if (chunk) chunk.push(tent);
-          else chunks.push([tent]);
-        }
-        spreadDates(year, months, chunks.length).forEach((date, i) => {
-          groups.push({ stageIndex, date, tents: chunks[i] });
-          for (const tent of chunks[i]) dateOf.set(`${tent.id}:${stageIndex}`, date);
-        });
+      const [min, max] = gapAfter(stageIndex);
+      const target = (tent: TentPlan) =>
+        stageIndex === 0
+          ? formationTarget.get(tent.id)!
+          : addDays(dateOf.get(`${tent.id}:${stageIndex - 1}`)!, int(min * 30, max * 30));
+      const planned = tents
+        .map((tent) => ({ tent, date: target(tent) }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      if (!stage.hasCamp) {
+        for (const { tent, date } of planned) dateOf.set(`${tent.id}:${stageIndex}`, date);
+        return;
       }
+      let current: typeof planned = [];
+      const flush = () => {
+        if (current.length === 0) return;
+        const date = nextSaturday(current.at(-1)!.date);
+        groups.push({ stageIndex, date, tents: current.map((item) => item.tent) });
+        for (const item of current) dateOf.set(`${item.tent.id}:${stageIndex}`, date);
+        current = [];
+      };
+      for (const item of planned) {
+        const fits =
+          current.length > 0 &&
+          current.length < (stageIndex === 0 ? 2 : 3) &&
+          daysBetween(current[0].date, item.date) <= GROUP_WINDOW_DAYS &&
+          !(stageIndex === 0 && current.some((other) => other.tent.parishId === item.tent.parishId));
+        if (!fits) flush();
+        current.push(item);
+      }
+      flush();
     });
 
     for (const tent of tents) {
@@ -851,12 +846,11 @@ async function main() {
       ),
     );
 
-    // 4. Próxima temporada de Kerigma: um com inscrições abertas (duas paróquias formando tendas
-    //    novos) e outro ainda em preparação, para mostrar vários Kerigmas na mesma temporada.
-    const kerigmaYear = kerigmaSeasonEnd(thisYear) >= today ? thisYear : thisYear + 1;
-    const [openDate, laterDate] = spreadDates(kerigmaYear, schedule(0).months, 2).map((d) =>
-      d > today ? d : addDays(today, 14),
-    );
+    // 4. Próximos Kerigmas: um com inscrições abertas (duas paróquias formando tendas novos) e
+    //    outro ainda em preparação.
+    const openDate = nextSaturday(addDays(today, int(25, 45)));
+    const laterDate = nextSaturday(addDays(today, int(70, 100)));
+    const kerigmaYear = Number(openDate.slice(0, 4));
     const statuses = [
       "confirmed",
       "confirmed",
