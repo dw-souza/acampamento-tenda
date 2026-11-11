@@ -176,20 +176,22 @@ export default async function CampTeamsPage({ params }: PageProps<"/acampamentos
 
                 {editable && (
                   <div className="flex flex-wrap gap-2">
-                    {team.kind === "tent" && (
+                    {/* O tipo da equipe define quem serve: tenda inteiro ou casais avulsos. */}
+                    {team.kind === "tent" ? (
                       <AddSelect
                         placeholder="Tenda inteiro..."
                         label="Adicionar tenda"
                         options={tentOptions}
                         action={addTeamTent.bind(null, camp.id, team.id)}
                       />
+                    ) : (
+                      <AddCombobox
+                        placeholder="Buscar casal..."
+                        emptyText="Nenhuma família disponível."
+                        options={families}
+                        action={addTeamFamily.bind(null, camp.id, team.id)}
+                      />
                     )}
-                    <AddCombobox
-                      placeholder="Buscar casal..."
-                      emptyText="Nenhuma família disponível."
-                      options={families}
-                      action={addTeamFamily.bind(null, camp.id, team.id)}
-                    />
                   </div>
                 )}
               </CardContent>

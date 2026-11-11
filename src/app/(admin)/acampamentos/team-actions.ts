@@ -33,6 +33,8 @@ async function assertCanServe(campId: string, teamId: string, tentId: string | n
 /** O tenda inteiro serve na equipe: cada família entra como servo, com todos os membros. */
 export async function addTeamTent(campId: string, teamId: string, tentId: string): Promise<ActionResult> {
   await requireUser();
+  const team = await db.query.workTeams.findFirst({ where: eq(workTeams.id, teamId) });
+  if (team?.kind !== "tent") return { error: "Nesta equipe servem casais avulsos, não tendas inteiros." };
   const problem = await assertCanServe(campId, teamId, tentId);
   if (problem) return { error: problem };
 
@@ -93,6 +95,8 @@ export async function removeTeamTent(campId: string, tentId: string): Promise<Ac
 /** Um casal avulso serve na equipe (ex.: música, ensino). */
 export async function addTeamFamily(campId: string, teamId: string, familyId: string): Promise<ActionResult> {
   await requireUser();
+  const team = await db.query.workTeams.findFirst({ where: eq(workTeams.id, teamId) });
+  if (team?.kind !== "special") return { error: "Nesta equipe serve o tenda inteiro, não casais avulsos." };
   const family = await db.query.families.findFirst({ where: eq(families.id, familyId) });
   const problem = await assertCanServe(campId, teamId, family?.tentId ?? null);
   if (problem) return { error: problem };
