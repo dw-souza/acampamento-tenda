@@ -8,13 +8,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { parishOptions } from "@/lib/data/parishes";
 import {
   type Camp,
+  type CampParticipant,
   getCamp,
   getCampParticipants,
   tentsAvailableForCamp,
   toSummaryInput,
 } from "@/lib/data/camps";
 import { countsTowardCamp, summarizeCamp } from "@/lib/domain/camp-summary";
-import { campLabel, tentLabel } from "@/lib/format/labels";
+import { campLabel, coupleName, tentLabel } from "@/lib/format/labels";
+import { listWorkTeams } from "@/lib/data/work-teams";
+import { StatusBadge } from "@/components/status-badge";
+import { displayName } from "./people";
 import { formatMoney } from "@/lib/format/money";
 import {
   addCampParish,
@@ -26,7 +30,7 @@ import {
   reopenCamp,
 } from "../actions";
 import { StatTile } from "@/components/stat-tile";
-import { HeartHandshake, Tent, UsersRound, Wallet } from "lucide-react";
+import { HeartHandshake, Phone, Tent, UsersRound, Wallet } from "lucide-react";
 import { plural } from "@/lib/format/labels";
 
 export default async function CampOverviewPage({ params }: PageProps<"/acampamentos/[id]">) {
@@ -84,9 +88,103 @@ export default async function CampOverviewPage({ params }: PageProps<"/acampamen
           Equipes.
         </p>
       )}
+      <ContactsCard camp={camp} participants={participants} />
       <StatusCard camp={camp} />
       {camp.stage.formsTents ? <ParishesCard camp={camp} /> : <TentsCard camp={camp} />}
     </div>
+  );
+}
+
+/** Casais das equipes marcadas como destaque (ex.: coordenadores gerais): pontos de contato. */
+async function ContactsCard({ camp, participants }: { camp: Camp; participants: CampParticipant[] }) {
+  const teams = (await listWorkTeams()).filter((team) => team.highlight);
+  if (teams.length === 0) return null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Phone className="size-4 text-primary" /> Contatos
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-6 md:grid-cols-2">
+        {teams.map((team) => {
+          const members = participants
+            .filter((participant) => participant.teamId === team.id && countsTowardCamp(participant.status))
+            .map((participant) => ({ participant, name: coupleName(participant.family.people) }))
+            .sort(
+              (a, b) =>
+                Number(b.participant.isCoordinator) - Number(a.participant.isCoordinator) ||
+                a.name.localeCompare(b.name),
+            );
+          return (
+            <section key={team.id}>
+              <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                <span
+                  className="size-2.5 rounded-full border"
+                  style={{ backgroundColor: team.color ?? undefined }}
+                  aria-hidden
+                />
+                {team.name}
+              </h3>
+              {members.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Ninguém ainda.{" "}
+                  <Link href={`/acampamentos/${camp.id}/equipes`} className="underline">
+                    Escolher na aba Equipes
+                  </Link>
+                </p>
+              ) : (
+                <ul className="flex flex-col gap-3">
+                  {members.map(({ participant, name }) => {
+                    const spouses = participant.family.people.filter(
+                      (person) => person.role !== "child" && person.status === "active",
+                    );
+                    return (
+                      <li key={participant.id} className="text-sm">
+                        <Link
+                          href={`/familias/${participant.familyId}`}
+                          className="font-medium hover:underline"
+                        >
+                          {name}
+                        </Link>
+                        {participant.isCoordinator && (
+                          <StatusBadge tone="brand" className="ml-2">
+                            Coordenador
+                          </StatusBadge>
+                        )}
+                        {participant.family.tent && (
+                          <div className="text-xs text-muted-foreground">
+                            {tentLabel(participant.family.tent)} – {participant.family.parish.name}
+                          </div>
+                        )}
+                        <div className="mt-0.5 flex flex-wrap gap-x-4 text-muted-foreground">
+                          {spouses.map((person) => (
+                            <span key={person.id}>
+                              {displayName(person)}:{" "}
+                              {person.phone ? (
+                                <a
+                                  href={`tel:${person.phone.replace(/\D/g, "")}`}
+                                  className="text-foreground hover:underline"
+                                >
+                                  {person.phone}
+                                </a>
+                              ) : (
+                                "sem telefone"
+                              )}
+                            </span>
+                          ))}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </section>
+          );
+        })}
+      </CardContent>
+    </Card>
   );
 }
 

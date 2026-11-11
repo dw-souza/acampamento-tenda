@@ -6,6 +6,7 @@ export const teamKinds = { tent: "Tenda inteiro", special: "Casais avulsos" } as
 export const workTeamSchema = z.object({
   name: requiredUpper("Informe o nome"),
   kind: z.enum(["tent", "special"], "Selecione o tipo"),
+  highlight: z.boolean(),
   color: optionalText,
   description: optionalText,
 });

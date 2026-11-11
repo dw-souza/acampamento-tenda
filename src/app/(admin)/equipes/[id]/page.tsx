@@ -17,6 +17,7 @@ export default async function EditWorkTeamPage({ params }: PageProps<"/equipes/[
         defaultValues={{
           name: team.name,
           kind: team.kind,
+          highlight: team.highlight,
           color: team.color ?? "#3B82F6",
           description: team.description ?? "",
         }}

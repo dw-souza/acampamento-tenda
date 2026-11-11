@@ -1,0 +1,1 @@
+ALTER TABLE "work_teams" ADD COLUMN "highlight" boolean DEFAULT false NOT NULL;

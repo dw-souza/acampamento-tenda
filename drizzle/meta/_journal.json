@@ -57,6 +57,13 @@
       "when": 1794236020438,
       "tag": "0007_nanny",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794404199521,
+      "tag": "0008_team_highlight",
+      "breakpoints": true
     }
   ]
 }

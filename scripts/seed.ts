@@ -16,22 +16,32 @@ const stageSeed = [
 ].map((stage, i) => ({ ...stage, name: stage.name.toUpperCase(), position: i + 1 }));
 
 const teamSeed = [
+  { name: "Capela", kind: "tent", color: "#8B5CF6", description: "Liturgia e momentos espirituais" },
   { name: "Cozinha", kind: "tent", color: "#EF4444", description: "Preparação das refeições" },
+  { name: "Filhos", kind: "tent", color: "#10B981", description: "Cuidado e atividades das crianças" },
   {
     name: "Secretaria",
     kind: "tent",
     color: "#3B82F6",
     description: "Organização, inscrições, tesouraria e crachás",
   },
-  { name: "Capela", kind: "tent", color: "#8B5CF6", description: "Liturgia e momentos espirituais" },
-  { name: "Filhos", kind: "tent", color: "#10B981", description: "Cuidado e atividades das crianças" },
-  { name: "Limpeza", kind: "tent", color: "#F59E0B", description: "Limpeza e organização dos espaços" },
-  { name: "Segurança", kind: "tent", color: "#6B7280", description: "Segurança e controle de acesso" },
-  { name: "Som e Mídia", kind: "tent", color: "#EC4899", description: "Som e apresentações" },
-  { name: "Logística", kind: "tent", color: "#6366F1", description: "Transporte e organização geral" },
-  { name: "Música", kind: "special", color: "#14B8A6", description: "Músicos de várias tendas" },
-  { name: "Ensino", kind: "special", color: "#A855F7", description: "Casais que fazem os ensinos" },
   { name: "Confidentes", kind: "special", color: "#22C55E", description: "Acompanhamento espiritual" },
+  {
+    name: "Coordenadores gerais",
+    kind: "special",
+    color: "#F4F73B",
+    description: "Coordenadores do acampamento no geral.",
+    highlight: true,
+  },
+  { name: "Ensino", kind: "special", color: "#A855F7", description: "Casais que fazem os ensinos" },
+  {
+    name: "Formadores",
+    kind: "special",
+    color: "#AC3BF7",
+    description: "Formadores das equipes de trabalho",
+    highlight: true,
+  },
+  { name: "Música", kind: "special", color: "#14B8A6", description: "Músicos de vários tendas" },
 ] as const;
 
 async function main() {

@@ -6,7 +6,10 @@ export default function NewWorkTeamPage() {
   return (
     <>
       <PageHeader icon={HeartHandshake} title="Nova equipe" />
-      <WorkTeamForm id={null} defaultValues={{ name: "", kind: "tent", color: "#3B82F6", description: "" }} />
+      <WorkTeamForm
+        id={null}
+        defaultValues={{ name: "", kind: "tent", highlight: false, color: "#3B82F6", description: "" }}
+      />
     </>
   );
 }

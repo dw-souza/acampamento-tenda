@@ -143,6 +143,9 @@ export const workTeams = pgTable("work_teams", {
   name: text().notNull().unique(),
   // tent: um tenda inteiro serve (ex.: cozinha). special: casais avulsos (ex.: música).
   kind: teamKind().notNull(),
+  // Pontos de contato (ex.: coordenadores gerais, formadores): aparecem com telefone na
+  // visão geral de cada acampamento.
+  highlight: boolean().notNull().default(false),
   color: text(),
   description: text(),
   ...timestamps,

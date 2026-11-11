@@ -2,6 +2,7 @@ import { HeartHandshake } from "lucide-react";
 import Link from "next/link";
 import { DeleteButton } from "@/components/delete-button";
 import { PageHeader } from "@/components/page-header";
+import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listWorkTeams } from "@/lib/data/work-teams";
@@ -43,7 +44,14 @@ export default async function WorkTeamsPage() {
                   {team.name}
                 </Link>
               </TableCell>
-              <TableCell>{teamKinds[team.kind]}</TableCell>
+              <TableCell>
+                {teamKinds[team.kind]}
+                {team.highlight && (
+                  <StatusBadge tone="brand" className="ml-2">
+                    Destaque
+                  </StatusBadge>
+                )}
+              </TableCell>
               <TableCell className="text-muted-foreground">{team.description}</TableCell>
               <TableCell className="text-right">
                 <DeleteButton

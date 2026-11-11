@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SelectField, TextareaField, TextField } from "@/components/form/fields";
+import { CheckboxField, SelectField, TextareaField, TextField } from "@/components/form/fields";
 import { useActionForm } from "@/components/form/use-action-form";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
@@ -28,6 +28,12 @@ export function WorkTeamForm({ id, defaultValues }: { id: string | null; default
           label="Quem serve"
           options={kindOptions}
           description="Tenda inteiro (ex.: cozinha) ou casais de várias tendas (ex.: música)."
+        />
+        <CheckboxField
+          control={control}
+          name="highlight"
+          label="Destacar no acampamento"
+          description="Os casais desta equipe aparecem com telefone nos contatos da visão geral do acampamento (ex.: coordenadores gerais)."
         />
         <TextField control={control} name="color" label="Cor" type="color" className="w-24" />
         <TextareaField control={control} name="description" label="Descrição" />
